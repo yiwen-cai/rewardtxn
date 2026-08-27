@@ -1,0 +1,13 @@
+{
+  "committed_iters": [
+    3,
+    7
+  ],
+  "resume_iter": 7,
+  "replay_groups": [],
+  "replay_samples": 0,
+  "aborted_groups": [],
+  "incomplete_groups": [],
+  "selective": true,
+  "note": "仅重算 Reward (CPU), 复用 Rollout 前缀; 已提交步不重放"
+}

@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "results": {
+    "R3": {
+      "T1_seal_detection": true,
+      "T2_replay_coverage": true,
+      "aborted": 20,
+      "replayed": 160,
+      "savings_pct": 99.9,
+      "pass": true
+    },
+    "R1": {
+      "T1_crash_persisted": true,
+      "T2_replay_recompute": true,
+      "crash_samples": 160,
+      "replayed": 160,
+      "savings_pct": 100.0,
+      "pass": true
+    },
+    "L2": {
+      "T3_resume_point": true,
+      "committed": [
+        3,
+        7
+      ],
+      "resume_iter": 7,
+      "pass": true
+    },
+    "Q0": {
+      "T5_reissue": true,
+      "lost_samples": 32,
+      "reissue_plan": "重新投递 32 个 task (TransferQueue 消费状态回滚)",
+      "pass": true
+    },
+    "L0": {
+      "no_checkpoint": true,
+      "resume_iter": null,
+      "note": "无落盘 checkpoint -> 协议层如实报告需从头, 与 L2 门禁一致",
+      "pass": true
+    },
+    "T4_savings": {
+      "pass": true,
+      "R3_savings_pct": 99.9,
+      "R1_savings_pct": 100.0,
+      "b5_full_step_s": 55.8
+    },
+    "T6_metadata": {
+      "pass": true,
+      "seal_bytes": 120625,
+      "data_bytes": 30866702,
+      "ratio_pct": 0.39
+    }
+  }
+}

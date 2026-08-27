@@ -1,0 +1,1448 @@
+{
+  "replayed_samples": 160,
+  "cpu_reward_recompute_s": 0.311,
+  "b5_full_restep_est_s": 279.0,
+  "savings_vs_b5": 99.9,
+  "samples": [
+    {
+      "group_index": 27,
+      "index": 221,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 214,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 204,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 207,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 188,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 222,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 210,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 212,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 213,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 205,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 215,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 209,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 279,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 219,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 211,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 240,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 230,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 272,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 201,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 220,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 216,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 172,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 242,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 184,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 187,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 226,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 277,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 274,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 197,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 198,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 189,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 253,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 192,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 174,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 245,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 301,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 203,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 228,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 273,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 175,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 190,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 254,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 163,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 196,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 185,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 195,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 285,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 302,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 288,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 194,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 26,
+      "index": 208,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 223,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 161,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 206,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 202,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 278,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 252,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 199,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 248,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 162,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 299,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 265,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 298,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 297,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 218,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 275,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 250,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 169,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 284,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 300,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 280,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 239,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 34,
+      "index": 276,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 255,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 168,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 171,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 263,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 249,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 260,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 246,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 233,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 262,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 244,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 259,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 224,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 258,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 306,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 238,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 231,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 234,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 257,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 269,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 232,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 225,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 177,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 310,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 180,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 261,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 182,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 293,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 243,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 247,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 271,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 307,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 236,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 229,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 308,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 305,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 268,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 166,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 178,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 318,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 160,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 181,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 309,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 270,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 176,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 183,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 304,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 316,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 283,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 237,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 164,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 319,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 312,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 28,
+      "index": 227,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 264,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 287,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 313,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 289,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 295,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 191,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 170,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 29,
+      "index": 235,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 24,
+      "index": 193,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 32,
+      "index": 256,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 23,
+      "index": 186,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 30,
+      "index": 241,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 21,
+      "index": 173,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 296,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 37,
+      "index": 303,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 22,
+      "index": 179,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 167,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 38,
+      "index": 311,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 267,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 33,
+      "index": 266,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 292,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 281,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 314,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 20,
+      "index": 165,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 317,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 290,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 291,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 27,
+      "index": 217,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 39,
+      "index": 315,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 31,
+      "index": 251,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 25,
+      "index": 200,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 1.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 286,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 1.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 36,
+      "index": 294,
+      "rollout_id": null,
+      "old_verifier": "v2",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    },
+    {
+      "group_index": 35,
+      "index": 282,
+      "rollout_id": null,
+      "old_verifier": "v1",
+      "old_reward": 0.0,
+      "new_reward": 0.0,
+      "authoritative": true
+    }
+  ]
+}

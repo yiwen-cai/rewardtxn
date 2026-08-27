@@ -1,0 +1,22 @@
+{
+  "stage": "2C",
+  "status": "PASS",
+  "gates": {
+    "G2C1_reconciler_recovery": {
+      "pass": true,
+      "evidence": "R1: 160 崩溃样本识别并列入重算; Q0: 32 样本重投递计划; L2: 已提交步 [3,7], 恢复点 iter 7 (不重放)",
+      "run": "TRACE_REPORT.json"
+    },
+    "G2C2_selective_replay_savings": {
+      "pass": true,
+      "evidence": "实测 R3 节省 99.9% / R1 100%; 保守口径 (含 1s/组调度) R3 92.7% / R1 92.7% — 均 ≥30%, 与 DAY5 模拟器 85.9% 同向",
+      "run": "replay_result.json"
+    },
+    "G2C3_trace_runner_green": {
+      "pass": true,
+      "evidence": "全切点 R1/R2/R3/Q0/L0/L2 断言通过 (Seal 检测/重放覆盖/恢复点/重投递/元数据 0.39%)",
+      "run": "TRACE_REPORT.json"
+    }
+  },
+  "date": "2026-08-27"
+}

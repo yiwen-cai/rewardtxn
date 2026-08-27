@@ -25,7 +25,12 @@ import json
 import os
 import time
 
-from slime.rollout.rm_hub.math_utils import extract_answer, grade_answer_mathd, grade_answer_sympy
+try:
+    from slime.rollout.rm_hub.math_utils import extract_answer, grade_answer_mathd, grade_answer_sympy
+except ImportError:  # 宿主机 (无 slime): 使用纯函数副本 (同 SHA 来源)
+    import sys as _sys, os as _os
+    _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__))))
+    from phase2_verifiers import extract_answer, grade_answer_mathd, grade_answer_sympy
 
 FAULT = os.environ.get("RTX_FAULT", "none")
 START = int(os.environ.get("RTX_FAULT_START", "-1"))
@@ -34,9 +39,25 @@ RUN_DIR = os.environ.get("RTX_RUN_DIR", "/workspace/runs")
 V2_MODE = os.environ.get("RTX_V2_MODE", "strict")
 SEAL = os.environ.get("RTX_SEAL", "0") == "1"
 K = int(os.environ.get("RTX_GROUP_SIZE", "8"))
+# 多窗口注入: RTX_FAULT_WINDOWS='{"skew":[20,39],"crm_crash":[40,43]}' (覆盖单窗口)
+import ast as _ast
+_WINDOWS = {}
+_wenv = os.environ.get("RTX_FAULT_WINDOWS", "")
+if _wenv:
+    _WINDOWS = _ast.literal_eval(_wenv)
 _lock = asyncio.Lock()
-_seal_state = {}  # group_index -> {verifiers:set, ids:set, count, first_ts}   # group_index -> {verifiers:set, ids:set, count, first_ts}
+_seal_state = {}  # group_index -> {verifiers:set, ids:set, count, first_ts}
 _seen_logical = set()
+
+
+def _fault_for(gidx):
+    """多窗口优先, 否则单窗口语义"""
+    if _WINDOWS:
+        for f, (s, e) in _WINDOWS.items():
+            if s <= gidx <= e:
+                return f
+        return "none"
+    return FAULT if START <= gidx <= END else "none"
 
 
 def _v1_reward(response: str, label: str) -> float:
@@ -160,26 +181,48 @@ def _log(sample, reward: float, verifier: str, injected: bool):
         "seal_enabled": SEAL,
         "ts": time.time(),
     }
+    # Seal 模式下完整记录 response/label (Selective Replay 重算输入)
+    if SEAL:
+        rec["response"] = (sample.response or "")[:4000]
+        rec["label"] = (sample.label or "")[:200]
     lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
     _cas_write(rec)
     if SEAL:
         _seal_register(sample.group_index if sample.group_index is not None else -1, verifier, lid)
 
 
+def _log_crash(sample, gidx):
+    """崩溃前先落盘 rollout 数据 (模拟真实系统 rollout buffer 可复用)"""
+    rec = {
+        "group_index": sample.group_index, "index": sample.index,
+        "rollout_id": sample.rollout_id, "reward": None,
+        "verifier": "v1", "injected": True, "fault": "crm_crash",
+        "seal_enabled": SEAL, "ts": time.time(),
+    }
+    if SEAL:
+        rec["response"] = (sample.response or "")[:4000]
+        rec["label"] = (sample.label or "")[:200]
+    lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
+    _cas_write(rec)
+
+
 async def _rm_one(s, is_batch_sorted_pos=None):
-    in_window = START <= (s.group_index if s.group_index is not None else -1) <= END
-    if FAULT == "crm_crash" and in_window:
-        raise RuntimeError(f"injected RM crash (group_index={s.group_index})")
+    gidx = s.group_index if s.group_index is not None else -1
+    fault = _fault_for(gidx)
+    in_window = fault != "none"
+    if fault == "crm_crash" and in_window:
+        _log_crash(s, gidx)
+        raise RuntimeError(f"injected RM crash (group_index={gidx})")
     r1 = float(_v1_reward(s.response, s.label or ""))
     r2 = float(_v2_reward(s.response, s.label or ""))
     half = K // 2
     pos = is_batch_sorted_pos if is_batch_sorted_pos is not None else ((s.index or 0) % K)
-    if FAULT == "skew" and in_window:
+    if fault == "skew" and in_window:
         if pos < half:
             r, ver, inj = r1, "v1", False
         else:
             r, ver, inj = r2, "v2", True
-    elif FAULT == "dup" and in_window:
+    elif fault == "dup" and in_window:
         if pos < half:
             r, ver, inj = r1, "v1", False
         else:

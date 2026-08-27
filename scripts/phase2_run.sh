@@ -67,6 +67,7 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
   -e RTX_V2_MODE="${RTX_V2_MODE:-strict}" \
   -e RTX_SEAL="${RTX_SEAL:-0}" \
   -e RTX_GROUP_SIZE="${RTX_GROUP_SIZE:-8}" \
+  -e RTX_FAULT_WINDOWS="${RTX_FAULT_WINDOWS:-}" \
   -e RTX_LOG_RESPONSE="${RTX_LOG_RESPONSE:-0}" \
   --shm-size=64g --ulimit memlock=-1 --ulimit stack=67108864 \
   -v "$BASE":/workspace \
