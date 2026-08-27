@@ -1,0 +1,25 @@
+{
+  "stage": "2B",
+  "status": "PASS",
+  "gates": {
+    "G2B1_manifest_token_persist": {
+      "pass": true,
+      "evidence": "真实训练 (p2b 20步, save-interval 4): iter 3,7,11,15,19 全部生成 StepToken sidecar, prev 链完整, weights_hash 内容采样绑定 checkpoint",
+      "run": "p2b-slime-ckpt-K8-s42-20260827"
+    },
+    "G2B2_committed_step_recognition": {
+      "pass": true,
+      "evidence": "Day4 L2 真实 kill 场景遗留 checkpoint: audit 识别已提交步 [3,7] + StepToken, 恢复决策从 iter 7 继续 (不重放)",
+      "run": "p1-slime-L2-K8-s42-20260825"
+    },
+    "G2B3_token_idempotent": {
+      "pass": true,
+      "evidence": "单测: 同内容 token 稳定 / 同size异内容哈希不同 (b220e5.. != 525fb7..) / mtime 迁移鲁棒 / NO_TOKEN 缺失识别 / iter_0000003 命名兼容"
+    }
+  },
+  "design_notes": [
+    "sidecar 存 SAVE_DIR 上级 manifests/ (checkpoint 目录容器 root 所有, 宿主无写权限); token 通过内容采样哈希与 checkpoint 强绑定 (等同嵌入)",
+    "恢复死锁 (Day4) 属 slime 框架层, 协议层识别已交付; 框架级恢复包装由 2C Reconciler 完成"
+  ],
+  "date": "2026-08-27"
+}
