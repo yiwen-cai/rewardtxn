@@ -71,6 +71,9 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
   -e RTX_GROUP_SIZE="${RTX_GROUP_SIZE:-8}" \
   -e RTX_FAULT_WINDOWS="${RTX_FAULT_WINDOWS:-}" \
   -e RTX_LOG_RESPONSE="${RTX_LOG_RESPONSE:-0}" \
+  -e RTX_ENTRY="${RTX_ENTRY:-day2_slime_train.sh}" \
+  -e RTX_MAX_RETRIES="${RTX_MAX_RETRIES:-3}" \
+  -e RTX_KILL_AFTER_ITER="${RTX_KILL_AFTER_ITER:-}" \
   --shm-size=64g --ulimit memlock=-1 --ulimit stack=67108864 \
   -v "$BASE":/workspace \
   -v "$BASE/third_party/slime":/root/slime \
@@ -82,7 +85,7 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
     git config --global --add safe.directory /root/slime
     cd /root/slime
     pip install -e . --no-deps -q
-    bash /workspace/scripts/day2_slime_train.sh
+    bash /workspace/scripts/${RTX_ENTRY:-day2_slime_train.sh}
   "
 
 echo "container $NAME started (fault=$FAULT, group_index [$START,$END])"
