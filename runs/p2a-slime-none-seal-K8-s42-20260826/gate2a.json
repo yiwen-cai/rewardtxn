@@ -1,0 +1,12 @@
+{
+  "run": "runs/p2a-slime-none-seal-K8-s42-20260826",
+  "fault": "custom_rm_path (${RTX_CUSTOM_RM:-day2_custom_rm.rm_function})",
+  "seals_total": 1245,
+  "aborted": 0,
+  "sealed": 1245,
+  "expected_aborted": 5,
+  "aborted_groups_mixed_in_rewards": 0,
+  "reward_records": 10956,
+  "g2a1_detection": false,
+  "g2a2_zero_false_positive": null
+}

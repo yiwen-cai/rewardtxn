@@ -1,0 +1,12 @@
+{
+  "run": "runs/p2a-slime-skew-seal-K8-s42-20260826",
+  "fault": "custom_rm_path (${RTX_CUSTOM_RM:-day2_custom_rm.rm_function})",
+  "seals_total": 564,
+  "aborted": 20,
+  "sealed": 544,
+  "expected_aborted": 20,
+  "aborted_groups_mixed_in_rewards": 20,
+  "reward_records": 7379,
+  "g2a1_detection": true,
+  "g2a2_zero_false_positive": null
+}

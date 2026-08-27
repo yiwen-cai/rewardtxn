@@ -1,0 +1,26 @@
+{
+  "stage": "2A",
+  "status": "PASS",
+  "gates": {
+    "G2A1_skew_detection": {
+      "pass": true,
+      "evidence": "skew+seal 20步: 20/20 注入组 ABORTED (versions=[v1,v2], count=8, unique=8), 无漏检",
+      "run": "p2a-slime-skew-seal-K8-s42-20260826"
+    },
+    "G2A2_zero_false_positive": {
+      "pass": true,
+      "evidence": "none+seal 20步: 1245 组全部 SEALED, ABORTED=0, 零误报",
+      "run": "p2a-slime-none-seal-K8-s42-20260826"
+    },
+    "G2A3_overhead_lt_5pct": {
+      "pass": true,
+      "evidence": "字节: Seal 373B/步 vs 完整数据 51200B/步 (模拟器一致口径) = 0.73%; 端到端: 20步总时长 11.3min vs 基线 14.5min 无系统差异; 逻辑 21µs/样本"
+    }
+  },
+  "cas_unit": {
+    "pass": true,
+    "evidence": "同一 logical_id 二次写入拒绝 + cas_rejects 审计; 异 index/rollout 放行"
+  },
+  "design_boundary": "2A 完成检测+审计+CAS 幂等 (静默->可审计)。ABORTED 组消费侧 gate (0 混算进训练) 由 2B StepToken + 2C Selective Replay 实现",
+  "date": "2026-08-27"
+}
