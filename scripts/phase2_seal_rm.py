@@ -38,6 +38,8 @@ END = int(os.environ.get("RTX_FAULT_END", "-1"))
 RUN_DIR = os.environ.get("RTX_RUN_DIR", "/workspace/runs")
 V2_MODE = os.environ.get("RTX_V2_MODE", "strict")
 SEAL = os.environ.get("RTX_SEAL", "0") == "1"
+AUTO_FIX = os.environ.get("RTX_SEAL_AUTO_FIX", "0") == "1"
+GROUP_RM = os.environ.get("RTX_GROUP_RM", "0") == "1"
 K = int(os.environ.get("RTX_GROUP_SIZE", "8"))
 # 多窗口注入: RTX_FAULT_WINDOWS='{"skew":[20,39],"crm_crash":[40,43]}' (覆盖单窗口)
 import ast as _ast
@@ -48,6 +50,7 @@ if _wenv:
 _lock = asyncio.Lock()
 _seal_state = {}  # group_index -> {verifiers:set, ids:set, count, first_ts}
 _seen_logical = set()
+_pending_samples = {}  # group_index -> [(sample, verifier)] 单样本降级路径的 AUTO_FIX 覆写输入
 
 
 def _fault_for(gidx):
@@ -142,23 +145,70 @@ def _cas_write(rec: dict) -> bool:
     return True
 
 
-def _seal_register(group_index: int, verifier: str, logical_id: str):
-    """登记样本到组状态; 组完成时返回 (status, versions) 否则 None"""
+def _seal_write(group_index: int, status: str, versions, autofix: bool = False, count: int = K):
+    """写 seals.jsonl (组级模式与单样本模式共用)"""
+    rec = {
+        "group_index": group_index,
+        "status": status,
+        "versions": sorted(versions),
+        "count": count,
+        "autofix": autofix,
+        "ts": time.time(),
+    }
+    try:
+        with open(os.path.join(RUN_DIR, "seals.jsonl"), "a") as f:
+            f.write(json.dumps(rec) + "\n")
+    except Exception:
+        pass
+    return status, sorted(versions)
+
+
+def _autofix_rewrite(group_index: int):
+    """单样本降级路径: 组检测到 ABORTED 时, 用权威 v1 重算覆写 rewards.jsonl 记录
+    (返回给训练器的值无法撤回, 但持久化数据流修正; --group-rm 组级模式为主路径)。
+    追加 corrected 记录, Reconciler 读取以最后一条为准。"""
+    pend = _pending_samples.get(group_index)
+    if not pend:
+        return 0
+    fixed = 0
+    with open(os.path.join(RUN_DIR, "rewards.jsonl"), "a") as f:
+        for s, _ver in pend:
+            rw = float(_v1_reward(s.response, s.label or ""))
+            lid = f"{s.group_index}:{s.index}:{s.rollout_id}"
+            f.write(json.dumps({
+                "logical_id": lid, "corrected_reward": rw, "autofix": True,
+                "group_index": s.group_index, "index": s.index,
+                "rollout_id": s.rollout_id, "ts": time.time(),
+            }) + "\n")
+            fixed += 1
+    return fixed
+
+
+def _seal_register(group_index: int, verifier: str, logical_id: str, sample=None):
+    """登记样本到组状态; 组完成时返回 (status, versions) 否则 None
+    AUTO_FIX 单样本降级: 组完成且 ABORTED -> 权威重算覆写 rewards.jsonl"""
     st = _seal_state.setdefault(group_index, {"verifiers": set(), "ids": set(), "count": 0, "first_ts": time.time()})
     st["verifiers"].add(verifier)
     st["ids"].add(logical_id)
     st["count"] += 1
+    if sample is not None:
+        _pending_samples.setdefault(group_index, []).append((sample, verifier))
     if st["count"] < K:
         return None
     # 组完成 -> Seal 检查
     status = "SEALED" if len(st["verifiers"]) == 1 else "ABORTED"
     versions = sorted(st["verifiers"])
+    autofix = False
+    if status == "ABORTED" and AUTO_FIX:
+        n = _autofix_rewrite(group_index)
+        autofix = n > 0
     rec = {
         "group_index": group_index,
         "status": status,
         "versions": versions,
         "count": st["count"],
         "unique_samples": len(st["ids"]),
+        "autofix": autofix,
         "ts": time.time(),
     }
     try:
@@ -169,7 +219,7 @@ def _seal_register(group_index: int, verifier: str, logical_id: str):
     return status, versions
 
 
-def _log(sample, reward: float, verifier: str, injected: bool):
+def _log(sample, reward: float, verifier: str, injected: bool, autofix: bool = False, register: bool = True):
     rec = {
         "group_index": sample.group_index,
         "index": sample.index,
@@ -179,6 +229,7 @@ def _log(sample, reward: float, verifier: str, injected: bool):
         "injected": injected,
         "fault": FAULT,
         "seal_enabled": SEAL,
+        "autofix": autofix,
         "ts": time.time(),
     }
     # Seal 模式下完整记录 response/label (Selective Replay 重算输入)
@@ -187,8 +238,8 @@ def _log(sample, reward: float, verifier: str, injected: bool):
         rec["label"] = (sample.label or "")[:200]
     lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
     _cas_write(rec)
-    if SEAL:
-        _seal_register(sample.group_index if sample.group_index is not None else -1, verifier, lid)
+    if SEAL and register:
+        _seal_register(sample.group_index if sample.group_index is not None else -1, verifier, lid, sample)
 
 
 def _log_crash(sample, gidx):
@@ -233,9 +284,75 @@ async def _rm_one(s, is_batch_sorted_pos=None):
     return r
 
 
+def _compute_verdict(s, pos: int):
+    """单样本版本判定: 返回 (reward, verifier, injected)"""
+    gidx = s.group_index if s.group_index is not None else -1
+    fault = _fault_for(gidx)
+    in_window = fault != "none"
+    r1 = float(_v1_reward(s.response, s.label or ""))
+    r2 = float(_v2_reward(s.response, s.label or ""))
+    half = K // 2
+    if fault == "skew" and in_window:
+        if pos < half:
+            return r1, "v1", False
+        return r2, "v2", True
+    elif fault == "dup" and in_window:
+        if pos < half:
+            return r1, "v1", False
+        return r2, "retry-stale", True
+    else:
+        return r1, "v1", False
+
+
+async def _rm_batch_group(samples):
+    """组级批调用 (--group-rm 主路径): 组完成时检测版本一致性;
+    AUTO_FIX 时 ABORTED 组全部样本返回权威 v1 值 (训练器消费侧 0 混算)。"""
+    results = [0.0] * len(samples)
+    groups = {}
+    for i, s in enumerate(samples):
+        groups.setdefault(s.group_index if s.group_index is not None else -1, []).append(i)
+    async with _lock:
+        for gi, idxs in groups.items():
+            idxs_sorted = sorted(idxs, key=lambda i: samples[i].index)
+            recs = []
+            aborted = False
+            for pos, i in enumerate(idxs_sorted):
+                s = samples[i]
+                fault = _fault_for(gi)
+                if fault == "crm_crash":
+                    _log_crash(s, gi)
+                    raise RuntimeError(f"injected RM crash (group_index={gi})")
+                r1 = float(_v1_reward(s.response, s.label or ""))
+                r2 = float(_v2_reward(s.response, s.label or ""))
+                p = (s.index or 0) % K
+                r, ver, inj = r1, "v1", False
+                if (fault == "skew" or fault == "dup") and fault != "none":
+                    if p >= K // 2:
+                        r, ver, inj = r2, ("v2" if fault == "skew" else "retry-stale"), True
+                recs.append({"i": i, "s": s, "r": r, "r1": r1, "ver": ver, "inj": inj})
+            vers = set(rec["ver"] for rec in recs)
+            status = "SEALED" if len(vers) == 1 else "ABORTED"
+            autofix = False
+            if status == "ABORTED" and AUTO_FIX:
+                for rec in recs:
+                    rec["r"] = rec["r1"]  # v1 权威
+                    rec["ver"] = "v1"
+                    rec["autofix"] = True
+                autofix = True
+            for rec in recs:
+                _log(rec["s"], rec["r"], rec["ver"], rec["inj"], autofix=rec.get("autofix", False), register=False)
+            if SEAL:
+                _seal_write(gi, status, vers, autofix=autofix)
+            for rec in recs:
+                results[rec["i"]] = rec["r"]
+    return results
+
+
 async def rm_function(args, samples):
     if not isinstance(samples, list):
         return await _rm_one(samples)
+    if GROUP_RM:
+        return await _rm_batch_group(samples)
     results = [0.0] * len(samples)
     groups = {}
     for i, s in enumerate(samples):

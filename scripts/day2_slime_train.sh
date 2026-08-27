@@ -52,6 +52,10 @@ if [ -n "$CUSTOM_RM" ]; then
    ROLLOUT_ARGS+=(--custom-rm-path "$CUSTOM_RM")
 fi
 
+if [ "${RTX_GROUP_RM:-0}" = "1" ]; then
+   ROLLOUT_ARGS+=(--group-rm)
+fi
+
 PERF_ARGS=(
    --tensor-model-parallel-size 1
    --sequence-parallel

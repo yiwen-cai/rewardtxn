@@ -1,0 +1,25 @@
+{
+  "exp_id": "p3a-slime-skew-autofix-K8-s42-20260828",
+  "n_steps": 20,
+  "throughput_base_tok_per_s": 19539.06,
+  "step_latency_mean_s": 27.749,
+  "step_latency_median_s": 4.816,
+  "step_latency_max_s": 187.637,
+  "wait_time_ratio_mean": 0.5642,
+  "rollout_time_mean_s": 18.636,
+  "rollout_tokens_per_gpu_per_s": 1242802.01,
+  "checkpoint_count": 2,
+  "checkpoint_iters": [
+    9,
+    19
+  ],
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "silent_errors_count": 0,
+  "crash_window_reproduced": false,
+  "gradient_delta_observed": false,
+  "invalid_committed_steps": 0,
+  "replay_savings_pct": 0.0,
+  "protocol_overhead_pct": 0.0,
+  "no_upstream_equivalent": true
+}
