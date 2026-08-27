@@ -1,0 +1,25 @@
+{
+  "exp_id": "p2d-slime-3b-noseal-K8-s42-20260827",
+  "n_steps": 20,
+  "throughput_base_tok_per_s": 11656.12,
+  "step_latency_mean_s": 40.897,
+  "step_latency_median_s": 6.637,
+  "step_latency_max_s": 172.363,
+  "wait_time_ratio_mean": 0.5922,
+  "rollout_time_mean_s": 32.36,
+  "rollout_tokens_per_gpu_per_s": 681699.86,
+  "checkpoint_count": 2,
+  "checkpoint_iters": [
+    9,
+    19
+  ],
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "silent_errors_count": 0,
+  "crash_window_reproduced": false,
+  "gradient_delta_observed": false,
+  "invalid_committed_steps": 0,
+  "replay_savings_pct": 0.0,
+  "protocol_overhead_pct": 0.0,
+  "no_upstream_equivalent": true
+}

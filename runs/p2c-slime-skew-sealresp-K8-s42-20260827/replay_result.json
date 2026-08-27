@@ -1,8 +1,8 @@
 {
   "replayed_samples": 160,
-  "cpu_reward_recompute_s": 0.311,
+  "cpu_reward_recompute_s": 0.434,
   "b5_full_restep_est_s": 279.0,
-  "savings_vs_b5": 99.9,
+  "savings_vs_b5": 99.8,
   "samples": [
     {
       "group_index": 27,

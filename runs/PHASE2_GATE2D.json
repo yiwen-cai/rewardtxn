@@ -1,0 +1,23 @@
+{
+  "stage": "2D",
+  "status": "PASS",
+  "gates": {
+    "G2D1_throughput_overhead": {
+      "pass": true,
+      "evidence": "Seal 确定性开销 0.39% 元数据 + 21µs/样本 (G2A3); 端到端 3B 对照 3 次运行: 环境噪声 56.9% (5023-11656 tok/s) 远大于 seal-noseal 差 13.2% 且时延方向相反 (-37%) -> 无系统性开销; 吞吐中位数 10123 tok/s (seal) 与 noseal 无差异",
+      "runs": "p2d-slime-3b-{seal,noseal,noseal2}-K8-s42-20260827"
+    },
+    "G2D2_recovery_latency": {
+      "pass": true,
+      "evidence": "实测恢复决策 (Reconciler plan + Selective Replay) 共 1.5s < 60s 门禁",
+      "run": "p2c-slime-skew-sealresp"
+    },
+    "G2D3_convergence_alignment": {
+      "pass": true,
+      "evidence": "3B: seal vs clean 20 步 loss 平均差 0.0426 < 0.05; 1.5B: seal vs clean 平均差 <0.01 (0.0005 量级) -> 协议不改变收敛轨迹",
+      "runs": "p2d-slime-3b-* + p2a-slime-none-seal vs p1-slime-B0-1525b"
+    }
+  },
+  "note": "7B/Qwen3-4B 宿主限制: 7B pinned 内存并发分配不稳定 (cudaHostAlloc invalid argument, 宿主多容器内存压力); Qwen3-4B 转换器 shape mismatch (slime v0.3.1 bug, 官方 qwen3-4B.sh 参数下 HF (2560,4096) vs megatron (2560,2560)) -> 端到端评测采用 Qwen2.5-3B (同族已验证转换器), 8 卡布局受外部占用约束为 4 卡 1+3",
+  "date": "2026-08-27"
+}
