@@ -1,0 +1,64 @@
+# RewardTxn 三栈版本锁定文件 (STACKS.lock)
+# 依据: RewardTxn H100 自包含实验指导.md 第 4 节
+# 更新时间: 2026-08-25T00:10:00Z (本地搭建验证)
+# 所有 SHA 均已通过 git ls-remote / git rev-parse 实测核对。
+
+stacks:
+  slime:
+    repo: https://github.com/THUDM/slime
+    ref: v0.3.1
+    commit_sha: a6272da0d4f3d0a08520c99a2f3b4f6c887960dc
+    image: slimerl/slime:v0.3.1
+    image_digest: sha256:2feaad36b157ee1f790f139aeb6d2669a466b914f28426f468df70b2324807a7
+    local_path: third_party/slime
+    role: 主力实验栈 (首选)
+    verified: true
+    smoke: 3 卡 (0,1,6) fully_async 冒烟通过 (ray job succeeded, 2026-08-24)
+    notes: 镜像经 docker.m.daocloud.io 国内镜像拉取, digest 与文档锁定前缀 sha256:2feaad36 一致
+
+  areal:
+    repo: https://github.com/areal-project/AReaL
+    ref: main (pinned)
+    commit_sha: b83d1f40196e5bd7d9f83092563443561870d550
+    image: ghcr.io/areal-project/areal-runtime:v2.0.0-sglang
+    image_digest: (本地导入, image ID/config = sha256:c0573bb8412a..., 53.4GB)
+    local_path: third_party/areal
+    role: 语义复核第二栈 (B0/B2 对照)
+    verified: true
+    smoke: 容器验证通过 (torch 2.9.1+cu129 CUDA OK, sglang 0.5.10.post1, ray 2.55.1, areal import OK, 挂载源码 uv pip install -e OK)
+    notes: dockerd 代理不稳导致 docker pull 失败 → crane 直连下载全部 32 blob (HTTP/1.1) + 手工构造 OCI/docker-save 导入
+
+  transferqueue:
+    repo: https://github.com/Ascend/TransferQueue
+    ref: release/v0.1.10
+    commit_sha: 8497a52a5c4347c4d67c97f7ce500e544426a08a
+    image: none (host python / pip install .)
+    local_path: third_party/transferqueue
+    venv: .venv-tq
+    role: 数据面 Crash Window 微基准
+    verified: true
+
+models:
+  qwen2.5-0.5b-instruct:
+    source: modelscope://Qwen/Qwen2.5-0.5B-Instruct (HF 不可达, 走国内源)
+    local_path: models/Qwen2.5-0.5B-Instruct
+    status: done
+  qwen2.5-0.5b-instruct-torch-dist:
+    source: tools/convert_hf_to_torch_dist.py (容器内 GPU0 转换)
+    local_path: models/Qwen2.5-0.5B-Instruct_torch_dist
+    size: 943M
+    status: done
+  dapo-math-17k:
+    source: hf-mirror.com/datasets/zhuzilin/dapo-math-17k
+    local_path: models/datasets/dapo-math-17k/dapo-math-17k.jsonl
+    rows: 17398
+    status: done
+
+network:
+  dockerhub_registry: registry-1.docker.io (不可达, 超时)
+  dockerhub_mirror: docker.m.daocloud.io (可用)
+  hf: huggingface.co (不可达)
+  hf_mirror: hf-mirror.com (可用)
+  modelscope: www.modelscope.cn (可用)
+  pypi: pypi.org (可用, 备选 清华/阿里镜像)
+  ghcr: ghcr.io (可用)

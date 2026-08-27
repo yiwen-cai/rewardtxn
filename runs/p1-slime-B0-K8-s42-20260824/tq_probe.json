@@ -1,0 +1,59 @@
+{
+  "exp_id": "p1-slime-B0-K8-s42-20260824",
+  "groups": [
+    {
+      "group": 0,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 1,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 2,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 3,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 4,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 5,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 6,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    },
+    {
+      "group": 7,
+      "K": 8,
+      "consumed": true,
+      "verified": true
+    }
+  ],
+  "n_samples_total": 64,
+  "ok": true,
+  "elapsed_s": 0.526,
+  "throughput_groups_per_s": 15.203,
+  "throughput_samples_per_s": 121.626,
+  "consumption_status_error": "TransferQueueClient.get_consumption_status() missing 1 required positional argument: 'task_name'"
+}

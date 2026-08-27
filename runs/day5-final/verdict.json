@@ -1,0 +1,14 @@
+{
+  "exp_id": "day5-final",
+  "auto_pass": true,
+  "gates": {
+    "g1_silent_errors_ge_2": true,
+    "g2_crash_window_reproduced": true,
+    "g3_gradient_delta_observed": true,
+    "g4_zero_invalid_commit": true,
+    "g5_savings_ge_30pct": true,
+    "g6_overhead_lt_5pct": true,
+    "g7_no_upstream_equivalent": true
+  },
+  "decision": "GO"
+}

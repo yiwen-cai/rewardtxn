@@ -1,0 +1,19 @@
+{
+  "exp_id": "day5-final",
+  "phase": "p1",
+  "stack": "slime+transferqueue+areal",
+  "baseline": "B0-B5",
+  "commit_sha": "a6272da0+8497a52a+b83d1f40",
+  "seed": 42,
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "fault_injection": {
+    "crash_point": "all",
+    "mechanism": "R1/R2/R3/Q0/L0/L2/C1",
+    "target_step": "all"
+  },
+  "tolerances": {
+    "max_l2_diff": 0.001,
+    "min_cosine_similarity": 0.995
+  }
+}

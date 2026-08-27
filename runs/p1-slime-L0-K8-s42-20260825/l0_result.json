@@ -1,0 +1,19 @@
+{
+  "exp_id": "p1-slime-L0-K8-s42-20260825",
+  "injection": {
+    "crash_point": "L0",
+    "mechanism": "kill -9 MegatronTrainRayActor (trainer)",
+    "at_step": 8
+  },
+  "observed": {
+    "actor_auto_restart": false,
+    "job_result": "failed (ActorDiedError, exit 1)",
+    "last_step_before_kill": 7,
+    "checkpoint_available": false,
+    "recovery": "无自动恢复; 训练需人工重启, 8 步训练成果丢失"
+  },
+  "vs_doc_expectation": {
+    "expect": "丢弃当前显存梯度, 从前驱 Checkpoint Cs 重做",
+    "actual": "无自动重启/无恢复点/训练失败, 已算梯度与数据丢失"
+  }
+}

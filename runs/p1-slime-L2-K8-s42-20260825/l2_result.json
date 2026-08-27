@@ -1,0 +1,35 @@
+{
+  "exp_id": "p1-slime-L2-K8-s42-20260825",
+  "injection": {
+    "crash_point": "L2 (修正版: 单 actor 架构)",
+    "mechanism": "kill -9 MegatronTrainRayActor (Optimizer 阶段)",
+    "at_step": 8
+  },
+  "checkpoint_before_kill": {
+    "iter": 7,
+    "save_duration_s": 20.0,
+    "latest_file": 7
+  },
+  "observed": {
+    "actor_auto_restart": false,
+    "job_result": "failed (ActorDiedError, exit 1)",
+    "default_restart_behavior": "不加载 checkpoint, 从 step 0 重新训练 (10 步成果丢失)",
+    "explicit_load_num_rollout_16": "AssertionError: OptimizerParamScheduler num_steps 512 vs 256 不匹配, 无法启动",
+    "explicit_load_num_rollout_8": "成功加载 iter 7, 但 rollout 轮次已耗尽, 0 个新 step 直接结束"
+  },
+  "recovery_verdict": "恢复路径双重死锁: (1) scheduler 要求 num_rollout == 保存时已消耗步数, 否则无法启动; (2) 匹配时 rollout 数据轮次无法续接, 恢复后无数据可训. 文档验收要求 '全 Trainer 回滚至上一个 Checkpoint 且不重复 apply' 无法满足",
+  "b5_checkpoint_overhead": {
+    "save_duration_s": [
+      31.0,
+      20.0
+    ],
+    "step_time_mean_s": 30.8,
+    "overhead_ratio": "65-100% of step time"
+  },
+  "b5_recompute_cost": {
+    "lost_steps": 2,
+    "step_time_s": 30.8,
+    "full_restart_steps": 10,
+    "note": "Selective Replay 对比基准: 全量重算 vs 仅重算失败 Reward"
+  }
+}

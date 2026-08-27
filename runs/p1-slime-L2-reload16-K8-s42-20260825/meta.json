@@ -1,0 +1,40 @@
+{
+  "exp_id": "p1-slime-L2-reload16-K8-s42-20260825",
+  "phase": "p1",
+  "stack": "slime",
+  "baseline": "B0",
+  "commit_sha": "a6272da0d4f3d0a08520c99a2f3b4f6c887960dc",
+  "seed": 42,
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "fault_injection": {
+    "crash_point": null,
+    "mechanism": "custom_rm_path (day2_custom_rm.py)",
+    "target_step": "group_index [0,4] (step 0-1)"
+  },
+  "tolerances": {
+    "max_l2_diff": 0.001,
+    "min_cosine_similarity": 0.995
+  },
+  "created_at": "2026-08-26T02:23:16.000Z",
+  "params": {
+    "num_rollout": 16,
+    "rollout_batch_size": 4,
+    "n_samples_per_prompt": 8,
+    "global_batch_size": 32,
+    "lr": 0.0001,
+    "kl_loss_coef": 0.01,
+    "save_interval": 10,
+    "model": "Qwen2.5-0.5B-Instruct",
+    "dataset": "dapo-math-17k",
+    "rm": "custom_rm_path",
+    "gpus": [
+      0,
+      1,
+      2,
+      5
+    ],
+    "actor_gpus": 1,
+    "rollout_gpus": 3
+  }
+}

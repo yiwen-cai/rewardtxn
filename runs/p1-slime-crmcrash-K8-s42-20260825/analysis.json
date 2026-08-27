@@ -1,0 +1,17 @@
+{
+  "exp_id": "p1-slime-crmcrash-K8-s42-20260825",
+  "fault": "R1",
+  "window": [
+    20,
+    23
+  ],
+  "n_total": 7663,
+  "n_window": 0,
+  "n_control": 7663,
+  "control_acc": 0.154247683674801,
+  "window_acc": null,
+  "window_v1_acc": null,
+  "window_v2_acc": null,
+  "injected_count": 0,
+  "n_steps": 20
+}

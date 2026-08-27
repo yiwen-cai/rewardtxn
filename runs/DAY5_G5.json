@@ -1,0 +1,54 @@
+{
+  "scenarios": [
+    {
+      "scenario": "R1_crash_32samples",
+      "desc": "4 组 32 样本 (RM 崩溃/整组丢弃)",
+      "b2_cost_gpu_s": 31.3,
+      "b5_cost_gpu_s": 87.6,
+      "selective_replay_cost_s": 4.4,
+      "savings_vs_b2_pct": 85.9,
+      "savings_vs_b5_pct": 95.0
+    },
+    {
+      "scenario": "R3_skew_20groups",
+      "desc": "20 组 80 样本 (跨版本混算 ABORTED)",
+      "b2_cost_gpu_s": 156.5,
+      "b5_cost_gpu_s": 438.0,
+      "selective_replay_cost_s": 22.0,
+      "savings_vs_b2_pct": 85.9,
+      "savings_vs_b5_pct": 95.0
+    },
+    {
+      "scenario": "R2_dup_20groups",
+      "desc": "20 组 80 样本 (陈旧重试混入 ABORTED)",
+      "b2_cost_gpu_s": 156.5,
+      "b5_cost_gpu_s": 438.0,
+      "selective_replay_cost_s": 22.0,
+      "savings_vs_b2_pct": 85.9,
+      "savings_vs_b5_pct": 95.0
+    },
+    {
+      "scenario": "Q0_lost_32samples",
+      "desc": "32 样本 (队列消费后崩溃)",
+      "b2_cost_gpu_s": 31.3,
+      "b5_cost_gpu_s": 87.6,
+      "selective_replay_cost_s": 4.4,
+      "savings_vs_b2_pct": 85.9,
+      "savings_vs_b5_pct": 95.0
+    }
+  ],
+  "total_savings_vs_b2_pct": 85.9,
+  "total_savings_vs_b5_pct": 95.0,
+  "g5_savings_ge_30pct": true,
+  "assumptions": {
+    "rollout_cost_per_step_s": 31.3,
+    "train_cost_per_step_s": 30.8,
+    "checkpoint_save_cost_s": [
+      31.0,
+      20.0
+    ],
+    "reward_recompute_s": 0.1,
+    "replay_overhead_per_group_s": 1.0,
+    "note": "Selective Replay 复用 Rollout 前缀, 仅重算失败 Reward (CPU)"
+  }
+}

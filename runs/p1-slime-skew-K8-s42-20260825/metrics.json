@@ -1,0 +1,39 @@
+{
+  "exp_id": "p1-slime-skew-K8-s42-20260825",
+  "n_steps": 20,
+  "throughput_base_tok_per_s": 15481.85,
+  "step_latency_mean_s": 32.374,
+  "step_latency_median_s": 6.165,
+  "step_latency_max_s": 135.916,
+  "wait_time_ratio_mean": 0.5707,
+  "rollout_time_mean_s": 23.019,
+  "rollout_tokens_per_gpu_per_s": 1505232.02,
+  "checkpoint_count": 2,
+  "checkpoint_iters": [
+    9,
+    19
+  ],
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "silent_errors_count": 1,
+  "crash_window_reproduced": false,
+  "gradient_delta_observed": false,
+  "invalid_committed_steps": 0,
+  "replay_savings_pct": 0.0,
+  "protocol_overhead_pct": 0.0,
+  "no_upstream_equivalent": true,
+  "day2_observation": {
+    "fault": "R3_skew",
+    "window": [
+      20,
+      39
+    ],
+    "silent_behavior": "\u8de8\u7248\u672c\u6df7\u7b97\u65e0\u611f\u77e5, \u8bad\u7ec3\u6b63\u5e38\u5b8c\u6210",
+    "control_v1_acc": 0.067,
+    "window_v1_acc": 0.512,
+    "injected_subgroup_acc": 0.0,
+    "group_stats_delta_mean": -0.2562,
+    "injected_samples": 80,
+    "error_class": "silent_group_contamination"
+  }
+}

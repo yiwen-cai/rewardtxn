@@ -1,0 +1,9 @@
+{
+  "experiment": "g3_controlled_delta",
+  "source": "runs/p1-slime-skew-K8-s42-20260825",
+  "n_groups": 8,
+  "delta_l2": 0.259842187166214,
+  "cosine_similarity": 0.7547842264175415,
+  "gradient_delta_observed": true,
+  "note": "\u540c\u4e00\u6837\u672c\u3001\u4ec5 reward \u7248\u672c\u6df7\u5165 -> Delta \u6f02\u79fb\u53ef\u5f52\u56e0"
+}

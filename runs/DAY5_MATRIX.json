@@ -1,0 +1,49 @@
+{
+  "matrix": {
+    "B0_default": {
+      "desc": "默认开源栈 (slime v0.3.1 / TransferQueue v0.1.10)",
+      "R1_rm_crash": "整组静默丢弃, 32 样本丢失, 训练继续 (半静默)",
+      "R2_dup": "陈旧结果混入, 组偏移 -0.275, 完全静默",
+      "R3_skew": "跨版本混算, 组偏移 -0.256, 完全静默",
+      "Q0": "get_meta 后崩溃 -> 32 样本永久丢失 (Available: 0)",
+      "L0/L2": "trainer 崩溃 -> 无自动重启, Job failed, 成果丢失",
+      "C1/C2": "无 StepToken/ACK, 恢复双重死锁",
+      "recompute_cost": "0 (但训练损坏/数据丢失)"
+    },
+    "B1_group_id": {
+      "desc": "显式 Group ID + 组大小校验 (day5_b1_validator.py 实证)",
+      "R3_skew": "穿透: 20/20 注入组放行 (ID 合法/大小=K/字段完整), 80 样本混算进入",
+      "note": "不检查 reward 版本一致性 -> 跨版本混算不可见",
+      "recompute_cost": "需整组丢弃 (若检测到异常)"
+    },
+    "B2_drop_incomplete": {
+      "desc": "AReaL drop_incomplete_group (容器实证 4/4 passed)",
+      "R1_rm_crash": "安全丢弃不完整组 (无污染), 但 100% Rollout 浪费",
+      "R3_skew": "穿透: 组完整时不触发丢弃, 无版本检查",
+      "recompute_cost": "100% Rollout 算力浪费 (整组重采样)"
+    },
+    "B3_idempotency": {
+      "desc": "幂等去重 (TransferQueue task 消费状态)",
+      "Q0": "穿透: 防同 task 重复消费, 不防'已标记消费未训练'窗口 (场景 A/C)",
+      "recompute_cost": "无法恢复崩溃窗口 (0 成本但数据丢失)"
+    },
+    "B4_reserve_occupy_consume": {
+      "desc": "Reserve/Occupy/Consume (TransferQueue get_meta=mark_consumed)",
+      "Q0": "窗口存在: mark_consumed 不可逆, 无超时回滚 (源码+实测)",
+      "recompute_cost": "无法覆盖 Q0/L0 窗口"
+    },
+    "B5_per_step_ckpt": {
+      "desc": "Per-step checkpoint + 全量重算 (Day 4 实测)",
+      "L2/C1": "强一致 (权重落盘), 但保存开销 20-31s/次 = step 时间 65-100%",
+      "recompute_cost": "100% Step 算力重跑 (丢失步 x 30.8s + rollout 重生成)"
+    },
+    "RewardTxn": {
+      "desc": "Seal + Fencing + StepToken + Selective Replay (语义模拟器评估)",
+      "R3/R2": "Seal 检测 digest 不一致 -> 20 组 ABORTED, 0 Invalid Commit",
+      "R1": "4 组 ABORTED + Selective Replay (仅重算 Reward)",
+      "Q0": "Reconciler 恢复 32 样本",
+      "L2/C1": "StepToken 绑定 checkpoint, 已提交步不重复",
+      "recompute_cost": "仅重算失败 Reward (CPU), 复用 Rollout 前缀: 节省 vsB2 85.9% / vsB5 95.0%"
+    }
+  }
+}

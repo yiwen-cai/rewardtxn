@@ -1,0 +1,24 @@
+{
+  "exp_id": "day5-final-review",
+  "auto_pass": true,
+  "gates": {
+    "g1": true,
+    "g2": true,
+    "g3": true,
+    "g4": true,
+    "g5": true,
+    "g6": true,
+    "g7": true
+  },
+  "decision": "GO",
+  "evidence": {
+    "g1": "Day2 三注入 (R1/R2/R3) + B1 校验器穿透验证 (20/20 组放行)",
+    "g2": "Day3 Q0 (Available:0) + Day3 L0 + Day4 L2/C1 (恢复死锁)",
+    "g3": "真实数据受控实验: Delta L2=0.260, 余弦=0.755 (g3_controlled_delta.json)",
+    "g4": "协议语义模拟器: 全切点 0 Invalid Commit (DAY5_SIMULATOR.json)",
+    "g5": "Selective Replay 节省 vsB2 85.9% / vsB5 95.0% (DAY5_G5.json)",
+    "g6": "协议元数据开销 2.54% < 5% (DAY5_SIMULATOR.json)",
+    "g7": "slime/AReaL/TransferQueue main 均无等价 Durable Step Commit (G7_UPSTREAM_AUDIT.md)"
+  },
+  "notes": "g4/g6 采用协议语义模拟器评估 (修正文档循环依赖, 见 DAY5_PLAN.md 修正 1)"
+}

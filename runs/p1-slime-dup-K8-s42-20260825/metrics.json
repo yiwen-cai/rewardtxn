@@ -1,0 +1,39 @@
+{
+  "exp_id": "p1-slime-dup-K8-s42-20260825",
+  "n_steps": 20,
+  "throughput_base_tok_per_s": 15982.47,
+  "step_latency_mean_s": 33.01,
+  "step_latency_median_s": 4.598,
+  "step_latency_max_s": 164.898,
+  "wait_time_ratio_mean": 0.5606,
+  "rollout_time_mean_s": 24.426,
+  "rollout_tokens_per_gpu_per_s": 927615.39,
+  "checkpoint_count": 2,
+  "checkpoint_iters": [
+    9,
+    19
+  ],
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "silent_errors_count": 1,
+  "crash_window_reproduced": false,
+  "gradient_delta_observed": false,
+  "invalid_committed_steps": 0,
+  "replay_savings_pct": 0.0,
+  "protocol_overhead_pct": 0.0,
+  "no_upstream_equivalent": true,
+  "day2_observation": {
+    "fault": "R2_dup",
+    "window": [
+      20,
+      39
+    ],
+    "silent_behavior": "\u9648\u65e7\u91cd\u8bd5\u7ed3\u679c\u6df7\u5165\u7ec4\u5185, \u6ce8\u5165\u5b50\u7ec4\u5168 0, \u8bad\u7ec3\u65e0\u611f\u77e5",
+    "control_v1_acc": 0.147,
+    "window_v1_acc": 0.55,
+    "injected_subgroup_acc": 0.0,
+    "group_stats_delta_mean": -0.275,
+    "injected_samples": 80,
+    "error_class": "silent_group_contamination"
+  }
+}

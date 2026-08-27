@@ -1,0 +1,10 @@
+# 大体积产物/依赖
+runs/*/checkpoints/
+runs/*/logs/
+models/
+third_party/
+.venv*/
+__pycache__/
+*.pyc
+*.log
+/tmp/

@@ -1,0 +1,25 @@
+{
+  "exp_id": "p1-tq-Q0Q1-s42-20260825",
+  "phase": "p1",
+  "stack": "transferqueue",
+  "baseline": "B3/B4",
+  "commit_sha": "8497a52a5c4347c4d67c97f7ce500e544426a08a",
+  "seed": 42,
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "fault_injection": {
+    "crash_point": "Q0",
+    "mechanism": "kill -9 consumer after get_meta",
+    "target_step": "n/a (queue 数据面)"
+  },
+  "tolerances": {
+    "max_l2_diff": 0.001,
+    "min_cosine_similarity": 0.995
+  },
+  "created_at": "2026-08-26T01:29:35.000Z",
+  "params": {
+    "env": ".venv-tq (python 3.11, ray 2.58.0)",
+    "batch_size": 32,
+    "mode": "fetch"
+  }
+}

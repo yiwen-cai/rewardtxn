@@ -1,0 +1,33 @@
+{
+  "exp_id": "p1-slime-L0-K8-s42-20260825",
+  "phase": "p1",
+  "stack": "slime",
+  "baseline": "B0",
+  "commit_sha": "a6272da0d4f3d0a08520c99a2f3b4f6c887960dc",
+  "seed": 42,
+  "group_size_K": 8,
+  "batch_groups_U": 4,
+  "fault_injection": {
+    "crash_point": "L0",
+    "mechanism": "kill -9 MegatronTrainRayActor",
+    "target_step": 8
+  },
+  "tolerances": {
+    "max_l2_diff": 0.001,
+    "min_cosine_similarity": 0.995
+  },
+  "created_at": "2026-08-26T01:40:26.000Z",
+  "params": {
+    "model": "Qwen2.5-1.5B-Instruct",
+    "dataset": "gsm8k",
+    "gpus": [
+      0,
+      1,
+      2,
+      5
+    ],
+    "num_rollout": 10,
+    "save_interval": 10,
+    "lr": 0.0001
+  }
+}

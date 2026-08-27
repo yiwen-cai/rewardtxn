@@ -1,0 +1,10 @@
+{
+  "exp_id": "day5-final",
+  "silent_errors_count": 3,
+  "crash_window_reproduced": true,
+  "gradient_delta_observed": true,
+  "invalid_committed_steps": 0,
+  "replay_savings_pct": 85.9,
+  "protocol_overhead_pct": 2.539,
+  "no_upstream_equivalent": true
+}

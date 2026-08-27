@@ -1,0 +1,43 @@
+{
+  "scenarios": {
+    "R3_skew": {
+      "groups_total": 1122,
+      "aborted": 20,
+      "invalid_commits": 0,
+      "replayed": 20,
+      "rejected_incomplete": 123
+    },
+    "R2_dup": {
+      "groups_total": 969,
+      "aborted": 20,
+      "invalid_commits": 0,
+      "replayed": 20,
+      "rejected_incomplete": 40
+    },
+    "R1_crm_crash": {
+      "groups_total": 20,
+      "aborted": 4,
+      "invalid_commits": 0,
+      "replayed": 4,
+      "lost_samples": 32
+    },
+    "Q0": {
+      "lost_samples": 32,
+      "reconciler_recovered": 32,
+      "invalid_commits": 0
+    },
+    "L2_C1": {
+      "checkpoint_iter": 7,
+      "step_token_bound": true,
+      "invalid_commits": 0,
+      "lost_steps_replayed": 2
+    }
+  },
+  "invalid_committed_steps_total": 0,
+  "g4_zero_invalid_commit": true,
+  "protocol_metadata_per_step_bytes": 1300,
+  "training_data_per_step_bytes": 51200,
+  "protocol_overhead_pct": 2.539,
+  "g6_overhead_lt_5pct": true,
+  "disclaimer": "语义级模拟: 在真实注入数据上应用 Seal/Fencing/StepToken/Reconciler 规则"
+}
