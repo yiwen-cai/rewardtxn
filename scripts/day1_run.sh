@@ -28,6 +28,12 @@ if [ "${RTX_ALLOW_REUSE:-0}" != "1" ] && [ -d "$RUN_DIR" ] \
 fi
 mkdir -p "$RUN_DIR"/{logs,manifests,checkpoints} "$LOCAL_SCRATCH/$EXP_ID"/{ray,cas}
 
+# ---- 资源健康门禁: 存储/显存不健康拒绝启动 (RTX_SKIP_GATE=1 可跳过) ----
+if [ "${RTX_SKIP_GATE:-0}" != "1" ]; then
+  python3 "$BASE/scripts/resource_gate.py" check --gpus "$GPUS" --out "$RUN_DIR/logs/resource_gate.json" \
+    || { echo "resource gate FAILED: /public或根盘可用空间或目标GPU显存不足, 拒绝启动" >&2; exit 2; }
+fi
+
 # ---------- meta.json (文档 10.2 规范) ----------
 python3 - "$EXP_ID" "$RUN_DIR" "$NUM_ROLLOUT" "$COMMIT_SHA" <<'EOF'
 import json, os, sys, datetime

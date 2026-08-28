@@ -138,10 +138,15 @@ NUM_GPUS=${NUM_GPUS:-4}
 export MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}
 mkdir -p "${RAY_TMP_DIR}" "${RAY_SPILL_DIR}"
 CKPT_RETENTION_PID=""
+RESOURCE_WATCH_PID=""
 cleanup_runtime() {
    if [ -n "${CKPT_RETENTION_PID}" ]; then
       kill "${CKPT_RETENTION_PID}" >/dev/null 2>&1 || true
       wait "${CKPT_RETENTION_PID}" >/dev/null 2>&1 || true
+   fi
+   if [ -n "${RESOURCE_WATCH_PID}" ]; then
+      kill "${RESOURCE_WATCH_PID}" >/dev/null 2>&1 || true
+      wait "${RESOURCE_WATCH_PID}" >/dev/null 2>&1 || true
    fi
    ray stop --force >/dev/null 2>&1 || true
 }
@@ -155,6 +160,13 @@ if [ "${CKPT_KEEP}" != "0" ]; then
       --min-age-seconds "${CKPT_RETENTION_MIN_AGE}" \
       >"${RETENTION_LOG_DIR}/checkpoint_retention.log" 2>&1 &
    CKPT_RETENTION_PID=$!
+fi
+if [ "${RTX_SKIP_GATE:-0}" != "1" ]; then
+   WATCH_DIR=${RTX_RUN_DIR:-$(dirname "${SAVE_DIR}")}
+   mkdir -p "${WATCH_DIR}/logs"
+   python3 /workspace/scripts/resource_gate.py watch --dir "${WATCH_DIR}/logs" \
+      --interval "${RTX_GATE_INTERVAL:-60}" --gpus "" &
+   RESOURCE_WATCH_PID=$!
 fi
 ray start --head --node-ip-address "${MASTER_ADDR}" --num-gpus "${NUM_GPUS}" \
    --disable-usage-stats \

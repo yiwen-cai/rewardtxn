@@ -121,6 +121,18 @@ RTX_PROFILE=phase3b RTX_META_ONLY=1 bash scripts/day2_run.sh none -1 -1 20
 训练脚本会拒绝 `RTX_NO_SAVE_OPTIM=1` 与 `--load` 同时出现（optimizer state 缺失
 会破坏恢复语义）。meta.json 的 `commit_sha` 改为运行时读取当前 git HEAD，不再硬编码。
 
+### 8. 资源健康门禁 (storage/VRAM gate)
+
+所有宿主入口启动前强制执行 `scripts/resource_gate.py check`，三项全过才允许启动：
+
+- `/public` 可用空间 ≥ 200G（`RTX_GATE_MIN_PUB_GB`）
+- 根盘可用空间 ≥ 100G（`RTX_GATE_MIN_ROOT_GB`，Ray spill/scratch 在根盘）
+- 目标 GPU 单卡空闲显存 ≥ 30G（`RTX_GATE_MIN_GPU_FREE_GB`）
+
+结果写入 `runs/<exp>/logs/resource_gate.json`；任一不达标则拒绝启动（exit 2）。
+紧急跳过用 `RTX_SKIP_GATE=1`（不推荐）。训练期间 `resource_gate.py watch`
+每 60s 采样主机内存/磁盘/GPU 显存到 `logs/resource_health.jsonl`，形成健康曲线。
+
 ## 不建议的做法
 
 - 内存紧张时不要开启 `--async-save`：它可能保留额外的 checkpoint buffer。
