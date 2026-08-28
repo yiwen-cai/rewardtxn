@@ -113,12 +113,13 @@ def replay_correct(tmp):
     assert all(abs(s["old_reward"] - s["new_reward"]) < 1e-9 for s in v1s)
 t("replay_correctness", replay_correct)
 
-# 7. Manifest audit (2B sidecar 链完整性)
+# 7. Manifest audit (2B sidecar 链完整性) — 证据: 新实验 p1-slime-skew-K8-s42-20260828-233354
+#    (历史 checkpoint 已清理; 门禁指向新生成的 checkpoint 证据, committed [9,19])
 def manifest_audit(tmp):
     from pathlib import Path
     from phase2_manifest import audit as audit_manifests
-    res = audit_manifests(Path("/public/home/caiyiwen/rewardtxn/runs/p2b-slime-ckpt-K8-s42-20260827/checkpoints"))
-    assert res["committed_iters"] == [3, 7, 11, 15, 19], res["committed_iters"]
+    res = audit_manifests(Path("/public/home/caiyiwen/rewardtxn/runs/p1-slime-skew-K8-s42-20260828-233354/checkpoints"))
+    assert res["committed_iters"] == [9, 19], res["committed_iters"]
     assert not res["missing_token_iters"]
     # prev 链完整: 每 token 的 prev_token == 前一 token
     toks = res["committed_steps"]

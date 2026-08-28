@@ -129,17 +129,24 @@ RTX_PROFILE=phase3b RTX_META_ONLY=1 bash scripts/day2_run.sh none -1 -1 20
   高负载的首要开关。
 - 不要降低 global batch 作为第一步，否则会改变训练对照语义。
 
-## 当前验证（未启动训练实验）
+## 当前验证（已按建议完成实验）
 
-已完成：
+### 离线验证
 
-- Python 源码编译检查；
-- 相关宿主入口和自动恢复入口 `bash -n`；
-- checkpoint retention 的安全删除/保留测试；
-- 单进程 CAS、批量 CAS、4 进程并发 CAS、旧 JSONL 导入测试；
-- 并发测试确认同一 logical ID 恰好写入一条 reward 记录。
+- 相关宿主入口和自动恢复入口 `bash -n`；Python 编译 + ruff；
+- checkpoint retention 的安全删除/保留测试；单进程/批量/4 进程并发 CAS、旧 JSONL 导入；
+- `phase3_regress.sh` 一键回归 **9/9 PASS**（manifest_audit 已改用新实验重新生成的
+  checkpoint 证据，committed [9,19]）。
 
-本次修改没有启动训练实验。历史 checkpoint payload 已按确认删除，因此现有完整
-`phase3_regress.sh` 的离线结果为 8/9：CAS 相关检查全部通过；唯一失败是
-`manifest_audit` 找不到已删除的 checkpoint 目录（保留的 sidecar/报告仍在）。如需
-重新通过该门禁，需要用新实验重新生成 checkpoint 证据。
+### 在线实验（GPU 1,2,3,4，Qwen2.5-0.5B，新配置首次实跑）
+
+| 实验 | 配置 | 结果 |
+|---|---|---|
+| smoke-K8-s42-20260828-232940 | profile=smoke, 4 步, 并发 16 | SUCCESS: Ray+CAS+Seal+checkpoint 链路正常, 204 组 SEALED, ckpt iter1/3 |
+| p1-slime-skew-…233354 | profile=phase3b, skew[20,39], 20 步 | SUCCESS: 窗口组 20/20 ABORTED+autofix, 4056 条 reward 0 混算, ckpt iter9/19 (keep=2) |
+| p1-slime-none-…234039 | profile=phase3b + kill 注入 iter9 | 3B 复验 3/3 PASS: rc=137 捕获, 0-9 步不重训, 恢复时延 148s (<5min), ckpt 仍限 2 份 |
+
+主机内存观测：训练期间 used 38-45G / avail 438-458G（此前曾出现接近耗尽的尖峰）；
+Ray object store 16GiB、spill 在根盘 scratch、CAS 索引 SQLite 均按配置生效。
+
+门禁证据：`runs/PHASE3_EXP_MEMIO.json`、`runs/PHASE3_GATE3B_MEMIO.json`。
