@@ -9,6 +9,9 @@ set -euo pipefail
 BASE=/public/home/caiyiwen/rewardtxn
 export RTX_PROFILE=smoke
 export RTX_NUM_ROLLOUT=${RTX_NUM_ROLLOUT:-4}
+# 冒烟默认走完整链路: CAS 索引 + Seal 检测 + AUTO_FIX (group-rm 原生路径)
+export RTX_CUSTOM_RM=phase2_seal_rm.rm_function
+export RTX_SEAL=1 RTX_GROUP_RM=1 RTX_SEAL_AUTO_FIX=1
 EXP_ID=${RTX_EXP_ID:-${1:-smoke-K8-s42-$(date +%Y%m%d-%H%M%S)}}
 
 echo "=== smoke test: exp=$EXP_ID num_rollout=$RTX_NUM_ROLLOUT profile=smoke ==="

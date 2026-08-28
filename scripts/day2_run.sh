@@ -81,7 +81,7 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
   -e RTX_FAULT="$FAULT" -e RTX_FAULT_START="$START" -e RTX_FAULT_END="$END" \
   -e RTX_RUN_DIR="/workspace/runs/$EXP_ID" \
   -e RTX_NUM_ROLLOUT="$NUM_ROLLOUT" \
-  -e RTX_CUSTOM_RM="day2_custom_rm.rm_function" \
+  -e RTX_CUSTOM_RM="${RTX_CUSTOM_RM:-day2_custom_rm.rm_function}" \
   -e DATA_PATH="${RTX_DATA_PATH:-/root/datasets/dapo-math-17k/dapo-math-17k.jsonl}" \
   -e MODEL_DIR="${RTX_MODEL_DIR:-/root/models/Qwen2.5-0.5B-Instruct}" \
   -e RTX_MODEL_CONFIG="${RTX_MODEL_CONFIG:-qwen2.5-0.5B.sh}" \
@@ -90,7 +90,7 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
   -e RTX_SGLANG_CONCURRENCY="${RTX_SGLANG_CONCURRENCY:-64}" \
   -e RTX_RAY_OBJECT_STORE_MEMORY="${RTX_RAY_OBJECT_STORE_MEMORY:-17179869184}" \
   -e RTX_RAY_PLASMA_DIR="${RTX_RAY_PLASMA_DIR:-/dev/shm}" \
-  -e RTX_RAY_TMP_DIR="${RTX_RAY_TMP_DIR:-/rtx-scratch/$EXP_ID/ray}" \
+  -e RTX_RAY_TMP_DIR="${RTX_RAY_TMP_DIR:-/rtx-scratch/ray}" \
   -e RTX_RAY_SPILL_DIR="${RTX_RAY_SPILL_DIR:-/rtx-scratch/$EXP_ID/ray/spill}" \
   -e RTX_CAS_INDEX_DIR="${RTX_CAS_INDEX_DIR:-/rtx-scratch/$EXP_ID/cas}" \
   -e RTX_NO_SAVE_OPTIM="${RTX_NO_SAVE_OPTIM:-0}" \
