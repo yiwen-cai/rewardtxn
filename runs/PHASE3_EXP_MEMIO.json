@@ -1,0 +1,61 @@
+{
+  "experiments": [
+    {
+      "name": "smoke-K8-s42-20260828-232940",
+      "profile": "smoke",
+      "steps": 4,
+      "result": "SUCCESS",
+      "seals": 204,
+      "seals_aborted": 0,
+      "checkpoints": [
+        "iter_0000001",
+        "iter_0000003"
+      ],
+      "note": "全链路: Ray+CAS+Seal+checkpoint retention"
+    },
+    {
+      "name": "runs/p1-slime-skew-K8-s42-20260828-233354",
+      "profile": "phase3b",
+      "fault": "skew[20,39]",
+      "steps": 20,
+      "result": "SUCCESS",
+      "seals_total": 727,
+      "window_aborted": "20/20",
+      "autofix_groups": 20,
+      "rewards_total": 4056,
+      "rewards_v1_mismatch": 0,
+      "checkpoints_kept": [
+        "iter_0000009",
+        "iter_0000019"
+      ],
+      "latest_iter": 19,
+      "gate": "G3A1/G3A2 口径: 窗口组 20/20 ABORTED+autofix, 0 混算, 0 误改"
+    }
+  ],
+  "memory_observation": {
+    "host_samples_during_training": [
+      {
+        "t_min": 4,
+        "mem_used_gb": 39,
+        "avail_gb": 457
+      },
+      {
+        "t_min": 8,
+        "mem_used_gb": 45,
+        "avail_gb": 441
+      },
+      {
+        "recovery_run": "used 38-45G avail 438-458G"
+      }
+    ],
+    "config": {
+      "ray_object_store_gib": 16,
+      "sglang_concurrency": 64,
+      "spill": "/rtx-scratch (根盘)",
+      "cas_index": "sqlite /rtx-scratch/<exp>/cas"
+    },
+    "conclusion": "4-GPU 0.5B 训练 + 3 rollout engine 主机内存保持 ~39-45G used, 可用 ~440-458G, 无尖峰/无 spill 压力"
+  },
+  "regression": "runs/PHASE3_REGRESSION.json -> 9/9 PASS (manifest_audit 使用新实验 checkpoint 证据)",
+  "ts": 1787932213.8903406
+}

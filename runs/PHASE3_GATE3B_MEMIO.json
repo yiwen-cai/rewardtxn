@@ -1,0 +1,47 @@
+{
+  "stage": "3B-recheck(mem-io config)",
+  "run": "runs/p1-slime-none-K8-s42-20260828-234039",
+  "gates": {
+    "G3B1_auto_recovery": {
+      "pass": true,
+      "attempts": 2,
+      "kill_injected": true,
+      "resume": true,
+      "exit_rc_captured": 137,
+      "evidence": "kill -9 at iter9 -> rc=137 captured -> recovery plan committed=9 -> attempt2 --load+override -> SUCCEEDED (无人干预)"
+    },
+    "G3B2_no_retrain": {
+      "pass": true,
+      "committed_0_9": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1,
+        "4": 1,
+        "5": 1,
+        "6": 1,
+        "7": 1,
+        "8": 1,
+        "9": 1
+      },
+      "post_recovery_steps": 11,
+      "evidence": "已提交步 0-9 各仅 1 次; step10 在 attempt1 未落盘故重训, 语义正确"
+    },
+    "G3B3_delay": {
+      "pass": true,
+      "delay_s": 148.0,
+      "evidence": "attempt1 step10(2026-08-28 15:45:03) -> attempt2 step10(2026-08-28 15:47:31) = 148.0s (含重启+加载)"
+    }
+  },
+  "protocol": {
+    "seals_aborted": 0,
+    "rewards_v1_mismatch": 0,
+    "checkpoints_kept": [
+      "iter_0000009",
+      "iter_0000019"
+    ],
+    "latest_iter": 19
+  },
+  "ts": 1787932213.1104517,
+  "status": "PASS"
+}

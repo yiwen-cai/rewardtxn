@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "total": 9,
+  "passed": 9,
+  "checks": {
+    "seal_autofix_group": {
+      "pass": true
+    },
+    "seal_clean_group": {
+      "pass": true
+    },
+    "cas_single_process": {
+      "pass": true
+    },
+    "cas_multi_process": {
+      "pass": true
+    },
+    "reconciler_plan": {
+      "pass": true
+    },
+    "replay_correctness": {
+      "pass": true
+    },
+    "manifest_audit": {
+      "pass": true
+    },
+    "zero_modification": {
+      "pass": true
+    },
+    "auto_recovery_history": {
+      "pass": true
+    }
+  },
+  "date": "2026-08-28T23:40:26"
+}
