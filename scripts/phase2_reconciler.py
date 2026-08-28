@@ -18,7 +18,6 @@ Selective Replay:
     输出 replay_result.json: {samples, correct_rewards, cpu_cost_s, est_savings}
     对比基准: B5 整步重跑 = 30.8s/步 + checkpoint 20-31s (Day4 实测)
 """
-import hashlib
 import json
 import os
 import sys
@@ -39,7 +38,7 @@ B5_FULL_STEP_S = B5_STEP_S + B5_CKPT_S
 def load_jsonl(p: Path):
     if not p.exists():
         return []
-    return [json.loads(l) for l in p.open()]
+    return [json.loads(line) for line in p.open()]
 
 
 def build_plan(save_dir: str, run_dir: str, resume_iter=None) -> dict:
@@ -132,6 +131,39 @@ def selective_replay(run_dir: str, plan_path=None) -> dict:
     return res
 
 
+def write_audit_report(run_dir, plan: dict, replay: dict = None) -> Path:
+    """3C: 恢复审计报告 (Markdown, 人类可读): 已提交步/重放组/重算样本/修正清单"""
+    run_dir = Path(run_dir)
+    lines = [
+        "# 恢复审计报告 (Recovery Audit Report)", "",
+        f"- 生成时间: {time.strftime('%Y-%m-%dT%H:%M:%S')}",
+        f"- 恢复起点 (resume_iter): {plan.get('resume_iter', 'none')}",
+        f"- 已提交步 (StepToken): {plan.get('committed_iters', [])}",
+        f"- 需重放组 (ABORTED/崩溃): {len(plan.get('replay_groups', []))}",
+        f"- 需重算样本: {plan.get('replay_samples', 0)}",
+        f"- 重新投递任务 (Q0): {len(plan.get('reissue_tasks', []))}",
+        "", "## 已提交步 (不重放)", "",
+    ]
+    for it in plan.get("committed_iters", []):
+        lines.append(f"- iter {it} (checkpoint 内容哈希绑定, StepToken 幂等)")
+    lines += ["", "## 重放组清单", "", "| 组 | 状态 | 版本 | 样本 |", "|---|---|---|---|"]
+    for g in plan.get("aborted_groups", []):
+        lines.append(f"| {g} | ABORTED | 混合 | 8 |")
+    for g in plan.get("replay_groups", []):
+        if g not in plan.get("aborted_groups", []):
+            lines.append(f"| {g} | 崩溃/不完整 | - | - |")
+    lines += ["", "## 重算样本", "", f"共 {plan.get('replay_samples', 0)} 个样本 (权威 verifier v1, CPU 重算)"]
+    if replay:
+        lines += ["", "## 重算结果", "",
+                  f"- 重算样本: {replay.get('replayed_samples', 0)}",
+                  f"- CPU 重算耗时: {replay.get('cpu_reward_recompute_s', 0):.2f}s",
+                  f"- B5 整步重跑预估: {replay.get('b5_full_restep_est_s', 0):.1f}s",
+                  f"- 节省 vs B5: {replay.get('savings_vs_b5', 0):.1f}%"]
+    out = run_dir / "recovery_audit_report.md"
+    out.write_text("\n".join(lines) + "\n")
+    return out
+
+
 def main():
     mode = sys.argv[1]
     if mode == "plan":
@@ -141,6 +173,15 @@ def main():
         r = selective_replay(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)
         print(json.dumps({"replayed_samples": r["replayed_samples"], "cpu_s": r["cpu_reward_recompute_s"],
                           "b5_est_s": r["b5_full_restep_est_s"], "savings_vs_b5_pct": r["savings_vs_b5"]}, indent=1))
+    elif mode == "report":
+        run_dir = sys.argv[2]
+        plan = json.loads((Path(run_dir) / "recovery_plan.json").read_text())
+        rep = None
+        rp = Path(run_dir) / "replay_result.json"
+        if rp.exists():
+            rep = json.loads(rp.read_text())
+        out = write_audit_report(run_dir, plan, rep)
+        print(f"report written: {out}")
 
 
 if __name__ == "__main__":

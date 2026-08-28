@@ -20,15 +20,20 @@ Phase 2A: Group Seal + Reward CAS 包装层 (slime --custom-rm-path, 兼容 batc
   - "ABORTED 组 0 混算进入训练"的完整消费侧 gate 由 2B StepToken +
     2C Selective Replay 实现 (slime 训练循环不可改, 需要包装 checkpoint/消费路径)
 """
+from __future__ import annotations
+
+import ast as _ast
 import asyncio
 import json
 import os
+import sqlite3
 import time
 
 try:
     from slime.rollout.rm_hub.math_utils import extract_answer, grade_answer_mathd, grade_answer_sympy
 except ImportError:  # 宿主机 (无 slime): 使用纯函数副本 (同 SHA 来源)
-    import sys as _sys, os as _os
+    import os as _os
+    import sys as _sys
     _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__))))
     from phase2_verifiers import extract_answer, grade_answer_mathd, grade_answer_sympy
 
@@ -42,7 +47,6 @@ AUTO_FIX = os.environ.get("RTX_SEAL_AUTO_FIX", "0") == "1"
 GROUP_RM = os.environ.get("RTX_GROUP_RM", "0") == "1"
 K = int(os.environ.get("RTX_GROUP_SIZE", "8"))
 # 多窗口注入: RTX_FAULT_WINDOWS='{"skew":[20,39],"crm_crash":[40,43]}' (覆盖单窗口)
-import ast as _ast
 _WINDOWS = {}
 _wenv = os.environ.get("RTX_FAULT_WINDOWS", "")
 if _wenv:
@@ -51,6 +55,12 @@ _lock = asyncio.Lock()
 _seal_state = {}  # group_index -> {verifiers:set, ids:set, count, first_ts}
 _seen_logical = set()
 _pending_samples = {}  # group_index -> [(sample, verifier)] 单样本降级路径的 AUTO_FIX 覆写输入
+# CAS index is process-local only as a fast path; the SQLite primary key is the
+# cross-process source of truth.  Connections are recreated after fork and
+# whenever RUN_DIR/RTX_CAS_INDEX_DIR changes (useful for offline gate tests).
+_cas_conn = None
+_cas_conn_path = None
+_cas_conn_pid = None
 
 
 def _fault_for(gidx):
@@ -126,23 +136,218 @@ def _v2_reward(response: str, label: str) -> float:
     return 0
 
 
-def _cas_write(rec: dict) -> bool:
-    """Reward CAS: (group_index, index, rollout_id) 幂等写入。重复 -> False (拒绝)。"""
-    lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
-    if lid in _seen_logical:
+def _logical_id(rec: dict) -> str:
+    """Return the stable CAS key, including for legacy records without the field."""
+    if rec.get("logical_id") is not None:
+        return str(rec["logical_id"])
+    return f"{rec.get('group_index')}:{rec.get('index')}:{rec.get('rollout_id')}"
+
+
+def _json_line(rec: dict) -> str:
+    # Compact JSON matters for the high-frequency audit stream, especially when
+    # response/label are retained for replay.
+    return json.dumps(rec, ensure_ascii=False, separators=(",", ":")) + "\n"
+
+
+def _append_json_lines(path: str, lines: list[str], lock: bool = False) -> None:
+    """Append a batch with one open/lock instead of one syscall per record."""
+    if not lines:
+        return
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "a") as f:
+        locked = False
         try:
-            with open(os.path.join(RUN_DIR, "cas_rejects.jsonl"), "a") as f:
-                f.write(json.dumps({**rec, "logical_id": lid, "reason": "duplicate-logical-id"}) + "\n")
+            if lock:
+                try:
+                    import fcntl
+                    fcntl.flock(f, fcntl.LOCK_EX)
+                    locked = True
+                except ImportError:  # pragma: no cover - non-POSIX fallback
+                    pass
+            f.write("".join(lines))
+            f.flush()
+        finally:
+            if locked:
+                fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def _cas_index_path() -> str:
+    root = os.environ.get("RTX_CAS_INDEX_DIR") or RUN_DIR
+    os.makedirs(root, exist_ok=True)
+    return os.path.join(root, "cas_index.sqlite3")
+
+
+def _reset_cas_connection() -> None:
+    global _cas_conn, _cas_conn_path, _cas_conn_pid
+    if _cas_conn is not None:
+        try:
+            _cas_conn.close()
         except Exception:
             pass
-        return False
-    _seen_logical.add(lid)
+    _cas_conn = None
+    _cas_conn_path = None
+    _cas_conn_pid = None
+
+
+def _initialize_cas_index(conn: sqlite3.Connection) -> None:
+    """Create/import the indexed CAS ledger once per run/index path.
+
+    The one-time import keeps compatibility with old rewards.jsonl records that
+    predate ``logical_id``.  Normal writes never scan rewards.jsonl again.
+    """
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS cas_claims ("
+        "logical_id TEXT PRIMARY KEY, record_json TEXT NOT NULL, created_at REAL NOT NULL)"
+    )
+    conn.execute("CREATE TABLE IF NOT EXISTS cas_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+    reward_path = os.path.join(RUN_DIR, "rewards.jsonl")
+    current_size = os.path.getsize(reward_path) if os.path.exists(reward_path) else 0
+
+    conn.execute("BEGIN IMMEDIATE")
+    row = conn.execute("SELECT value FROM cas_meta WHERE key='rewards_size'").fetchone()
+    previous_size = int(row[0]) if row else None
+    # Rebuild if the log was truncated/replaced; rescan only on startup or
+    # after an external legacy append, never once per reward.
+    if previous_size is None or previous_size != current_size:
+        if previous_size is not None and current_size < previous_size:
+            conn.execute("DELETE FROM cas_claims")
+        if os.path.exists(reward_path):
+            with open(reward_path, errors="replace") as f:
+                for line in f:
+                    try:
+                        rec = json.loads(line)
+                        if not isinstance(rec, dict):
+                            continue
+                        lid = _logical_id(rec)
+                        if lid == "None:None:None":
+                            continue
+                        try:
+                            created_at = float(rec.get("ts", time.time()))
+                        except (TypeError, ValueError):
+                            created_at = time.time()
+                        conn.execute(
+                            "INSERT OR IGNORE INTO cas_claims(logical_id, record_json, created_at) VALUES(?,?,?)",
+                            (lid, _json_line(rec).rstrip("\n"), created_at),
+                        )
+                    except (ValueError, TypeError, sqlite3.Error):
+                        continue
+        conn.execute(
+            "INSERT OR REPLACE INTO cas_meta(key, value) VALUES('rewards_size', ?)",
+            (str(current_size),),
+        )
+    conn.commit()
+
+
+def _get_cas_connection() -> sqlite3.Connection:
+    global _cas_conn, _cas_conn_path, _cas_conn_pid
+    path = _cas_index_path()
+    pid = os.getpid()
+    if _cas_conn is not None and _cas_conn_path == path and _cas_conn_pid == pid:
+        return _cas_conn
+    _reset_cas_connection()
+    conn = sqlite3.connect(path, timeout=30)
+    conn.execute("PRAGMA busy_timeout=30000")
+    # The JSONL stream remains the human-readable audit trail.  NORMAL avoids
+    # an fsync for every tiny SQLite transaction while retaining transactions.
+    conn.execute("PRAGMA synchronous=NORMAL")
+    _initialize_cas_index(conn)
+    _cas_conn, _cas_conn_path, _cas_conn_pid = conn, path, pid
+    return conn
+
+
+def _write_cas_rejects(items: list[tuple[dict, str]]) -> None:
+    if not items:
+        return
+    lines = []
+    for rec, lid in items:
+        # A duplicate carries no new replay payload; retaining the full sample
+        # here was a needless source of writes and disk growth.
+        compact = {
+            "logical_id": lid,
+            "group_index": rec.get("group_index"),
+            "index": rec.get("index"),
+            "rollout_id": rec.get("rollout_id"),
+            "reason": "duplicate-logical-id",
+            "ts": time.time(),
+        }
+        lines.append(_json_line(compact))
     try:
-        with open(os.path.join(RUN_DIR, "rewards.jsonl"), "a") as f:
-            f.write(json.dumps(rec) + "\n")
+        _append_json_lines(os.path.join(RUN_DIR, "cas_rejects.jsonl"), lines, lock=True)
     except Exception:
         pass
-    return True
+
+
+def _cas_write_many(records: list[dict]) -> list[bool]:
+    """Indexed, cross-process CAS with one transaction per batch.
+
+    The old implementation held a file lock while parsing the complete
+    rewards.jsonl for every sample (O(N²) I/O).  SQLite's PRIMARY KEY makes the
+    membership test O(log N), and group-RM callers can commit all eight samples
+    in one transaction.
+    """
+    results = [False] * len(records)
+    candidates = []
+    duplicate_items = []
+    batch_ids = set()
+    for idx, rec in enumerate(records):
+        lid = _logical_id(rec)
+        prepared = {**rec, "logical_id": lid}
+        if lid in _seen_logical or lid in batch_ids:
+            duplicate_items.append((prepared, lid))
+        else:
+            batch_ids.add(lid)
+            candidates.append((idx, prepared, lid))
+
+    db_duplicates = []
+    if candidates:
+        conn = _get_cas_connection()
+        inserted = []
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            for idx, rec, lid in candidates:
+                raw = _json_line(rec)
+                cur = conn.execute(
+                    "INSERT OR IGNORE INTO cas_claims(logical_id, record_json, created_at) VALUES(?,?,?)",
+                    (lid, raw.rstrip("\n"), time.time()),
+                )
+                if cur.rowcount == 1:
+                    inserted.append((idx, rec, lid, raw))
+                else:
+                    db_duplicates.append((rec, lid))
+            if inserted:
+                _append_json_lines(
+                    os.path.join(RUN_DIR, "rewards.jsonl"),
+                    [raw for _idx, _rec, _lid, raw in inserted],
+                    lock=True,
+                )
+                conn.execute(
+                    "INSERT OR REPLACE INTO cas_meta(key, value) VALUES('rewards_size', ?)",
+                    (str(os.path.getsize(os.path.join(RUN_DIR, "rewards.jsonl"))),),
+                )
+            conn.commit()
+        except Exception:
+            try:
+                conn.rollback()
+            finally:
+                # If the append succeeded but commit failed, the next open
+                # imports that tail once and prevents a duplicate retry.
+                _reset_cas_connection()
+            raise
+        for idx, _rec, lid, _raw in inserted:
+            results[idx] = True
+            _seen_logical.add(lid)
+        for rec, lid in db_duplicates:
+            _seen_logical.add(lid)
+
+    _write_cas_rejects(duplicate_items + db_duplicates)
+    for rec, lid in duplicate_items:
+        _seen_logical.add(lid)
+    return results
+
+
+def _cas_write(rec: dict) -> bool:
+    """Reward CAS wrapper; membership is indexed, not a full-log scan."""
+    return _cas_write_many([rec])[0]
 
 
 def _seal_write(group_index: int, status: str, versions, autofix: bool = False, count: int = K):
@@ -156,8 +361,7 @@ def _seal_write(group_index: int, status: str, versions, autofix: bool = False, 
         "ts": time.time(),
     }
     try:
-        with open(os.path.join(RUN_DIR, "seals.jsonl"), "a") as f:
-            f.write(json.dumps(rec) + "\n")
+        _append_json_lines(os.path.join(RUN_DIR, "seals.jsonl"), [_json_line(rec)], lock=True)
     except Exception:
         pass
     return status, sorted(versions)
@@ -171,16 +375,17 @@ def _autofix_rewrite(group_index: int):
     if not pend:
         return 0
     fixed = 0
-    with open(os.path.join(RUN_DIR, "rewards.jsonl"), "a") as f:
-        for s, _ver in pend:
-            rw = float(_v1_reward(s.response, s.label or ""))
-            lid = f"{s.group_index}:{s.index}:{s.rollout_id}"
-            f.write(json.dumps({
-                "logical_id": lid, "corrected_reward": rw, "autofix": True,
-                "group_index": s.group_index, "index": s.index,
-                "rollout_id": s.rollout_id, "ts": time.time(),
-            }) + "\n")
-            fixed += 1
+    lines = []
+    for s, _ver in pend:
+        rw = float(_v1_reward(s.response, s.label or ""))
+        lid = f"{s.group_index}:{s.index}:{s.rollout_id}"
+        lines.append(_json_line({
+            "logical_id": lid, "corrected_reward": rw, "autofix": True,
+            "group_index": s.group_index, "index": s.index,
+            "rollout_id": s.rollout_id, "ts": time.time(),
+        }))
+        fixed += 1
+    _append_json_lines(os.path.join(RUN_DIR, "rewards.jsonl"), lines, lock=True)
     return fixed
 
 
@@ -212,14 +417,13 @@ def _seal_register(group_index: int, verifier: str, logical_id: str, sample=None
         "ts": time.time(),
     }
     try:
-        with open(os.path.join(RUN_DIR, "seals.jsonl"), "a") as f:
-            f.write(json.dumps(rec) + "\n")
+        _append_json_lines(os.path.join(RUN_DIR, "seals.jsonl"), [_json_line(rec)], lock=True)
     except Exception:
         pass
     return status, versions
 
 
-def _log(sample, reward: float, verifier: str, injected: bool, autofix: bool = False, register: bool = True):
+def _make_log_record(sample, reward: float, verifier: str, injected: bool, autofix: bool = False) -> dict:
     rec = {
         "group_index": sample.group_index,
         "index": sample.index,
@@ -236,7 +440,12 @@ def _log(sample, reward: float, verifier: str, injected: bool, autofix: bool = F
     if SEAL:
         rec["response"] = (sample.response or "")[:4000]
         rec["label"] = (sample.label or "")[:200]
-    lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
+    return rec
+
+
+def _log(sample, reward: float, verifier: str, injected: bool, autofix: bool = False, register: bool = True):
+    rec = _make_log_record(sample, reward, verifier, injected, autofix=autofix)
+    lid = _logical_id(rec) if SEAL and register else None
     _cas_write(rec)
     if SEAL and register:
         _seal_register(sample.group_index if sample.group_index is not None else -1, verifier, lid, sample)
@@ -253,7 +462,6 @@ def _log_crash(sample, gidx):
     if SEAL:
         rec["response"] = (sample.response or "")[:4000]
         rec["label"] = (sample.label or "")[:200]
-    lid = f"{rec['group_index']}:{rec['index']}:{rec['rollout_id']}"
     _cas_write(rec)
 
 
@@ -315,7 +523,6 @@ async def _rm_batch_group(samples):
         for gi, idxs in groups.items():
             idxs_sorted = sorted(idxs, key=lambda i: samples[i].index)
             recs = []
-            aborted = False
             for pos, i in enumerate(idxs_sorted):
                 s = samples[i]
                 fault = _fault_for(gi)
@@ -339,8 +546,16 @@ async def _rm_batch_group(samples):
                     rec["ver"] = "v1"
                     rec["autofix"] = True
                 autofix = True
-            for rec in recs:
-                _log(rec["s"], rec["r"], rec["ver"], rec["inj"], autofix=rec.get("autofix", False), register=False)
+            # Group-RM already has all samples available; commit their audit
+            # records in one indexed CAS transaction instead of opening,
+            # locking, and committing once per sample.
+            _cas_write_many([
+                _make_log_record(
+                    rec["s"], rec["r"], rec["ver"], rec["inj"],
+                    autofix=rec.get("autofix", False),
+                )
+                for rec in recs
+            ])
             if SEAL:
                 _seal_write(gi, status, vers, autofix=autofix)
             for rec in recs:

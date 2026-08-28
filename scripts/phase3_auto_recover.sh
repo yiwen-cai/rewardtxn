@@ -12,6 +12,11 @@ MAX_RETRIES=${RTX_MAX_RETRIES:-3}
 RESTART_FILE=/workspace/runs/rtx_restart_count.txt
 HISTORY=/workspace/runs/rtx_recovery_history.jsonl
 
+if [ "${RTX_NO_SAVE_OPTIM:-0}" = "1" ]; then
+  echo "[3B] RTX_NO_SAVE_OPTIM=1 is incompatible with checkpoint resume; refusing unsafe recovery config" >&2
+  exit 2
+fi
+
 attempt=0
 
 # ---- 崩溃注入 (实验用, 仅 attempt 1): checkpoint 落盘后 kill 训练进程 ----
@@ -44,8 +49,9 @@ while true; do
   if bash /workspace/scripts/day2_slime_train.sh; then
     echo "[3B] training SUCCEEDED after attempt $attempt"
     exit 0
+  else
+    rc=$?
   fi
-  rc=$?
   echo "[3B] training FAILED rc=$rc (attempt $attempt)"
 
   if [ "$attempt" -gt "$MAX_RETRIES" ]; then
