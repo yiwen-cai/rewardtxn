@@ -101,6 +101,9 @@ docker run -d --name "$NAME" --gpus "$GPUS" -e NUM_GPUS=${RTX_NUM_GPUS:-4} \
   -e RTX_MAX_TOKENS_PER_GPU="${RTX_MAX_TOKENS_PER_GPU:-4096}" \
   -e RTX_SGLANG_MEM_FRACTION_STATIC="${RTX_SGLANG_MEM_FRACTION_STATIC:-0.55}" \
   -e RTX_V2_MODE="${RTX_V2_MODE:-strict}" \
+  -e RTX_SEAL="${RTX_SEAL:-0}" \
+  -e RTX_SEAL_AUTO_FIX="${RTX_SEAL_AUTO_FIX:-0}" \
+  -e RTX_GROUP_RM="${RTX_GROUP_RM:-0}" \
   -e RTX_LOG_RESPONSE="${RTX_LOG_RESPONSE:-0}" \
   --shm-size=64g --ulimit memlock=-1 --ulimit stack=67108864 \
   -v "$BASE":/workspace \
