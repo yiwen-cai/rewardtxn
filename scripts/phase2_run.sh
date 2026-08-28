@@ -19,7 +19,11 @@ DATE=${RTX_DATE:-$(date +%Y%m%d-%H%M%S)}
 EXP_ID=${RTX_EXP_ID:-${5:-p1-slime-${FAULT}-K8-s42-${DATE}}}
 RUN_DIR="$BASE/runs/$EXP_ID"
 NAME="rtx-p2-$EXP_ID"
-GPUS=${RTX_GPUS:-"device=0,1,2,5"}
+GPUS=${RTX_GPUS:-device=0,1,2,5}
+case "$GPUS" in
+  '"'*) : ;;                      # 已是 JSON 带引号形式
+  *) GPUS="\"$GPUS\"" ;;       # docker --gpus 需要 "device=..." 形式
+esac
 # Keep Ray spill and the small CAS index on the local/root NVMe by default;
 # high-volume experiment artifacts remain under runs/ for audit/replay.
 LOCAL_SCRATCH=${RTX_LOCAL_SCRATCH:-/tmp/rewardtxn}

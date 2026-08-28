@@ -13,6 +13,10 @@ EXP_ID=${RTX_EXP_ID:-${1:-p1-slime-B0-K8-s42-$DATE}}
 RUN_DIR="$BASE/runs/$EXP_ID"
 NAME="rtx-day1-$EXP_ID"
 GPUS=${RTX_GPUS:-'"device=0,1,2,5"'}
+case "$GPUS" in
+  '"'*) : ;;                      # 已是 JSON 带引号形式
+  *) GPUS="\"$GPUS\"" ;;       # docker --gpus 需要 "device=..." 形式
+esac
 NUM_GPUS=${RTX_NUM_GPUS:-4}
 NUM_ROLLOUT=${RTX_NUM_ROLLOUT:-20}
 LOCAL_SCRATCH=${RTX_LOCAL_SCRATCH:-/tmp/rewardtxn}
