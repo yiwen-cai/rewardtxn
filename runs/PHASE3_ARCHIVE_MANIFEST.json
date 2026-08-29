@@ -1,0 +1,840 @@
+{
+  "schema_version": 1,
+  "archive": "RewardTxn Phase 3 final",
+  "generated_at": "2026-08-29T04:31:07.127783+00:00",
+  "archive_base_commit": "e977b2674535b7e7a836fb5b3e0ebeef8aca7887",
+  "expected_final_tag": "phase3-final",
+  "verdict": "PASS",
+  "gate_summary": {
+    "3A": {
+      "path": "runs/PHASE3_GATE3A.json",
+      "status": "PASS",
+      "passed": 3,
+      "total": 3
+    },
+    "3B": {
+      "path": "runs/PHASE3_GATE3B.json",
+      "status": "PASS",
+      "passed": 3,
+      "total": 3
+    },
+    "3C": {
+      "path": "runs/PHASE3_GATE3C.json",
+      "status": "PASS",
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "regression": {
+    "path": "runs/PHASE3_REGRESSION.json",
+    "status": "PASS",
+    "passed": 9,
+    "total": 9
+  },
+  "portable_evidence": [
+    {
+      "path": ".gitattributes",
+      "bytes": 125,
+      "sha256": "7f46260bcf0cc11a45afe8c9a6e6aea3a3eb020be4dcfb7eccdd19f0b8a42fd9"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 443,
+      "sha256": "cf70d5cfa1d36e9cf789fdd798389a180a9b1d2cc5acb0a39eac6730d2906fc9"
+    },
+    {
+      "path": "ENVIRONMENT_SETUP.md",
+      "bytes": 4321,
+      "sha256": "669280c46431a320ad6d6b75b0118858187b285e2817cf6102bd356077ced640"
+    },
+    {
+      "path": "MEMORY_OPTIMIZATION.md",
+      "bytes": 7165,
+      "sha256": "0742acf0ae72bb08a209ebdc2a494c5e8320cd86184e9ff28eb2921d59be487e"
+    },
+    {
+      "path": "MODEL_INVENTORY.md",
+      "bytes": 3815,
+      "sha256": "592a61581b42e0a77016184c6a48ab581955f46b7e74cdb927725841bd0a3be6"
+    },
+    {
+      "path": "PHASE3_PLAN.md",
+      "bytes": 7316,
+      "sha256": "dfc2aaede8d60547aa82749457af4f3a7ab424290decf0c43b28c1461a7d8c5b"
+    },
+    {
+      "path": "RewardTxn H100 自包含实验指导.md",
+      "bytes": 36654,
+      "sha256": "b556089d62e641c72412c6ffafec6379af80227197e5b3c3a9c05e1c96961247"
+    },
+    {
+      "path": "patches/slime-qwen2.5-1.5b-rotary-base.patch",
+      "bytes": 410,
+      "sha256": "fec11b663a08311d83204637ef63ac266563bbe488115b04dceeb8a8c3410f82"
+    },
+    {
+      "path": "requirements-phase3-archive.txt",
+      "bytes": 113,
+      "sha256": "8b1de1911a3c22a74982a1663a6f2e48bdc8e6187ce96516531ae22aa9eec198"
+    },
+    {
+      "path": "runs/PHASE3_3A.md",
+      "bytes": 3933,
+      "sha256": "800df13d1911bd698475220f21a8953e7784d7c9e7de75fd934b3dc77c9ca3be"
+    },
+    {
+      "path": "runs/PHASE3_3B.md",
+      "bytes": 4154,
+      "sha256": "46c5d1baba9ebfd8f3cdb7873e15b94eea069cccfaffba212118c6d8d9791d23"
+    },
+    {
+      "path": "runs/PHASE3_3C.md",
+      "bytes": 3648,
+      "sha256": "936a6a303a83c43047153109ddfc6acd05d79f12d3e00976e5379b3ce8f95b34"
+    },
+    {
+      "path": "runs/PHASE3_CONVERGENCE_EVIDENCE.json",
+      "bytes": 8175,
+      "sha256": "ce4d0f9e85efb6e7dc9da13d310e88010abdbeeac347880e49fecaf3ea18f944"
+    },
+    {
+      "path": "runs/PHASE3_EXP_MEMIO.json",
+      "bytes": 1634,
+      "sha256": "67fdd92f4068f56825e69901406915241dea9c17bffe1dd696081e38535395b3"
+    },
+    {
+      "path": "runs/PHASE3_FINAL.md",
+      "bytes": 7652,
+      "sha256": "6c700f59e08a69d3bb42cdbaceedd28a76fe6b4098566a2cd4d98fded2840b4d"
+    },
+    {
+      "path": "runs/PHASE3_GATE3A.json",
+      "bytes": 1315,
+      "sha256": "e5e4927e0e10319a0b3d7afdda77fa8a53e44b61bad9bd0bf46d6b036131d89b"
+    },
+    {
+      "path": "runs/PHASE3_GATE3B.json",
+      "bytes": 1330,
+      "sha256": "9d3bfaef5521fd4427ec19e0377ea86ba1be3642d18f2174f904115ed9435b5e"
+    },
+    {
+      "path": "runs/PHASE3_GATE3B_MEMIO.json",
+      "bytes": 1211,
+      "sha256": "e246eb932ddeee4f440842f1c3057d5fc2738132f587e32facb283349c3938f5"
+    },
+    {
+      "path": "runs/PHASE3_GATE3C.json",
+      "bytes": 1765,
+      "sha256": "8496d0c10b3d45c18a8a1c74f5d0167d9bab12b1e9761f90bf2025ac01a33554"
+    },
+    {
+      "path": "runs/PHASE3_REGRESSION.json",
+      "bytes": 1070,
+      "sha256": "6e8961830a3f629686e867e82b7db44472ffdeaabf87479bced6bd608dd9cd57"
+    },
+    {
+      "path": "runs/TRACE_REPORT.json",
+      "bytes": 1176,
+      "sha256": "bb241035c6d971efb98ba4321e32f59398f9dbdcaa70d0da9e1d3aab4dc69532"
+    },
+    {
+      "path": "runs/p1-slime-L0-K8-s42-20260825/recovery_plan.json",
+      "bytes": 250,
+      "sha256": "ac2ec09d83706161d4602f820b4cb2f9d2d231fe4452a44a8359be7f164c5262"
+    },
+    {
+      "path": "runs/p1-slime-L2-K8-s42-20260825/recovery_plan.json",
+      "bytes": 263,
+      "sha256": "15449b2fce9725b7fe96b9de7a8a80f93dbca08503d685f2cdc5adedf98c0758"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/cas_rejects.jsonl",
+      "bytes": 42890,
+      "sha256": "d9e51231880e34f3f06477401de7c42937daab843b80cb7823b192996235fa43"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/checkpoint_retention.log",
+      "bytes": 127,
+      "sha256": "66df0111a7af56edcc8cf3b7f8d3eb21c7c1df8a745055404634394a6164ebee"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/logs/train.log",
+      "bytes": 571150,
+      "sha256": "112ea50a853f8aa04ed5c1d6e46d84f2ff6168a61583723bf45d9aa2399ca4d8"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/meta.json",
+      "bytes": 1130,
+      "sha256": "4befee156b8dab2830645432ba071b1ff4600e64375bee6463110703dfc77a54"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/rewards.jsonl",
+      "bytes": 11196456,
+      "sha256": "39d486ab46b75513693d6cd25bdc560dd3ab187ef286227338b345f1f7059bb6"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260828-234039/seals.jsonl",
+      "bytes": 62593,
+      "sha256": "1e298baed592bbbbe55256583b0dbcc2171ee85d94db6edb666ed38c01d4ec7e"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/cas_rejects.jsonl",
+      "bytes": 1581474,
+      "sha256": "9725a3ed0db71a5887931c9cc117009a8623d86676b143aee542ae282e787836"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/checkpoint_retention.log",
+      "bytes": 127,
+      "sha256": "fbe262662f7a50bb8cf07ae3347c790ecbf2b409ed47c51cf3a25cfaac2cdbe0"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/logs/resource_gate.json",
+      "bytes": 1134,
+      "sha256": "d95081b25cde56ff4a831f10198f7afc55e5d3ecf81f4ec934bb3a9ac33eb971"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/logs/resource_health.jsonl",
+      "bytes": 8413,
+      "sha256": "6d27d9be4bc0bfd9b0e2937ebac9ee6680338ac3697e85047173aed049e50792"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/logs/train.log",
+      "bytes": 1202906,
+      "sha256": "de204253e763f57adac1dcd467b23fc4ef7139c696e4fdc22deca1c31a4ebad1"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/meta.json",
+      "bytes": 1052,
+      "sha256": "0842ef07519718a7e2cd37b2cff1936ca23cf73173b35df1176de534a1e3514d"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/rewards.jsonl",
+      "bytes": 28584543,
+      "sha256": "2c19c83317d62b99581f1ea2f2c56bdf576cc0ec67c392dacddcfeac70fc4048"
+    },
+    {
+      "path": "runs/p1-slime-none-K8-s42-20260829-001020/seals.jsonl",
+      "bytes": 291169,
+      "sha256": "61714a66b6c8275c01712cc97c07a107373fbf168df1fea7572b69cbba74b5af"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/cas_rejects.jsonl",
+      "bytes": 238452,
+      "sha256": "3095882c2a3802f0bd225b72aaaf7f1afda4e6856b95f40d9a7e4dc599c59691"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/checkpoint_retention.log",
+      "bytes": 127,
+      "sha256": "2c596f429211388629d0bb9348230ef41ae75b63467ad07db420f9ca3c79d607"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/logs/train.log",
+      "bytes": 383973,
+      "sha256": "52bf98465d41b151086b2c844abb6614af09b67fbb6d1907ce382253cb697b78"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/manifests/step_token_19.json",
+      "bytes": 253,
+      "sha256": "d33593bc7f9f2308c4b2fb6e59b04237116af8159a546035736455e7d6315687"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/manifests/step_token_9.json",
+      "bytes": 230,
+      "sha256": "5b301443e4b0a9093629d14d0389c4ad5f8450e6e78ea171a4723111c4865f09"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/meta.json",
+      "bytes": 1049,
+      "sha256": "009611fcf92c38b604cebd402e9df4bf9a62355a1e589dddf09f62fb57db1538"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/rewards.jsonl",
+      "bytes": 7869296,
+      "sha256": "70790431b0c5c7ffb4e9c81e345e7f8a00523bbc0d3f99bfa19614d871648953"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260828-233354/seals.jsonl",
+      "bytes": 76874,
+      "sha256": "64acd5fb3c368d0041f03849e2b5dbc529633387a83ed5d401642b3f1fde8d8a"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/cas_rejects.jsonl",
+      "bytes": 251077,
+      "sha256": "d7b66cbdc7656fcccfd8617cde6d6424585be22337844c71ac255b3944cc8e49"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/checkpoint_retention.log",
+      "bytes": 127,
+      "sha256": "a6d42b22deb922c5907c9e1a00f834529890b23abeaba4a0c39f1aa70ef812f2"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/logs/resource_gate.json",
+      "bytes": 1133,
+      "sha256": "593df35fb692be326fccda8be05b9f9b27f2bb8392d6b22d724a57f36befbda0"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/logs/resource_health.jsonl",
+      "bytes": 4189,
+      "sha256": "58317db21d9befad226cb81838d98a6fd364ed1ec658ca56f6d710385a3f63bf"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/logs/train.log",
+      "bytes": 382203,
+      "sha256": "826d7060a961f27a24b7105f3b85fcfbc8e2ad22d8934578946f353ac7e0b903"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/meta.json",
+      "bytes": 1061,
+      "sha256": "aea4a417de1902938ab4e34d1848d5c4461002d71b9766ce7a8204f5a5f7b306"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/rewards.jsonl",
+      "bytes": 10718636,
+      "sha256": "9880ea44c70a9555c9787d9048a1c7c9df4e95d0b4b95c00486ab627018fc12b"
+    },
+    {
+      "path": "runs/p1-slime-skew-K8-s42-20260829-100342/seals.jsonl",
+      "bytes": 81369,
+      "sha256": "69aa7c0001c7d160ebf05805748d1e89da69875ace8ece2c38b6a79aff93eab5"
+    },
+    {
+      "path": "runs/p1-tq-Q0Q1-s42-20260825/tq_crash_probe.json",
+      "bytes": 3515,
+      "sha256": "1de3538a42c2cb8a693e2cd30661c00b3fa6dc10c51e91a1cd89eaea7fd26ab4"
+    },
+    {
+      "path": "runs/p2c-slime-crash-sealresp-K8-s42-20260827/recovery_plan.json",
+      "bytes": 576,
+      "sha256": "458d029b1485bdd61e649abc51df08f1123309b0ebed77fb612bedd26f1d3fbb"
+    },
+    {
+      "path": "runs/p2c-slime-crash-sealresp-K8-s42-20260827/replay_result.json",
+      "bytes": 30702,
+      "sha256": "b9c767826317299cfa097c16b5e8ca23eccfd17d19039ddfe08708922e73dac7"
+    },
+    {
+      "path": "runs/p2c-slime-crash-sealresp-K8-s42-20260827/rewards.jsonl",
+      "bytes": 25660414,
+      "sha256": "5aee0919f8300c7a5e43142cc42746277fd22f46a07482317e41f5c9ab33608a"
+    },
+    {
+      "path": "runs/p2c-slime-skew-sealresp-K8-s42-20260827/recovery_audit_report.md",
+      "bytes": 1127,
+      "sha256": "c7e74967978317d4e9e5f3cf9cb15c20f1ef20a0ad74658d9c8815d5d5cb88f4"
+    },
+    {
+      "path": "runs/p2c-slime-skew-sealresp-K8-s42-20260827/replay_result.json",
+      "bytes": 30541,
+      "sha256": "454b255da9bd50ba23268e4672a25c1aece77739cb98fbed5e83e6a83872dc83"
+    },
+    {
+      "path": "runs/p2c-slime-skew-sealresp-K8-s42-20260827/rewards.jsonl",
+      "bytes": 30866702,
+      "sha256": "14aec30a6389aec972c16850153237b4015ccc881fe4f0e5baf2e92ef627ba37"
+    },
+    {
+      "path": "runs/p2c-slime-skew-sealresp-K8-s42-20260827/seals.jsonl",
+      "bytes": 120625,
+      "sha256": "8baf7bc1b5245fce580be0bed2c442f2a67fcb9f61bdde3e644b8272f0e04fdf"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/cas_rejects.jsonl",
+      "bytes": 1051106,
+      "sha256": "ed3117e3f87ee9d2548693d2e76fc5da95b06694d088782f62e07267402705b4"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/logs/train.log",
+      "bytes": 392355,
+      "sha256": "724821915aa076f3ef14bf1e7bb87fd6a15a0390d604c9aa097e50f10853062c"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/manifests/groups.jsonl",
+      "bytes": 18130,
+      "sha256": "dd17e553cc2b5443cbab03ce2a3aee9aee8c4da21fbc2046871a0b8b6d92fe12"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/manifests/steps.jsonl",
+      "bytes": 6378,
+      "sha256": "7dae8489b089aff59ffd3db2cf9454c23408b65f198435ea33bf0d20cc6d8499"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/meta.json",
+      "bytes": 997,
+      "sha256": "3232b2ee768769f10a2c6dd9a1ed084e06a85fcaa04bf98df309a705c40648ea"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/metrics.json",
+      "bytes": 664,
+      "sha256": "ac83503b8cb1559a2e91ce3899206e0df8218ed04e5f59f2a950203bcab04218"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/rewards.jsonl",
+      "bytes": 42078857,
+      "sha256": "05bb03ecd8b9793aec75dbff7092f23b5f0e455b40bae40bb02ecfe94885f111"
+    },
+    {
+      "path": "runs/p3a-slime-none-autofix-K8-s42-20260828/seals.jsonl",
+      "bytes": 203256,
+      "sha256": "8c06401523f0e4bc26c857283ad7de8e238424e6c0e6c6c78d04659d362cb333"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/logs/train.log",
+      "bytes": 775582,
+      "sha256": "6ebd034e0f355bad8978cde5ac6142026f5e7167f691204429697f6e04a3ff3c"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/manifests/groups.jsonl",
+      "bytes": 18130,
+      "sha256": "dd17e553cc2b5443cbab03ce2a3aee9aee8c4da21fbc2046871a0b8b6d92fe12"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/manifests/steps.jsonl",
+      "bytes": 6392,
+      "sha256": "ab9f4c04cdbe4aca42f120d5deb6ebc56a93c8be8283d601dad90d5e5000d064"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/meta.json",
+      "bytes": 1001,
+      "sha256": "5d5f554cafebaa29bd18cabedeef170def1f02ef12fcb800b4ddaab9a7128625"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/metrics.json",
+      "bytes": 666,
+      "sha256": "0eddee41e421a63282532c75b76217c5d86d047ae1d0e7c375fd8d966ee851b0"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/rewards.jsonl",
+      "bytes": 23132023,
+      "sha256": "9dbdb1c5bb2d1bd4392344a3a8ec975ae1a0f4e3e82bb6cbe1da1110825d74b0"
+    },
+    {
+      "path": "runs/p3a-slime-skew-autofix-K8-s42-20260828/seals.jsonl",
+      "bytes": 363111,
+      "sha256": "9e8dc0353cd39afa0683d922418f0a4c3adb0450f2dc489d956f8201a381436f"
+    },
+    {
+      "path": "runs/p3b-probe-stage1-K8-s42-20260828/logs/train.log",
+      "bytes": 236774,
+      "sha256": "9d755c09a1d17dea2af7fde7e319fa8b4558c77b10bf764ccd21aea737b5b9f6"
+    },
+    {
+      "path": "runs/p3b-probe-stage1-K8-s42-20260828/meta.json",
+      "bytes": 990,
+      "sha256": "1fd257f822974f56b3e05c965605c17800dd7d3e0717abebb50e2fe3add14ad0"
+    },
+    {
+      "path": "runs/p3b-probe-stage1-K8-s42-20260828/rewards.jsonl",
+      "bytes": 4808353,
+      "sha256": "5b03e2876138ed02b355fcd1caa6c3ac58893bbc34ac37867e1914551d71fbe8"
+    },
+    {
+      "path": "runs/p3b-probe-stage1-K8-s42-20260828/seals.jsonl",
+      "bytes": 31181,
+      "sha256": "7b56244f0e91d4a10014a3ae1b7d7777eaaefc71fc54463f95449d3da253386b"
+    },
+    {
+      "path": "runs/p3b-probe-stage2-K8-s42-20260828/logs/train.log",
+      "bytes": 209759,
+      "sha256": "9ad9db4019ef97aff697727daeadf1075dcbce12e7167af5e755d84a21cd4fca"
+    },
+    {
+      "path": "runs/p3b-probe-stage2-K8-s42-20260828/meta.json",
+      "bytes": 991,
+      "sha256": "5077dfafb3fbf6b370e42be9354db9afb18cc65a78faf1fb0ba4850868eded67"
+    },
+    {
+      "path": "runs/p3b-probe-stage2-K8-s42-20260828/rewards.jsonl",
+      "bytes": 5774468,
+      "sha256": "cee7eddf03a7a9f9a46319ddee2cd48262523ce14913f21cfa6ba585ecb281a1"
+    },
+    {
+      "path": "runs/p3b-probe-stage2-K8-s42-20260828/seals.jsonl",
+      "bytes": 33531,
+      "sha256": "233a6fb6bb88fa76cc10416349f318277735bafc54f96452f41c66ab83666924"
+    },
+    {
+      "path": "runs/p3b-slime-crash-autorecover-K8-s42-20260828/logs/train.log",
+      "bytes": 406438,
+      "sha256": "5110f32b312a41052919170d4c33d29093eaaca2f9b26a07ec8111bcecd88589"
+    },
+    {
+      "path": "runs/p3b-slime-crash-autorecover-K8-s42-20260828/meta.json",
+      "bytes": 1002,
+      "sha256": "ef635feab4c0d1d9444a196b72b1a1867d7004d4506896d288adc13a919a8bb0"
+    },
+    {
+      "path": "runs/p3b-slime-crash-autorecover-K8-s42-20260828/rewards.jsonl",
+      "bytes": 29427222,
+      "sha256": "c6fad0341ee12ac14798add6277929189d96b83e497cc3b79cc9d823d57cd9a8"
+    },
+    {
+      "path": "runs/p3b-slime-crash-autorecover-K8-s42-20260828/seals.jsonl",
+      "bytes": 153013,
+      "sha256": "6372289510c9736b25841920692d8fa0781cbb920c0ad302a76d5fa5271a5a28"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover-K8-s42-20260828/cas_rejects.jsonl",
+      "bytes": 264060,
+      "sha256": "e0fc8ed321b2c4d6f29a2b1aa875135a7da055c4ba3d5a7fa19274948266d8b6"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover-K8-s42-20260828/logs/train.log",
+      "bytes": 393480,
+      "sha256": "a70f8e9d22cacb847e7a66d3da634e5f8702560a10f8ce0b35c89509690600e3"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover-K8-s42-20260828/meta.json",
+      "bytes": 1001,
+      "sha256": "826dc1361b9dbb0c5a8d579af8037a5cab4816b9c2a0c5ec14f9a5948c31467d"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover-K8-s42-20260828/rewards.jsonl",
+      "bytes": 36189307,
+      "sha256": "edcaa55dc984d72b9e5efcdb6b247ded093913843aace89c61a937b490592dcb"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover-K8-s42-20260828/seals.jsonl",
+      "bytes": 200166,
+      "sha256": "ebf7a79ee0e513af8b4dda9aacb59657e8339fce95348e89e0e6a7b6fe8a53c4"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover2-K8-s42-20260828/logs/train.log",
+      "bytes": 586143,
+      "sha256": "b85e484e19754e106010760e12deb8fd034313e3a98434d3d94e493a4ff4129c"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover2-K8-s42-20260828/meta.json",
+      "bytes": 1002,
+      "sha256": "eea9a52aaa9bee3e9337b725e11204dad02cf4010ae70bc8284d43447f23a33a"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover2-K8-s42-20260828/rewards.jsonl",
+      "bytes": 35830212,
+      "sha256": "fa16580258b5144a908bb3e596be1d2e5ad9d68abc7247a1694e6d87bcc24d2c"
+    },
+    {
+      "path": "runs/p3b-slime-kill-autorecover2-K8-s42-20260828/seals.jsonl",
+      "bytes": 222492,
+      "sha256": "71fd241a3ee08813cd8f0ed1828015667d93959e95ea251add89ea2635899970"
+    },
+    {
+      "path": "runs/p3c-slime-long-seal-K8-s42-20260828/cas_rejects.jsonl",
+      "bytes": 35264102,
+      "sha256": "8c179b6259700d3b79f6f3517e6d65e84c69f1208994e5deffd243702eb4923c"
+    },
+    {
+      "path": "runs/p3c-slime-long-seal-K8-s42-20260828/logs/train.log",
+      "bytes": 1265126,
+      "sha256": "d3f8fa5c168fdff5b5b75677d87599612c9efe686fa7b0380edacd0e8945f5bc"
+    },
+    {
+      "path": "runs/p3c-slime-long-seal-K8-s42-20260828/meta.json",
+      "bytes": 995,
+      "sha256": "c5199022430b328830804792ed3a93baff73083cd8da1111e7252e527f0bab5a"
+    },
+    {
+      "path": "runs/p3c-slime-long-seal-K8-s42-20260828/rewards.jsonl",
+      "bytes": 60532210,
+      "sha256": "49b1e9de9756f3de72ed77b1773e03a45daee7ccacd0e9ab1556176b814c4310"
+    },
+    {
+      "path": "runs/p3c-slime-long-seal-K8-s42-20260828/seals.jsonl",
+      "bytes": 440076,
+      "sha256": "68ba15c6eb5bedfec6fbd000a228da940473ab5414adb98dc8aef62b3b53f27b"
+    },
+    {
+      "path": "runs/rtx_recovery_history.jsonl",
+      "bytes": 515,
+      "sha256": "611403c92808388a061eb204c7d6ea9d6334fb6fc8f391725c43c5ec37c38671"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/cas_rejects.jsonl",
+      "bytes": 26849,
+      "sha256": "6982a155d3b5038ee708b8c8eda3ca716bcf4674e9bced018c72dd2dbe5b2d7b"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/checkpoint_retention.log",
+      "bytes": 119,
+      "sha256": "e87dd87c18ef20620513555fc9ce80ae054f5bd6284d695ee988ed1f2e46031c"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/logs/train.log",
+      "bytes": 217276,
+      "sha256": "69b6e4f33094594af6fb547a7b060c4128c3299b0a5bae8a9419fa087592c6ab"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/meta.json",
+      "bytes": 1041,
+      "sha256": "495ccd9140e5ca0bd43fa4c0095ff55265513866434967e5554d5620aaccd310"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/rewards.jsonl",
+      "bytes": 3170630,
+      "sha256": "b43009450cdebc839f2d72184730be2191f777b50aad281ac8cd955319116dea"
+    },
+    {
+      "path": "runs/smoke-K8-s42-20260828-232940/seals.jsonl",
+      "bytes": 21437,
+      "sha256": "e6e5375b6c597d2590ba397e2db021584909b0fc4573dcbb8f085a28f6b73e99"
+    },
+    {
+      "path": "scripts/checkpoint_retention.py",
+      "bytes": 4859,
+      "sha256": "c9bd893c6e3d894d249a169622301df8efaeb9eed5273cd31c61dcf6484c3b89"
+    },
+    {
+      "path": "scripts/experiment_profiles.sh",
+      "bytes": 1306,
+      "sha256": "7a6b8eda11308ac8adb3b3bd3f4e3926d14730e7e577270f36aa132d34b642d1"
+    },
+    {
+      "path": "scripts/phase2_manifest.py",
+      "bytes": 7062,
+      "sha256": "653dc468c87318e134697eed861af978144e4d85eb1ade07f16e111835a50d0e"
+    },
+    {
+      "path": "scripts/phase2_reconciler.py",
+      "bytes": 9061,
+      "sha256": "de6f57e78faa775fd362129413dfe4f3d5557d3cc5d0889bf31831f62b7b5389"
+    },
+    {
+      "path": "scripts/phase2_seal_rm.py",
+      "bytes": 22085,
+      "sha256": "0def7fe6d768c250ac675c598cccb4db662d9aa25ec838a6e50be7b39d2598ef"
+    },
+    {
+      "path": "scripts/phase2_trace_runner.py",
+      "bytes": 4893,
+      "sha256": "9c357deab20eb15c5736532f9c4c055ddee43c4327a9ece3c3b40f3840b5227e"
+    },
+    {
+      "path": "scripts/phase2_verifiers.py",
+      "bytes": 14943,
+      "sha256": "1e3cbb4a03446de3daac21023d6a2395b3909107f708f0176440f12dce5a602f"
+    },
+    {
+      "path": "scripts/phase3_archive.py",
+      "bytes": 22974,
+      "sha256": "6795c0f245f37b6cc7f06632030fd55f71c252eaad6e31f547a552d265289ff7"
+    },
+    {
+      "path": "scripts/phase3_auto_recover.sh",
+      "bytes": 4376,
+      "sha256": "be7f6946bf935148fbac66dd6954fcd085f6078c347f2e8a4e59014dae51ae1d"
+    },
+    {
+      "path": "scripts/phase3_gate3a.py",
+      "bytes": 6672,
+      "sha256": "746730cfb23798b82c980cd4b85b2bf0e1f73c1b9ee6312ce7f4ad281d3d2652"
+    },
+    {
+      "path": "scripts/phase3_gate3b.py",
+      "bytes": 3489,
+      "sha256": "745e7067033eb61d846d9da2929ae6e4a2105c880167f719e932bdf4fcd52f18"
+    },
+    {
+      "path": "scripts/phase3_regress.sh",
+      "bytes": 11740,
+      "sha256": "e3e9cbd8fb21f6d4a08786154e83bc2ffcd449a5edf88622eefc24493b200e86"
+    },
+    {
+      "path": "scripts/resource_gate.py",
+      "bytes": 6993,
+      "sha256": "6b23e6339eab171a191e23219a3c932a3606c0eb074f6a7c0c6a02a9ce9cea9d"
+    }
+  ],
+  "canonical_runs": [
+    {
+      "id": "p3a-slime-skew-autofix-K8-s42-20260828",
+      "role": "3A 注入组消费侧 0 混算",
+      "portable_file_count": 7,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3a-slime-none-autofix-K8-s42-20260828",
+      "role": "3A 干净组零误改",
+      "portable_file_count": 8,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3b-probe-stage1-K8-s42-20260828",
+      "role": "3B resume 探针 checkpoint 生成",
+      "portable_file_count": 4,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3b-probe-stage2-K8-s42-20260828",
+      "role": "3B resume 探针续跑",
+      "portable_file_count": 4,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3b-slime-crash-autorecover-K8-s42-20260828",
+      "role": "3B RM 异常边界探针",
+      "portable_file_count": 4,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3b-slime-kill-autorecover-K8-s42-20260828",
+      "role": "3B 自动恢复初次实弹",
+      "portable_file_count": 5,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p3b-slime-kill-autorecover2-K8-s42-20260828",
+      "role": "3B 自动恢复门禁实弹",
+      "portable_file_count": 4,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "smoke-K8-s42-20260828-232940",
+      "role": "内存/IO 新配置冒烟",
+      "portable_file_count": 6,
+      "checkpoint": {
+        "present": true,
+        "retention": "local large artifact; Git excludes checkpoint weights",
+        "file_count": 13,
+        "total_bytes": 13835809735,
+        "iterations": [
+          "iter_0000001",
+          "iter_0000003"
+        ],
+        "latest_checkpointed_iteration": "3",
+        "path_size_inventory_sha256": "8b0ad6575312359ab039dc1761839723aae77e190505b24a0892e7adb1ca005c",
+        "note": "摘要绑定路径与大小，不等同于大权重内容哈希"
+      }
+    },
+    {
+      "id": "p1-slime-skew-K8-s42-20260828-233354",
+      "role": "新配置 Seal/CAS/Manifest 复验",
+      "portable_file_count": 8,
+      "checkpoint": {
+        "present": true,
+        "retention": "local large artifact; Git excludes checkpoint weights",
+        "file_count": 13,
+        "total_bytes": 13835809886,
+        "iterations": [
+          "iter_0000009",
+          "iter_0000019"
+        ],
+        "latest_checkpointed_iteration": "19",
+        "path_size_inventory_sha256": "10c523a55bfae4d6682ee890f1004e55e0ca24f4c014874354e7c976d3ce31da",
+        "note": "摘要绑定路径与大小，不等同于大权重内容哈希"
+      }
+    },
+    {
+      "id": "p1-slime-none-K8-s42-20260828-234039",
+      "role": "新配置自动恢复复验",
+      "portable_file_count": 6,
+      "checkpoint": {
+        "present": true,
+        "retention": "local large artifact; Git excludes checkpoint weights",
+        "file_count": 13,
+        "total_bytes": 13835809950,
+        "iterations": [
+          "iter_0000009",
+          "iter_0000019"
+        ],
+        "latest_checkpointed_iteration": "19",
+        "path_size_inventory_sha256": "a4fe1f59ea4642af8845cf699648c9d557f7ae751fb259598dcc1d5738449517",
+        "note": "摘要绑定路径与大小，不等同于大权重内容哈希"
+      }
+    },
+    {
+      "id": "p3c-slime-long-seal-K8-s42-20260828",
+      "role": "3C 历史 0.5B Seal 100 步对照",
+      "portable_file_count": 5,
+      "checkpoint": {
+        "present": false,
+        "retention": "empty directory / checkpoint already cleaned"
+      }
+    },
+    {
+      "id": "p1-slime-none-K8-s42-20260829-001020",
+      "role": "3C 新配置 0.5B 100 步长程",
+      "portable_file_count": 8,
+      "checkpoint": {
+        "present": true,
+        "retention": "local large artifact; Git excludes checkpoint weights",
+        "file_count": 7,
+        "total_bytes": 988633941,
+        "iterations": [
+          "iter_0000099"
+        ],
+        "latest_checkpointed_iteration": "99",
+        "path_size_inventory_sha256": "b85cee20e3029c79a3afb64c61f99c487f93a42bb5dcc4b1bda7dca020926b8a",
+        "note": "摘要绑定路径与大小，不等同于大权重内容哈希"
+      }
+    },
+    {
+      "id": "p1-slime-skew-K8-s42-20260829-100342",
+      "role": "3C Qwen2.5-1.5B 协议升级复验",
+      "portable_file_count": 8,
+      "checkpoint": {
+        "present": true,
+        "retention": "local large artifact; Git excludes checkpoint weights",
+        "file_count": 13,
+        "total_bytes": 43227345296,
+        "iterations": [
+          "iter_0000009",
+          "iter_0000019"
+        ],
+        "latest_checkpointed_iteration": "19",
+        "path_size_inventory_sha256": "82c11054fd37c4350c9cb4830716af057c834d37b936a8d40ba743462c5e19a9",
+        "note": "摘要绑定路径与大小，不等同于大权重内容哈希"
+      }
+    }
+  ],
+  "superseded_local_runs": [
+    {
+      "id": "smoke-K8-s42-20260828-232347",
+      "steps": null,
+      "reason": "冒烟配置修复前的失败尝试，仅保留本地诊断日志/checkpoint"
+    },
+    {
+      "id": "p3c-slime-long-clean-K8-s42-20260828",
+      "steps": 7,
+      "reason": "训练失败，未形成 100 步对照"
+    },
+    {
+      "id": "p3c-slime-long-clean2-K8-s42-20260828",
+      "steps": 9,
+      "reason": "训练中断，未形成 100 步对照"
+    },
+    {
+      "id": "p3c-slime-long-clean-dm-K8-s42-20260828",
+      "steps": 70,
+      "reason": "训练中断，未形成 100 步对照"
+    },
+    {
+      "id": "p3c-slime-long-seal-dm-K8-s42-20260828",
+      "steps": 10,
+      "reason": "CUDA invalid argument，已由完整 100 步 Seal 实验替代"
+    }
+  ],
+  "policy": {
+    "portable": "进入 Git，可在 checkout 后校验 SHA-256",
+    "checkpoints": "大权重不进入 Git；保留本地路径/大小清单摘要。Phase 3 回归不依赖大 checkpoint。"
+  }
+}

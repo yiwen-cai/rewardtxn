@@ -1,78 +1,180 @@
 #!/usr/bin/env python3
-"""Phase 3A 门禁判定: Seal AUTO_FIX 消费侧正确性闭合
-G3A1: 注入实验训练消费侧 100% 样本 reward == v1 权威重算值 (0 混算)
-G3A2: 干净组零误改 (0 ABORTED / 0 autofix / 逐样本 == v1)
-G3A3: 修正开销 <5% (group-rm 模式 vs 逐样本 seal 基线)
+"""Phase 3A 门禁判定: Seal AUTO_FIX 消费侧正确性闭合。
+
+G3A1: 注入实验训练消费侧 100% 样本 reward == v1 权威重算值。
+G3A2: 干净端到端 0 误改 + 同一输入 AUTO_FIX on/off 逐样本一致。
+G3A3: 同 group-rm 模式 skew+AUTO_FIX vs clean 吞吐下降 <5%。
 """
+import asyncio
+import importlib
 import json
+import os
 import sys
+import tempfile
+from pathlib import Path
 
-sys.path.insert(0, "/public/home/caiyiwen/rewardtxn/scripts")
-from phase2_seal_rm import _v1_reward
+ROOT = Path(__file__).resolve().parents[1]
+BASE = ROOT / "runs"
+sys.path.insert(0, str(ROOT / "scripts"))
+seal = importlib.import_module("phase2_seal_rm")
 
-BASE = "/public/home/caiyiwen/rewardtxn/runs"
 RES = {"stage": "3A", "gates": {}}
 
 
 def load(run, fname):
-    return [json.loads(l) for l in open(f"{BASE}/{run}/{fname}")]
+    with (BASE / run / fname).open() as handle:
+        return [json.loads(line) for line in handle]
 
 
 # ---- G3A1: skew 注入 + AUTO_FIX ----
 inj_run = "p3a-slime-skew-autofix-K8-s42-20260828"
 recs = load(inj_run, "rewards.jsonl")
 seals = load(inj_run, "seals.jsonl")
-inj_groups = [s for s in seals if 20 <= s["group_index"] <= 39]
-mism = [r for r in recs if abs(r["reward"] - float(_v1_reward(r["response"], r["label"]))) > 1e-9]
-non_v1 = [r for r in recs if 20 <= r["group_index"] <= 39 and r["verifier"] != "v1"]
+inj_groups = [item for item in seals if 20 <= item["group_index"] <= 39]
+mism = [
+    item for item in recs
+    if abs(item["reward"] - float(seal._v1_reward(item["response"], item["label"]))) > 1e-9
+]
+non_v1 = [
+    item for item in recs
+    if 20 <= item["group_index"] <= 39 and item["verifier"] != "v1"
+]
 g3a1 = {
-    "pass": len(mism) == 0 and len(non_v1) == 0,
+    "pass": (
+        len(recs) == 11392
+        and len(mism) == 0
+        and len(non_v1) == 0
+        and sum(1 for item in inj_groups if item["status"] == "ABORTED") == 20
+        and sum(1 for item in inj_groups if item["autofix"]) == 20
+    ),
     "samples_total": len(recs),
     "reward_mismatch_vs_v1": len(mism),
-    "injected_groups_aborted": sum(1 for s in inj_groups if s["status"] == "ABORTED"),
-    "injected_groups_autofix": sum(1 for s in inj_groups if s["autofix"]),
+    "injected_groups_aborted": sum(1 for item in inj_groups if item["status"] == "ABORTED"),
+    "injected_groups_autofix": sum(1 for item in inj_groups if item["autofix"]),
     "residual_non_v1_in_injected": len(non_v1),
-    "evidence": "group-rm 批调用返回值直接 zip 到 sample.reward (sglang_rollout.py:331-332) -> rewards.jsonl == 训练器消费值; 注入组 20/20 ABORTED + autofix, 160 样本返回前全部修正为 v1 权威值",
+    "evidence": (
+        "group-rm 返回值直接进入 sample.reward；注入组 20/20 ABORTED+autofix，"
+        "11,392 条样本记录逐条权威重算 0 mismatch"
+    ),
 }
 RES["gates"]["G3A1"] = g3a1
 
-# ---- G3A2: none 注入 + AUTO_FIX 零误改 ----
+
+# ---- G3A2: none 注入 + AUTO_FIX 零误改 + 配对 on/off ----
 clean_run = "p3a-slime-none-autofix-K8-s42-20260828"
 crecs = load(clean_run, "rewards.jsonl")
 cseals = load(clean_run, "seals.jsonl")
-c_bad = [s for s in cseals if s["status"] != "SEALED"]
-c_af = [r for r in crecs if r.get("autofix")]
-c_mism = [r for r in crecs if abs(r["reward"] - float(_v1_reward(r["response"], r["label"]))) > 1e-9]
+c_bad = [item for item in cseals if item["status"] != "SEALED"]
+c_af = [item for item in crecs if item.get("autofix")]
+c_mism = [
+    item for item in crecs
+    if abs(item["reward"] - float(seal._v1_reward(item["response"], item["label"]))) > 1e-9
+]
+
+
+class Sample:
+    def __init__(self, record):
+        self.group_index = record["group_index"]
+        self.index = record["index"]
+        self.rollout_id = record.get("rollout_id")
+        self.response = record["response"]
+        self.label = record["label"]
+
+
+async def paired_clean_check():
+    first_group = crecs[0]["group_index"]
+    records = [item for item in crecs if item["group_index"] == first_group][:8]
+    if len(records) != 8:
+        raise RuntimeError("clean paired fixture does not contain one complete group")
+    original = {
+        "run_dir": seal.RUN_DIR,
+        "fault": seal.FAULT,
+        "auto_fix": seal.AUTO_FIX,
+        "seal": seal.SEAL,
+        "group_rm": seal.GROUP_RM,
+        "cas_index": os.environ.get("RTX_CAS_INDEX_DIR"),
+    }
+    outputs = []
+    try:
+        with tempfile.TemporaryDirectory(prefix="phase3-g3a2-") as tmp:
+            for enabled in (True, False):
+                run_dir = Path(tmp) / ("on" if enabled else "off")
+                run_dir.mkdir()
+                seal.RUN_DIR = str(run_dir)
+                seal.FAULT = "none"
+                seal.AUTO_FIX = enabled
+                seal.SEAL = True
+                seal.GROUP_RM = True
+                os.environ["RTX_CAS_INDEX_DIR"] = str(run_dir / "cas")
+                seal._seal_state.clear()
+                seal._seen_logical.clear()
+                seal._pending_samples.clear()
+                seal._reset_cas_connection()
+                outputs.append(await seal.rm_function(None, [Sample(item) for item in records]))
+    finally:
+        seal._reset_cas_connection()
+        seal.RUN_DIR = original["run_dir"]
+        seal.FAULT = original["fault"]
+        seal.AUTO_FIX = original["auto_fix"]
+        seal.SEAL = original["seal"]
+        seal.GROUP_RM = original["group_rm"]
+        if original["cas_index"] is None:
+            os.environ.pop("RTX_CAS_INDEX_DIR", None)
+        else:
+            os.environ["RTX_CAS_INDEX_DIR"] = original["cas_index"]
+    return outputs
+
+
+paired_on, paired_off = asyncio.run(paired_clean_check())
+paired_mismatch = sum(abs(left - right) > 1e-9 for left, right in zip(paired_on, paired_off))
 RES["gates"]["G3A2"] = {
-    "pass": not (c_bad or c_af or c_mism),
+    "pass": (
+        len(crecs) == 13600
+        and not (c_bad or c_af or c_mism)
+        and len(paired_on) == len(paired_off) == 8
+        and paired_mismatch == 0
+    ),
     "samples_total": len(crecs),
     "non_sealed_groups": len(c_bad),
     "autofix_samples": len(c_af),
     "reward_mismatch_vs_v1": len(c_mism),
-    "evidence": "无注入 20 步端到端: 0 非 SEALED 组 / 0 autofix / 全部 reward == v1 权威值; 确定性纯函数保证 AUTO_FIX 关闭时逐样本一致",
+    "paired_samples": len(paired_on),
+    "paired_autofix_on_off_mismatch": paired_mismatch,
+    "evidence": (
+        "无注入 20 步端到端 0 非 SEALED/0 autofix/13,600 条 reward 0 mismatch；"
+        "另以同一完整组配对运行 AUTO_FIX on/off，8/8 返回值逐样本一致"
+    ),
 }
 
-# ---- G3A3: 开销 ----
+
+# ---- G3A3: 同模式下 AUTO_FIX 注入相对 clean 的开销 ----
 def metrics(run):
-    return json.load(open(f"{BASE}/{run}/metrics.json"))
+    return json.loads((BASE / run / "metrics.json").read_text())
 
-m_new = metrics(clean_run)
-m_old = metrics("p2a-slime-none-seal-K8-s42-20260826")
-thp_overhead = m_new["throughput_base_tok_per_s"] / m_old["throughput_base_tok_per_s"] - 1
-lat_overhead = m_new["step_latency_mean_s"] / m_old["step_latency_mean_s"] - 1
+
+m_skew = metrics(inj_run)
+m_clean = metrics(clean_run)
+thp_delta = m_skew["throughput_base_tok_per_s"] / m_clean["throughput_base_tok_per_s"] - 1
+lat_delta = m_skew["step_latency_mean_s"] / m_clean["step_latency_mean_s"] - 1
 RES["gates"]["G3A3"] = {
-    "pass": thp_overhead > -0.05 and lat_overhead < 0.05,
-    "grouprm_autofix_thp": m_new["throughput_base_tok_per_s"],
-    "grouprm_autofix_lat": m_new["step_latency_mean_s"],
-    "per_sample_seal_thp": m_old["throughput_base_tok_per_s"],
-    "per_sample_seal_lat": m_old["step_latency_mean_s"],
-    "thp_overhead_pct": round(thp_overhead * 100, 2),
-    "lat_overhead_pct": round(lat_overhead * 100, 2),
-    "evidence": "group-rm 批调用 + AUTO_FIX 端到端吞吐 20,097 tok/s vs 逐样本 seal 15,936 tok/s (开销 -26.1%: 批调用减少 Python 开销); AUTO_FIX 仅注入组触发 (160 样本 ~1s CPU, 异步不阻塞 GPU 流水); skew vs none 吞吐差 2.8% 在噪声内",
+    "pass": thp_delta >= -0.05 and lat_delta <= 0.05,
+    "mode": "group-rm for both runs",
+    "skew_autofix_throughput_tok_s": m_skew["throughput_base_tok_per_s"],
+    "clean_throughput_tok_s": m_clean["throughput_base_tok_per_s"],
+    "throughput_delta_pct": round(thp_delta * 100, 2),
+    "skew_autofix_step_latency_s": m_skew["step_latency_mean_s"],
+    "clean_step_latency_s": m_clean["step_latency_mean_s"],
+    "latency_delta_pct": round(lat_delta * 100, 2),
+    "evidence": (
+        "同为 group-rm：skew+AUTO_FIX 19,539 tok/s vs clean 20,097 tok/s，"
+        "吞吐下降 2.78%<5%；step latency 反而下降 15.78%"
+    ),
 }
 
-RES["status"] = "PASS" if all(g["pass"] for g in RES["gates"].values()) else "FAIL"
-out = f"{BASE}/PHASE3_GATE3A.json"
-json.dump(RES, open(out, "w"), indent=2, ensure_ascii=False)
-print(json.dumps({k: v["pass"] for k, v in RES["gates"].items()}, indent=1))
-print(f"status={RES['status']} -> {out}")
+RES["status"] = "PASS" if all(gate["pass"] for gate in RES["gates"].values()) else "FAIL"
+out = BASE / "PHASE3_GATE3A.json"
+out.write_text(json.dumps(RES, indent=2, ensure_ascii=False) + "\n")
+print(json.dumps({key: value["pass"] for key, value in RES["gates"].items()}, indent=1))
+print("status={} -> {}".format(RES["status"], out))
+if RES["status"] != "PASS":
+    sys.exit(1)

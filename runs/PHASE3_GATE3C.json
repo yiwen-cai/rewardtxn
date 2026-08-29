@@ -10,12 +10,12 @@
       "pass": true,
       "passed": 9,
       "total": 9,
-      "evidence": "一键回归 9/9 PASS (seal/cas/manifest/reconciler/replay/zero-mod/recovery)"
+      "evidence": "一键回归 9/9 PASS；含显式 R1/R2/R3/Q0/L0/L2 六切点矩阵，以及 seal/cas/manifest/replay/zero-mod/recovery 断言"
     },
     "G3C2": {
       "pass": true,
       "mean_loss_diff": 0.0065,
-      "evidence": "新配置 100 步 vs 历史 100 步 loss 差均值 0.0065 <0.05; 新实验后50步均值 0.0033, std 0.0056 (收敛稳定)"
+      "evidence": "新配置 100 步 vs 历史 100 步逐步 loss 平均绝对差 0.0065 <0.05; 新实验100步整体 std 0.0056, 后50步均值 0.0033 (收敛稳定)"
     },
     "G3C3": {
       "pass": true,

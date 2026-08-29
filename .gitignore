@@ -8,3 +8,10 @@ __pycache__/
 *.pyc
 *.log
 /tmp/
+
+# Phase 3 未完成且已被正式实验替代的本地诊断运行；结项报告保留状态/原因索引。
+runs/smoke-K8-s42-20260828-232347/
+runs/p3c-slime-long-clean-K8-s42-20260828/
+runs/p3c-slime-long-clean2-K8-s42-20260828/
+runs/p3c-slime-long-clean-dm-K8-s42-20260828/
+runs/p3c-slime-long-seal-dm-K8-s42-20260828/

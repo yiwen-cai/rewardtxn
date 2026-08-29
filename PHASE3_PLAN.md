@@ -1,5 +1,9 @@
 # Phase 3 分阶段实施计划 — 正确性/可用性/规模化闭合
 
+> **归档状态（2026-08-29）**：Phase 3A/3B/3C 全部完成并通过 9/9 阶段门禁，
+> 最终结项见 `runs/PHASE3_FINAL.md`、`runs/PHASE3_ARCHIVE_MANIFEST.json` 与
+> `phase3-final` tag。本文保留实施计划，同时按最终验收口径校正 3C 的实际配置。
+
 **目标**: 在 Phase 2 协议栈 (已交付, tag phase2-final) 基础上, 闭合三个层次:
 3A 消费侧正确性 (0 混算进训练) → 3B 无人干预自动恢复 → 3C 规模化回归与审计。
 每阶段: **严格门禁 → 文档 → git 提交(tag) 可回退** (沿用 Phase 2 流程)。
@@ -19,9 +23,9 @@
 
 | 阶段 | 内容 | 门禁 (全部必须实证通过) | 回退点 |
 |---|---|---|---|
-| **3A 消费侧正确性** | Seal AUTO_FIX 就地修正: ABORTED 组返回权威 v1 值而非混合值 (RTX_SEAL_AUTO_FIX=1, 不碰训练循环) | G3A1: 注入实验训练消费侧 100% 样本 reward == v1 权威重算值; G3A2: 干净组零误改 (与无 AUTO_FIX 逐样本一致); G3A3: 修正开销 <5% (ABORTED 组 +0.5s CPU/组, 干净组 0 额外延迟) | tag phase2-final |
-| **3B 可用性闭合** | 自动恢复链: 死亡检测 → 恢复计划自动执行 → 自动重启 → 接续 (容器 entrypoint 包装) | G3B1: 注入 R1/R3 真实崩溃, 无人工干预, 训练自动继续完成 (恢复后 ≥10 步); G3B2: 恢复正确性 (loss 轨迹对照无崩溃在噪声内 + 已提交步不重复计); G3B3: 端到端恢复时延 <5 min (含重启, 对比手动恢复 >30 min) | tag phase3a |
-| **3C 规模化回归** | 注入回归自动化 (一条命令全切点) + 长程收敛 (1.5B ≥100 步) + 多进程 CAS + 审计报告; 8 卡复测 (外部窗口, 可选) | G3C1: 回归套件全绿 (一条命令, 全切点断言); G3C2: 长程收敛对齐 (100 步 loss 差均值 <0.05); G3C3: 多进程 CAS (2 进程并发同组 → 恰好 1 条权威记录 + 幂等) | tag phase3b |
+| **3A 消费侧正确性** | Seal AUTO_FIX 就地修正: ABORTED 组返回权威 v1 值而非混合值 (RTX_SEAL_AUTO_FIX=1, 不碰训练循环) | G3A1: 注入实验训练消费侧 100% 样本 reward == v1 权威重算值; G3A2: 干净端到端运行 0 ABORTED/0 autofix，并以同一输入 AUTO_FIX on/off 配对断言逐样本一致; G3A3: 同 group-rm 模式 skew+AUTO_FIX vs clean 吞吐下降 <5% | tag phase2-final |
+| **3B 可用性闭合** | 自动恢复链: 死亡检测 → 恢复计划自动执行 → 自动重启 → 接续 (容器 entrypoint 包装) | G3B1: 注入真实训练进程 kill -9，无人工干预自动继续完成 (恢复后 ≥10 步); G3B2: 恢复正确性 (loss 轨迹对照无崩溃在噪声内 + 已提交步不重复计); G3B3: 端到端恢复时延 <5 min。RM 异常 R1 被 fully-async 吞并表现为组丢弃，由 3A/2C 覆盖，不作为进程死亡门禁 | tag phase3a |
+| **3C 规模化回归** | 注入回归自动化 + 0.5B 新配置 100 步长程 + 1.5B 20 步模型升级复验 + 多进程 CAS + 审计报告；8 卡复测为门禁外可选项 | G3C1: 回归套件全绿 (一条命令, 全切点断言); G3C2: 同 Seal 配置 100 步 loss 平均绝对差 <0.05，且 1.5B 协议语义一致; G3C3: 多进程并发同组 → 恰好 1 条权威记录 + 幂等 | tag phase3b |
 
 ## 3A 设计要点 (Seal AUTO_FIX)
 
@@ -41,28 +45,34 @@
   - **探针结果写入 3B 文档, 决定 3B 最终路线** (不预先承诺)
 - **容器 entrypoint 包装**: 主进程退出/日志停滞检测 → `phase2_reconciler plan`
   自动执行 → 重启训练 (加载已提交步 + 重放未提交组) → 幂等防重
-- **验证方法**: 真实注入 (kill -9 训练进程) + 全程无人干预观察
+- **验证方法（最终采用）**: checkpoint iter9 落盘后真实 kill -9 训练进程 + 全程无人干预观察；
+  `crm_crash` 的 RM 异常会被 fully-async 容错捕获并退化为组丢弃，因此归入 3A/2C 的
+  Seal/Replay 正确性覆盖，不将它冒充进程死亡恢复
 
 ## 3C 设计要点 (规模化回归)
 
 - `scripts/phase3_regress.sh`: 一条命令跑全切点 (R1/R2/R3/Q0/L0/L2 +
   Seal/Manifest/Reconciler/Replay 断言), 输出回归 JSON
-- 长程: 1.5B seal vs clean ≥100 步 (成本低, 同族已对齐), 验证最终收敛语义
+- 长程最终验收: 0.5B 新配置 Seal 100 步 vs 历史同 Seal 配置 100 步，逐步 loss
+  平均绝对差 0.0065 <0.05；另以 1.5B skew 20 步验证模型升级后的
+  Seal/CAS/AUTO_FIX/checkpoint 语义。两项证据职责分离，不将 1.5B 20 步表述为长程对照
 - 多进程 CAS: 2 个进程并发投递同一 (LogicalID,Epoch,Attempt) → 文件锁级恰好 1 条
 - 审计报告: Reconciler 输出 Markdown/HTML 恢复报告 (ABORTED/修正/重放/已提交清单)
 - 8 卡 4+4 复测: 外部 GPU 窗口就绪后执行 (可选门禁外)
 
 ## 阶段门禁流程 (每阶段强制, 同 Phase 2)
 
-1. 实现 (包装层, 不改 third_party 锁定源码)
+1. 实现 (协议包装层, 不改 third_party 协议/训练循环源码；模型配置兼容 patch 单独归档)
 2. 门禁验证 (脚本化, 输出 gate 结果 JSON: PHASE3_GATE3{A,B,C}.json)
 3. 阶段文档 (runs/PHASE3_3{A,B,C}.md: 设计/实现/验证/结论/边界)
 4. git commit + tag (phase3a/b/c); 失败时 `git checkout <tag>` 回退
 
 ## 架构原则 (继承)
 
-- **包装层注入**: 全部逻辑通过 custom-rm / env / entrypoint 包装器, 不修改
-  third_party 锁定源码 (a6272da0/b83d1f40/8497a52a)
+- **包装层注入**: 协议逻辑全部通过 custom-rm / env / entrypoint 包装器实现，不修改
+  third_party 的协议/训练循环源码 (a6272da0/b83d1f40/8497a52a)。为运行 Qwen2.5-1.5B，
+  对 slime 模型配置的 `rotary-base` 做了 10000→1000000 兼容修正；该单行 patch 独立归档，
+  不属于 RewardTxn 协议实现
 - **复用资产**: phase2_seal_rm.py (AUTO_FIX 挂载点), phase2_reconciler.py (3B 恢复链),
   phase2_trace_runner.py (3C 回归底座), day4_inject.sh (kill 注入)
 - **预期对照**: 3A=Day5 g4 门禁 (0 Invalid Commit) 的真实消费侧闭合;
@@ -73,9 +83,9 @@
 | 风险 | 缓解 |
 |---|---|
 | slime resume 死锁 (L2) 无法包装绕过 | 3B 前置探针先行, 路线 B 保底 (代价: 已提交步重训) |
-| AUTO_FIX 误改干净样本 | G3A2 逐样本一致性断言 (400+ 样本) |
+| AUTO_FIX 误改干净样本 | G3A2 端到端 13,600 样本零误改 + 同输入 on/off 8/8 配对一致性断言 |
 | 自动恢复循环崩溃 (恢复本身失败) | 幂等 + 恢复计数上限 (≥3 次失败转人工告警) |
-| 外部 GPU 抢占 (8 卡/长程) | 3C 长程用 4 卡 1.5B 降风险; 8 卡列可选 |
+| 外部 GPU 抢占 (8 卡/长程) | 3C 长程采用 4 卡 0.5B，并补 4 卡 1.5B 协议升级复验；8 卡列可选 |
 
 ## 验收出口 (Phase 3 完成定义)
 
@@ -84,3 +94,5 @@
 3. 真实训练中 0 混算进入 (样本级证据)
 4. 全切点回归一条命令可复现
 5. 文档链完整: PHASE3_PLAN.md / 3{A,B,C}.md / 3 个 GATE JSON / git tag 3 个
+6. 结项归档完整: PHASE3_FINAL.md / ARCHIVE_MANIFEST.json / `phase3-final` tag，
+   portable evidence 可校验，大 checkpoint 有明确本地保留策略

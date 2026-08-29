@@ -8,7 +8,7 @@
 
 > **文档性质**：独立、自包含的端到端实验操作规范。无需翻阅其他设计方案，按本文档即可在目标服务器 `h100` 上完成从环境预检、基线冒烟、Phase 0 差分 Oracle、Phase 1（5 天 Failure Probe 强制门禁）到 Phase 2（最小协议实现）的全部实验。  
 > **目标硬件环境**：单节点 8× NVIDIA H100 PCIe 81GB、双路 Intel Xeon Gold 6430（64 核）、503 GiB 内存、Ubuntu 20.04.6 LTS、CUDA 12.6.20、Docker 24.0.7。  
-> **当前状态**：**Conditional Go（7.2/10）**——**当前仅批准执行 Phase 0 与 Phase 1（5 天 Failure Probe）**。只有在第 5 天满足全部 Go 门禁后，方可进入 Phase 2 协议实现。
+> **当前归档状态（2026-08-29）**：本文最初的 Conditional Go 已完成后续验证并被正式结果取代：Phase 1 为 **GO（7/7）**，Phase 2 为 **PASS（12/12）**，Phase 3A/3B/3C 为 **PASS（9/9）**。本文保留初始实验规范；当前结论与证据索引以 `runs/PHASE3_FINAL.md`、`runs/PHASE3_ARCHIVE_MANIFEST.json` 和 `phase3-final` tag 为准。
 
 ---
 

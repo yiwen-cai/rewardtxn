@@ -7,16 +7,40 @@
       "pass": true
     },
     "seal_clean_group": {
-      "pass": true
+      "pass": true,
+      "detail": {
+        "paired_samples": 8,
+        "autofix_on_off_mismatch": 0
+      }
     },
     "cas_single_process": {
       "pass": true
     },
     "cas_multi_process": {
-      "pass": true
+      "pass": true,
+      "detail": {
+        "workers": 4,
+        "worker_exitcodes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "authoritative_records": 8
+      }
     },
-    "reconciler_plan": {
-      "pass": true
+    "cutpoint_matrix_R1_R2_R3_Q0_L0_L2": {
+      "pass": true,
+      "detail": {
+        "cutpoints": {
+          "R1": "PASS",
+          "R2": "PASS",
+          "R3": "PASS",
+          "Q0": "PASS",
+          "L0": "PASS",
+          "L2": "PASS"
+        }
+      }
     },
     "replay_correctness": {
       "pass": true
@@ -31,5 +55,5 @@
       "pass": true
     }
   },
-  "date": "2026-08-29T10:10:53"
+  "date": "2026-08-29T12:29:24"
 }

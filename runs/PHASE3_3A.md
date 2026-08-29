@@ -46,8 +46,8 @@ T5 单样本降级覆写 8 条 corrected
 | 门禁 | 结果 | 证据 |
 |---|---|---|
 | G3A1 训练消费侧 0 混算 | PASS | group-rm 返回值直接进 sample.reward (源码级对应); 注入组 160 样本返回前全部修正为 v1, 记录级 0 不一致 |
-| G3A2 干净组零误改 | PASS | 无注入实验 0 ABORTED / 0 autofix / 13,600 样本逐样本 == v1 |
-| G3A3 修正开销 <5% | PASS | 端到端吞吐 20,097 tok/s vs 逐样本 seal 15,936 (开销 **-26.1%**, group-rm 批调用减 Python 开销); AUTO_FIX 仅注入组触发 ~1s CPU 异步 |
+| G3A2 干净组零误改 | PASS | 无注入实验 0 ABORTED / 0 autofix / 13,600 样本逐样本 == v1；结项复验同一完整组 AUTO_FIX on/off 8/8 返回值一致 |
+| G3A3 修正开销 <5% | PASS | 同为 group-rm：skew+AUTO_FIX 19,539 tok/s vs clean 20,097 tok/s，吞吐下降 **2.78% <5%**；step latency 反而下降 15.78% |
 
 ## 意义
 

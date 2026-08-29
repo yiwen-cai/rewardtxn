@@ -1,0 +1,56 @@
+{
+  "ts": 1787933421.4497826,
+  "pass": true,
+  "thresholds": {
+    "min_pub_gb": 200,
+    "min_root_gb": 100,
+    "min_gpu_free_gb": 30
+  },
+  "checks": {
+    "storage_public": {
+      "avail_gb": 1360.0,
+      "min_gb": 200,
+      "pass": true
+    },
+    "storage_root": {
+      "avail_gb": 1426.0,
+      "min_gb": 100,
+      "pass": true
+    },
+    "gpu_memory": {
+      "min_free_gb": 30,
+      "gpus": [
+        {
+          "index": 3,
+          "free_gb": 79.2,
+          "used_gb": 0.0,
+          "utilization": 0.0,
+          "pass": true
+        },
+        {
+          "index": 4,
+          "free_gb": 79.2,
+          "used_gb": 0.0,
+          "utilization": 0.0,
+          "pass": true
+        },
+        {
+          "index": 5,
+          "free_gb": 79.2,
+          "used_gb": 0.0,
+          "utilization": 0.0,
+          "pass": true
+        },
+        {
+          "index": 6,
+          "free_gb": 79.2,
+          "used_gb": 0.0,
+          "utilization": 0.0,
+          "pass": true
+        }
+      ],
+      "pass": true
+    }
+  },
+  "note": "所有检查通过才允许启动实验; RTX_SKIP_GATE=1 可跳过(不推荐)"
+}

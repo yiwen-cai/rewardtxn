@@ -1,0 +1,2 @@
+# 归档训练日志保留原始 ANSI/空白；按二进制证据处理，避免 diff 规范化。
+runs/**/*.log -diff -text

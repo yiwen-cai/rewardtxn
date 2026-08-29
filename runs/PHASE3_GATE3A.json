@@ -8,7 +8,7 @@
       "injected_groups_aborted": 20,
       "injected_groups_autofix": 20,
       "residual_non_v1_in_injected": 0,
-      "evidence": "group-rm 批调用返回值直接 zip 到 sample.reward (sglang_rollout.py:331-332) -> rewards.jsonl == 训练器消费值; 注入组 20/20 ABORTED + autofix, 160 样本返回前全部修正为 v1 权威值"
+      "evidence": "group-rm 返回值直接进入 sample.reward；注入组 20/20 ABORTED+autofix，11,392 条样本记录逐条权威重算 0 mismatch"
     },
     "G3A2": {
       "pass": true,
@@ -16,17 +16,20 @@
       "non_sealed_groups": 0,
       "autofix_samples": 0,
       "reward_mismatch_vs_v1": 0,
-      "evidence": "无注入 20 步端到端: 0 非 SEALED 组 / 0 autofix / 全部 reward == v1 权威值; 确定性纯函数保证 AUTO_FIX 关闭时逐样本一致"
+      "paired_samples": 8,
+      "paired_autofix_on_off_mismatch": 0,
+      "evidence": "无注入 20 步端到端 0 非 SEALED/0 autofix/13,600 条 reward 0 mismatch；另以同一完整组配对运行 AUTO_FIX on/off，8/8 返回值逐样本一致"
     },
     "G3A3": {
       "pass": true,
-      "grouprm_autofix_thp": 20097.14,
-      "grouprm_autofix_lat": 32.95,
-      "per_sample_seal_thp": 15936.13,
-      "per_sample_seal_lat": 42.123,
-      "thp_overhead_pct": 26.11,
-      "lat_overhead_pct": -21.78,
-      "evidence": "group-rm 批调用 + AUTO_FIX 端到端吞吐 20,097 tok/s vs 逐样本 seal 15,936 tok/s (开销 -26.1%: 批调用减少 Python 开销); AUTO_FIX 仅注入组触发 (160 样本 ~1s CPU, 异步不阻塞 GPU 流水); skew vs none 吞吐差 2.8% 在噪声内"
+      "mode": "group-rm for both runs",
+      "skew_autofix_throughput_tok_s": 19539.06,
+      "clean_throughput_tok_s": 20097.14,
+      "throughput_delta_pct": -2.78,
+      "skew_autofix_step_latency_s": 27.749,
+      "clean_step_latency_s": 32.95,
+      "latency_delta_pct": -15.78,
+      "evidence": "同为 group-rm：skew+AUTO_FIX 19,539 tok/s vs clean 20,097 tok/s，吞吐下降 2.78%<5%；step latency 反而下降 15.78%"
     }
   },
   "status": "PASS"

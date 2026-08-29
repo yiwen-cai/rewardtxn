@@ -1,0 +1,13 @@
+diff --git a/scripts/models/qwen2.5-1.5B.sh b/scripts/models/qwen2.5-1.5B.sh
+index b046a95..b681ed7 100644
+--- a/scripts/models/qwen2.5-1.5B.sh
++++ b/scripts/models/qwen2.5-1.5B.sh
+@@ -9,7 +9,7 @@ MODEL_ARGS=(
+    --add-qkv-bias
+    --normalization "RMSNorm"
+    --norm-epsilon 1e-6
+-   --rotary-base 10000
++   --rotary-base 1000000
+    --group-query-attention
+    --num-query-groups 2
+    --vocab-size 151936
