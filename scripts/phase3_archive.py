@@ -34,6 +34,7 @@ GATE_FILES = [
 CORE_FILES = [
     ".gitattributes",
     ".gitignore",
+    "REWARDTXN_EXPERIMENT_DELIVERY.md",
     "ENVIRONMENT_SETUP.md",
     "MEMORY_OPTIMIZATION.md",
     "MODEL_INVENTORY.md",

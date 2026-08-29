@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "archive": "RewardTxn Phase 3 final",
-  "generated_at": "2026-08-29T04:41:27.707039+00:00",
-  "archive_base_commit": "35d160cc30e812d983c6f33fc64bbe4b97847f9b",
+  "generated_at": "2026-08-29T04:55:25.619844+00:00",
+  "archive_base_commit": "9d1596d117c1659fa12f0822bfea5098fad30d63",
   "expected_final_tag": "phase3-final",
   "verdict": "PASS",
   "gate_summary": {
@@ -61,6 +61,11 @@
       "path": "PHASE3_PLAN.md",
       "bytes": 7316,
       "sha256": "dfc2aaede8d60547aa82749457af4f3a7ab424290decf0c43b28c1461a7d8c5b"
+    },
+    {
+      "path": "REWARDTXN_EXPERIMENT_DELIVERY.md",
+      "bytes": 22204,
+      "sha256": "71d764d9a335358960a47c9e6a93cd5616e4a8a0cc3953596283d16e315b732e"
     },
     {
       "path": "RewardTxn H100 自包含实验指导.md",
@@ -130,7 +135,7 @@
     {
       "path": "runs/PHASE3_REGRESSION.json",
       "bytes": 1070,
-      "sha256": "a99ab440e014d4c3161bbd12cecf59ad99cfd201820d298da845fd8f6c346d14"
+      "sha256": "2533b3965e32956bd4ba16c91cb9280a01eb7a8ae0abae2d632e02e08cfdaec9"
     },
     {
       "path": "runs/TRACE_REPORT.json",
@@ -614,8 +619,8 @@
     },
     {
       "path": "scripts/phase3_archive.py",
-      "bytes": 23752,
-      "sha256": "023db7dea85dae6190c19f8ca9568324d8eb7beadc7e3bc295847587fdaebb31"
+      "bytes": 23792,
+      "sha256": "a336ea04dd7c0f41b86dca8fe8f4daa5a7a9c6c5fdbfbc67fbdd5939cecdec69"
     },
     {
       "path": "scripts/phase3_auto_recover.sh",
