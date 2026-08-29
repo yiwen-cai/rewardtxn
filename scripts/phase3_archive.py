@@ -138,26 +138,31 @@ SUPERSEDED_RUNS = [
     {
         "id": "smoke-K8-s42-20260828-232347",
         "steps": None,
-        "reason": "冒烟配置修复前的失败尝试，仅保留本地诊断日志/checkpoint",
+        "disposition": "deleted",
+        "reason": "冒烟配置修复前的失败尝试，已由 ...232940 替代",
     },
     {
         "id": "p3c-slime-long-clean-K8-s42-20260828",
         "steps": 7,
+        "disposition": "deleted",
         "reason": "训练失败，未形成 100 步对照",
     },
     {
         "id": "p3c-slime-long-clean2-K8-s42-20260828",
         "steps": 9,
+        "disposition": "deleted",
         "reason": "训练中断，未形成 100 步对照",
     },
     {
         "id": "p3c-slime-long-clean-dm-K8-s42-20260828",
         "steps": 70,
+        "disposition": "deleted",
         "reason": "训练中断，未形成 100 步对照",
     },
     {
         "id": "p3c-slime-long-seal-dm-K8-s42-20260828",
         "steps": 10,
+        "disposition": "deleted",
         "reason": "CUDA invalid argument，已由完整 100 步 Seal 实验替代",
     },
 ]
@@ -476,6 +481,16 @@ def verify(args):
         ] if isinstance(superseded, list) else []
         if superseded_ids != expected_superseded_ids:
             errors.append("manifest superseded run 集合/顺序不匹配")
+        if any(
+            not isinstance(run, dict) or run.get("disposition") != "deleted"
+            for run in (superseded if isinstance(superseded, list) else [])
+        ):
+            errors.append("manifest superseded runs 必须全部标记 disposition=deleted")
+        for run in (superseded if isinstance(superseded, list) else []):
+            if isinstance(run, dict) and run.get("disposition") == "deleted":
+                local_path = BASE / "runs" / str(run.get("id", ""))
+                if local_path.exists():
+                    errors.append("superseded run 尚未删除: {}".format(run.get("id")))
 
         gate_summary = manifest.get("gate_summary")
         if not isinstance(gate_summary, dict) or set(gate_summary) != {"3A", "3B", "3C"}:

@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "archive": "RewardTxn Phase 3 final",
-  "generated_at": "2026-08-29T04:31:07.127783+00:00",
-  "archive_base_commit": "e977b2674535b7e7a836fb5b3e0ebeef8aca7887",
+  "generated_at": "2026-08-29T04:41:27.707039+00:00",
+  "archive_base_commit": "35d160cc30e812d983c6f33fc64bbe4b97847f9b",
   "expected_final_tag": "phase3-final",
   "verdict": "PASS",
   "gate_summary": {
@@ -104,8 +104,8 @@
     },
     {
       "path": "runs/PHASE3_FINAL.md",
-      "bytes": 7652,
-      "sha256": "6c700f59e08a69d3bb42cdbaceedd28a76fe6b4098566a2cd4d98fded2840b4d"
+      "bytes": 7715,
+      "sha256": "de822f74c2ff12101562ebca43a83ca3a725ecba235f78324dd45fa108326781"
     },
     {
       "path": "runs/PHASE3_GATE3A.json",
@@ -130,7 +130,7 @@
     {
       "path": "runs/PHASE3_REGRESSION.json",
       "bytes": 1070,
-      "sha256": "6e8961830a3f629686e867e82b7db44472ffdeaabf87479bced6bd608dd9cd57"
+      "sha256": "a99ab440e014d4c3161bbd12cecf59ad99cfd201820d298da845fd8f6c346d14"
     },
     {
       "path": "runs/TRACE_REPORT.json",
@@ -614,8 +614,8 @@
     },
     {
       "path": "scripts/phase3_archive.py",
-      "bytes": 22974,
-      "sha256": "6795c0f245f37b6cc7f06632030fd55f71c252eaad6e31f547a552d265289ff7"
+      "bytes": 23752,
+      "sha256": "023db7dea85dae6190c19f8ca9568324d8eb7beadc7e3bc295847587fdaebb31"
     },
     {
       "path": "scripts/phase3_auto_recover.sh",
@@ -810,26 +810,31 @@
     {
       "id": "smoke-K8-s42-20260828-232347",
       "steps": null,
-      "reason": "冒烟配置修复前的失败尝试，仅保留本地诊断日志/checkpoint"
+      "disposition": "deleted",
+      "reason": "冒烟配置修复前的失败尝试，已由 ...232940 替代"
     },
     {
       "id": "p3c-slime-long-clean-K8-s42-20260828",
       "steps": 7,
+      "disposition": "deleted",
       "reason": "训练失败，未形成 100 步对照"
     },
     {
       "id": "p3c-slime-long-clean2-K8-s42-20260828",
       "steps": 9,
+      "disposition": "deleted",
       "reason": "训练中断，未形成 100 步对照"
     },
     {
       "id": "p3c-slime-long-clean-dm-K8-s42-20260828",
       "steps": 70,
+      "disposition": "deleted",
       "reason": "训练中断，未形成 100 步对照"
     },
     {
       "id": "p3c-slime-long-seal-dm-K8-s42-20260828",
       "steps": 10,
+      "disposition": "deleted",
       "reason": "CUDA invalid argument，已由完整 100 步 Seal 实验替代"
     }
   ],

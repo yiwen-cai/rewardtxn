@@ -111,7 +111,8 @@ canonical run 记录 checkpoint：
 
 ## 6. 未完成/替代运行的处置
 
-以下运行未形成有效门禁证据，保留为本地诊断数据并由 `.gitignore` 明确排除：
+以下运行未形成有效门禁证据，已从本机删除；删除记录保留在
+`runs/PHASE3_ARCHIVE_MANIFEST.json`，并由 `.gitignore` 防止后续误收录：
 
 | 运行 | 有效步数 | 处置原因 |
 |---|---:|---|
