@@ -69,7 +69,8 @@ meta = {
         "ray_object_store_memory": int(os.environ.get("RTX_RAY_OBJECT_STORE_MEMORY", "17179869184")),
         "checkpoint_keep": int(os.environ.get("RTX_CKPT_KEEP", "2")),
         "no_save_optim": os.environ.get("RTX_NO_SAVE_OPTIM", "0") == "1",
-        "model": "Qwen2.5-0.5B-Instruct", "dataset": "dapo-math-17k", "rm": "custom_rm_path",
+        "model": os.environ.get("RTX_MODEL_DIR", "Qwen2.5-0.5B-Instruct").rstrip("/").split("/")[-1],
+        "dataset": "dapo-math-17k", "rm": os.environ.get("RTX_CUSTOM_RM", "deepscaler"),
         "gpus": [0, 1, 2, 5], "actor_gpus": 1, "rollout_gpus": 3,
     },
 }
