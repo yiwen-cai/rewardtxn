@@ -3,7 +3,7 @@
   "run_evidence": {
     "long_run_new": "p1-slime-none-K8-s42-20260829-001020 (0.5B, long profile, 100步)",
     "long_run_history": "p3c-slime-long-seal-K8-s42-20260828 (0.5B, 100步)",
-    "model_upgrade_run": "p1-slime-skew-K8-s42-20260829-100342 (1.5B, phase3b, skew[20,39], 20步)"
+    "model_upgrade_run": "p1-slime-skew-K8-s42-20260829-100342 (Qwen2.5-1.5B, phase3b, skew[20,39], 20步)"
   },
   "gates": {
     "G3C1": {
