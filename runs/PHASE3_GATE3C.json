@@ -1,0 +1,54 @@
+{
+  "stage": "3C",
+  "run_evidence": {
+    "long_run_new": "p1-slime-none-K8-s42-20260829-001020 (0.5B, long profile, 100步)",
+    "long_run_history": "p3c-slime-long-seal-K8-s42-20260828 (0.5B, 100步)",
+    "model_upgrade_run": "p1-slime-skew-K8-s42-20260829-100342 (1.5B, phase3b, skew[20,39], 20步)"
+  },
+  "gates": {
+    "G3C1": {
+      "pass": true,
+      "passed": 9,
+      "total": 9,
+      "evidence": "一键回归 9/9 PASS (seal/cas/manifest/reconciler/replay/zero-mod/recovery)"
+    },
+    "G3C2": {
+      "pass": true,
+      "mean_loss_diff": 0.0065,
+      "evidence": "新配置 100 步 vs 历史 100 步 loss 差均值 0.0065 <0.05; 新实验后50步均值 0.0033, std 0.0056 (收敛稳定)"
+    },
+    "G3C3": {
+      "pass": true,
+      "evidence": "4 进程并发同组 CAS -> 恰好 1 条权威记录 (回归 cas_multi_process PASS)"
+    }
+  },
+  "supplementary": {
+    "long_run_protocol": {
+      "seals_aborted": 0,
+      "rewards_v1_mismatch": 0,
+      "checkpoints_kept": 1,
+      "note": "CKPT_KEEP=1 生效: 100 步仅 1 份 checkpoint (943M, no-save-optim)"
+    },
+    "model_upgrade_1_5b": {
+      "window_aborted": "20/20",
+      "autofix": 20,
+      "rewards_v1_mismatch": 0,
+      "checkpoints": [
+        "iter_0000009",
+        "iter_0000019"
+      ],
+      "note": "1.5B 协议栈与 0.5B 一致, keep=2 生效 (41G)"
+    },
+    "resource_gate": {
+      "enabled": true,
+      "thresholds": {
+        "pub_gb": 200,
+        "root_gb": 100,
+        "gpu_free_gb": 30
+      },
+      "note": "所有实验启动前强制检查, 结果写 logs/resource_gate.json; 训练期间 health 采样"
+    }
+  },
+  "ts": 1787969463.5492866,
+  "status": "PASS"
+}
