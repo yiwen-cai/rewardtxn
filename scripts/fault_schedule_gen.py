@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import random
 import sys
 from pathlib import Path
@@ -29,7 +30,7 @@ from pathlib import Path
 BASE = Path(__file__).resolve().parent.parent
 OUT_DIR = BASE / "prereg" / "fault_schedules"
 
-CUTS = ["R1", "R2", "R3", "R4", "R5", "Q0", "L3", "C1", "C2"]
+CUTS = ("R1", "R2", "R3", "R4", "R5", "Q0", "L3", "C1", "C2")
 
 
 def _params_for(cut: str, rng: random.Random, u: int, step: int) -> dict:
@@ -65,9 +66,12 @@ def gen_e7(seeds, steps: int, k: int, u: int, n_events: int = 9) -> list[dict]:
         step_pool = list(range(margin, steps - margin))
         rng.shuffle(step_pool)
         chosen = sorted(step_pool[:n_events])
-        rng.shuffle(CUTS)
+        # Never mutate the module-level cut catalog.  A schedule for seed S must
+        # be identical whether generated alone or as part of a seed batch.
+        cuts = list(CUTS)
+        rng.shuffle(cuts)
         events = []
-        for step, cut in zip(chosen, CUTS[:n_events]):
+        for step, cut in zip(chosen, cuts[:n_events]):
             events.append({
                 "step": int(step),
                 "cut": cut,
@@ -90,20 +94,35 @@ def gen_e7(seeds, steps: int, k: int, u: int, n_events: int = 9) -> list[dict]:
 
 
 def gen_e8(runs: int, hours: float, rate_per_hour: float) -> list[dict]:
+    if runs <= 0 or hours <= 0 or rate_per_hour <= 0:
+        raise ValueError("runs/hours/rate_per_hour must be positive")
     schedules = []
     cuts_cycle = ["R3", "Q0", "C2", "R2", "L3", "C1", "R5", "R1"]
     for r in range(runs):
-        rng = random.Random(int(hashlib.sha256(f"e8:{r}".encode()).hexdigest()[:8], 16))
-        total_min = int(hours * 60)
-        # 均匀化 Poisson 到达（速率恒定下的等价采样，确定性）
-        n = int(hours * rate_per_hour)
-        offsets = sorted(rng.sample(range(10, total_min - 10), n))
+        schedule_seed = int(hashlib.sha256(f"e8:{r}".encode()).hexdigest()[:8], 16)
+        rng = random.Random(schedule_seed)
+        total_sec = int(hours * 3600)
+        guard_sec = min(600, total_sec // 10)
+        rate_per_sec = rate_per_hour / 3600.0
+
+        # Homogeneous Poisson process: exponential inter-arrival times.  The
+        # previous implementation fixed N and sampled uniform offsets, which is
+        # only a Poisson process conditional on N and incorrectly removed count
+        # variability.  Guard windows avoid faults during startup/teardown.
+        offsets = []
+        t = float(guard_sec)
+        while True:
+            t += rng.expovariate(rate_per_sec)
+            if t >= total_sec - guard_sec:
+                break
+            offsets.append(round(t, 3))
         events = []
         for i, off in enumerate(offsets):
             cut = cuts_cycle[i % len(cuts_cycle)]
-            step = int((off / total_min) * 500)  # 训练进度近似映射（soak 以 wall-clock 为准）
+            step = min(499, int((off / total_sec) * 500))  # soak 以 wall-clock 为准
             events.append({
-                "wall_clock_min": int(off),
+                "wall_clock_sec": off,
+                "wall_clock_min": round(off / 60.0, 3),
                 "step": step,
                 "cut": cut,
                 "params": _params_for(cut, rng, 4, step),
@@ -111,6 +130,7 @@ def gen_e8(runs: int, hours: float, rate_per_hour: float) -> list[dict]:
         schedules.append({
             "schedule_id": f"e8-soak-run{r+1}",
             "seed": r + 1,
+            "schedule_seed": schedule_seed,
             "stack": "slime",
             "model": "Qwen2.5-1.5B-Instruct",
             "steps": 500,
@@ -120,6 +140,9 @@ def gen_e8(runs: int, hours: float, rate_per_hour: float) -> list[dict]:
             "hours": hours,
             "rate_per_hour": rate_per_hour,
             "fault_process": "poisson",
+            "arrival_model": "exponential_interarrival",
+            "startup_teardown_guard_sec": guard_sec,
+            "realized_event_count": len(events),
             "generator": "scripts/fault_schedule_gen.py",
             "events": events,
         })
@@ -133,6 +156,8 @@ def validate(s: dict) -> list[str]:
     evs = s.get("events", [])
     steps = s.get("steps")
     u = s.get("u", 4)
+    seen_event_keys = set()
+    previous_wall_sec = -math.inf
     for e in evs:
         if "step" in e and steps is not None and not (0 <= e["step"] < steps):
             errs.append(f"step out of range: {e['step']}")
@@ -142,6 +167,23 @@ def validate(s: dict) -> list[str]:
                 errs.append(f"group {g} inconsistent with step {e.get('step')} (u={u})")
         if e.get("cut") not in CUTS:
             errs.append(f"unknown cut {e.get('cut')}")
+        key = (e.get("step"), e.get("cut"), e.get("wall_clock_sec"))
+        if key in seen_event_keys:
+            errs.append(f"duplicate event: {key}")
+        seen_event_keys.add(key)
+        if s.get("kind") == "soak":
+            wall_sec = e.get("wall_clock_sec")
+            if not isinstance(wall_sec, (int, float)) or wall_sec <= previous_wall_sec:
+                errs.append("soak wall_clock_sec must be strictly increasing numbers")
+            else:
+                previous_wall_sec = wall_sec
+    if s.get("kind") == "soak":
+        if s.get("fault_process") != "poisson" or s.get("arrival_model") != "exponential_interarrival":
+            errs.append("soak schedule must use exponential-interarrival Poisson process")
+        if not isinstance(s.get("schedule_seed"), int):
+            errs.append("soak schedule missing integer schedule_seed")
+        if s.get("realized_event_count") != len(evs):
+            errs.append("realized_event_count mismatch")
     if not s.get("generator", "").startswith("scripts/"):
         errs.append("missing generator attribution")
     return errs

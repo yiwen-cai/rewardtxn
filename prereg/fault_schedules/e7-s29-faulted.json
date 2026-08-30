@@ -11,7 +11,7 @@
   "events": [
     {
       "step": 61,
-      "cut": "L3",
+      "cut": "R2",
       "params": {
         "groups": [
           244,
@@ -19,39 +19,37 @@
           246,
           247
         ],
-        "after": "optimizer_return",
-        "before": "checkpoint",
-        "expect": "not_committed"
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
       }
     },
     {
       "step": 72,
-      "cut": "C2",
-      "params": {
-        "groups": [
-          288,
-          289,
-          290,
-          291
-        ],
-        "ack_drop": true,
-        "expect": "no_duplicate_apply"
-      }
-    },
-    {
-      "step": 138,
       "cut": "R5",
       "params": {
         "groups": [
-          552
+          288
         ],
         "workers": 2,
         "expect": "single_winner"
       }
     },
     {
+      "step": 138,
+      "cut": "R4",
+      "params": {
+        "groups": [
+          552
+        ],
+        "same_id": true,
+        "second_digest": "d-x",
+        "expect": "blocked"
+      }
+    },
+    {
       "step": 167,
-      "cut": "Q0",
+      "cut": "L3",
       "params": {
         "groups": [
           668,
@@ -59,13 +57,14 @@
           670,
           671
         ],
-        "after": "get_meta",
-        "expect": "reclaim_or_manifest"
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
       }
     },
     {
       "step": 222,
-      "cut": "R2",
+      "cut": "Q0",
       "params": {
         "groups": [
           888,
@@ -73,21 +72,23 @@
           890,
           891
         ],
-        "retry": "stale",
-        "verifier": "v1",
-        "stale_verifier": "retry-stale"
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
       }
     },
     {
       "step": 256,
-      "cut": "R4",
+      "cut": "C1",
       "params": {
         "groups": [
-          1024
+          1024,
+          1025,
+          1026,
+          1027
         ],
-        "same_id": true,
-        "second_digest": "d-x",
-        "expect": "blocked"
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
       }
     },
     {
@@ -120,7 +121,7 @@
     },
     {
       "step": 472,
-      "cut": "C1",
+      "cut": "C2",
       "params": {
         "groups": [
           1888,
@@ -128,9 +129,8 @@
           1890,
           1891
         ],
-        "after": "checkpoint_durable",
-        "before": "commit_pointer",
-        "expect": "unique_verdict"
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
       }
     }
   ]

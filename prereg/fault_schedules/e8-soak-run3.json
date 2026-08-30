@@ -1,6 +1,7 @@
 {
   "schedule_id": "e8-soak-run3",
   "seed": 3,
+  "schedule_seed": 1340096955,
   "stack": "slime",
   "model": "Qwen2.5-1.5B-Instruct",
   "steps": 500,
@@ -10,63 +11,70 @@
   "hours": 8.0,
   "rate_per_hour": 2.0,
   "fault_process": "poisson",
+  "arrival_model": "exponential_interarrival",
+  "startup_teardown_guard_sec": 600,
+  "realized_event_count": 16,
   "generator": "scripts/fault_schedule_gen.py",
   "events": [
     {
-      "wall_clock_min": 16,
-      "step": 16,
+      "wall_clock_sec": 1104.576,
+      "wall_clock_min": 18.41,
+      "step": 19,
       "cut": "R3",
       "params": {
         "groups": [
-          64,
-          65,
-          66,
-          67
+          76,
+          77,
+          78,
+          79
         ],
         "verifier": "v2",
         "digest": "d2"
       }
     },
     {
-      "wall_clock_min": 28,
-      "step": 29,
+      "wall_clock_sec": 1205.881,
+      "wall_clock_min": 20.098,
+      "step": 20,
       "cut": "Q0",
       "params": {
         "groups": [
-          116,
-          117,
-          118,
-          119
+          80,
+          81,
+          82,
+          83
         ],
         "after": "get_meta",
         "expect": "reclaim_or_manifest"
       }
     },
     {
-      "wall_clock_min": 38,
-      "step": 39,
+      "wall_clock_sec": 2003.714,
+      "wall_clock_min": 33.395,
+      "step": 34,
       "cut": "C2",
       "params": {
         "groups": [
-          156,
-          157,
-          158,
-          159
+          136,
+          137,
+          138,
+          139
         ],
         "ack_drop": true,
         "expect": "no_duplicate_apply"
       }
     },
     {
-      "wall_clock_min": 119,
-      "step": 123,
+      "wall_clock_sec": 4621.234,
+      "wall_clock_min": 77.021,
+      "step": 80,
       "cut": "R2",
       "params": {
         "groups": [
-          492,
-          493,
-          494,
-          495
+          320,
+          321,
+          322,
+          323
         ],
         "retry": "stale",
         "verifier": "v1",
@@ -74,15 +82,16 @@
       }
     },
     {
-      "wall_clock_min": 130,
-      "step": 135,
+      "wall_clock_sec": 5182.566,
+      "wall_clock_min": 86.376,
+      "step": 89,
       "cut": "L3",
       "params": {
         "groups": [
-          540,
-          541,
-          542,
-          543
+          356,
+          357,
+          358,
+          359
         ],
         "after": "optimizer_return",
         "before": "checkpoint",
@@ -90,15 +99,16 @@
       }
     },
     {
-      "wall_clock_min": 135,
-      "step": 140,
+      "wall_clock_sec": 5616.592,
+      "wall_clock_min": 93.61,
+      "step": 97,
       "cut": "C1",
       "params": {
         "groups": [
-          560,
-          561,
-          562,
-          563
+          388,
+          389,
+          390,
+          391
         ],
         "after": "checkpoint_durable",
         "before": "commit_pointer",
@@ -106,87 +116,93 @@
       }
     },
     {
-      "wall_clock_min": 147,
-      "step": 153,
+      "wall_clock_sec": 7877.346,
+      "wall_clock_min": 131.289,
+      "step": 136,
       "cut": "R5",
       "params": {
         "groups": [
-          612
+          544
         ],
         "workers": 2,
         "expect": "single_winner"
       }
     },
     {
-      "wall_clock_min": 150,
-      "step": 156,
+      "wall_clock_sec": 10110.463,
+      "wall_clock_min": 168.508,
+      "step": 175,
       "cut": "R1",
       "params": {
         "groups": [
-          624,
-          625,
-          626,
-          627
+          700,
+          701,
+          702,
+          703
         ],
         "mechanism": "crm_crash",
         "crash_frac": 0.5
       }
     },
     {
-      "wall_clock_min": 170,
-      "step": 177,
+      "wall_clock_sec": 10686.687,
+      "wall_clock_min": 178.111,
+      "step": 185,
       "cut": "R3",
       "params": {
         "groups": [
-          708,
-          709,
-          710,
-          711
+          740,
+          741,
+          742,
+          743
         ],
         "verifier": "v2",
         "digest": "d2"
       }
     },
     {
-      "wall_clock_min": 193,
-      "step": 201,
+      "wall_clock_sec": 12432.797,
+      "wall_clock_min": 207.213,
+      "step": 215,
       "cut": "Q0",
       "params": {
         "groups": [
-          804,
-          805,
-          806,
-          807
+          860,
+          861,
+          862,
+          863
         ],
         "after": "get_meta",
         "expect": "reclaim_or_manifest"
       }
     },
     {
-      "wall_clock_min": 209,
-      "step": 217,
+      "wall_clock_sec": 12495.576,
+      "wall_clock_min": 208.26,
+      "step": 216,
       "cut": "C2",
       "params": {
         "groups": [
-          868,
-          869,
-          870,
-          871
+          864,
+          865,
+          866,
+          867
         ],
         "ack_drop": true,
         "expect": "no_duplicate_apply"
       }
     },
     {
-      "wall_clock_min": 265,
-      "step": 276,
+      "wall_clock_sec": 13081.437,
+      "wall_clock_min": 218.024,
+      "step": 227,
       "cut": "R2",
       "params": {
         "groups": [
-          1104,
-          1105,
-          1106,
-          1107
+          908,
+          909,
+          910,
+          911
         ],
         "retry": "stale",
         "verifier": "v1",
@@ -194,15 +210,16 @@
       }
     },
     {
-      "wall_clock_min": 313,
-      "step": 326,
+      "wall_clock_sec": 20264.063,
+      "wall_clock_min": 337.734,
+      "step": 351,
       "cut": "L3",
       "params": {
         "groups": [
-          1304,
-          1305,
-          1306,
-          1307
+          1404,
+          1405,
+          1406,
+          1407
         ],
         "after": "optimizer_return",
         "before": "checkpoint",
@@ -210,15 +227,16 @@
       }
     },
     {
-      "wall_clock_min": 373,
-      "step": 388,
+      "wall_clock_sec": 21770.874,
+      "wall_clock_min": 362.848,
+      "step": 377,
       "cut": "C1",
       "params": {
         "groups": [
-          1552,
-          1553,
-          1554,
-          1555
+          1508,
+          1509,
+          1510,
+          1511
         ],
         "after": "checkpoint_durable",
         "before": "commit_pointer",
@@ -226,27 +244,29 @@
       }
     },
     {
-      "wall_clock_min": 376,
-      "step": 391,
+      "wall_clock_sec": 24064.288,
+      "wall_clock_min": 401.071,
+      "step": 417,
       "cut": "R5",
       "params": {
         "groups": [
-          1564
+          1668
         ],
         "workers": 2,
         "expect": "single_winner"
       }
     },
     {
-      "wall_clock_min": 402,
-      "step": 418,
+      "wall_clock_sec": 28004.165,
+      "wall_clock_min": 466.736,
+      "step": 486,
       "cut": "R1",
       "params": {
         "groups": [
-          1672,
-          1673,
-          1674,
-          1675
+          1944,
+          1945,
+          1946,
+          1947
         ],
         "mechanism": "crm_crash",
         "crash_frac": 0.5

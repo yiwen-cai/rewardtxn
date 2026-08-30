@@ -1,36 +1,27 @@
 #!/usr/bin/env python3
-"""
-P0: E2 Trace Runner — 12 切点确定性随机化调度（附录 C.1/C.2）
+"""E2 deterministic trace runner with auditable, isolated trial artifacts.
 
-覆盖切点: R1 R2 R3 R4 R5 Q0 Q1 L0 L2 L3 C1 C2（每切点 >= 1,500 次，默认 2,500 次 → 30,000 总注入）
+Formal runs use 2,500 trials per cut.  Smoke runs are explicitly separated and
+can never overwrite the formal artifact path::
 
-fixture 性质（如实标注，真实进程实验另行开展）:
-  R1/R2/R3/R4/R5 —— 驱动真实 phase2_seal_rm 代码路径（CAS/SQLite/Seal/AUTO_FIX），
-                    fixture 内嵌断言，随机化维度含 group 大小 K∈{4,8,16}；
-  Q0/Q1/L0/L2/L3/C1/C2 —— 确定性协议模型 fixture（队列/checkpoint/ACK 状态机）：
-                    fixture 只产生事件日志，判定由日志解释器（VERIFIERS）完成，
-                    oracle 从日志反推状态，非构造即真；与真实进程实验分表报告（§1 原则）。
-
-oracle（附录 C.2）: 混版本 committed 组 / StepToken 重复或缺失 / checkpoint hash 绑定不符 /
-错误 reward 进入 committed gradient —— 由 scripts/trace_oracle.py 与各 fixture 内嵌断言共同判定。
-
-随机化维度（E2 设计）: kill 时间、ACK 丢失、attempt 到达顺序、revision、group 大小、
-checkpoint 延迟 —— 全部由 schedule_seed 确定性驱动。
-
-输出: runs/TRACE_REPORT_PAPER.json（每切点 n/failures/上界 + 聚合 rule-of-three）
-用法:
-  python3 scripts/paper_trace_runner.py            # 默认 30,000（12×2,500）
-  python3 scripts/paper_trace_runner.py --per-cut 200   # 快速冒烟
+    python3 scripts/paper_trace_runner.py
+    python3 scripts/paper_trace_runner.py --mode smoke --per-cut 3
 """
 from __future__ import annotations
 
+import argparse
 import asyncio
+import hashlib
 import json
 import multiprocessing as mp
 import os
 import random
+import subprocess
 import sys
 import tempfile
+import time
+import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
@@ -38,407 +29,660 @@ sys.path.insert(0, str(BASE / "scripts"))
 import phase2_seal_rm as m
 import trace_oracle
 
-OUT = BASE / "runs" / "TRACE_REPORT_PAPER.json"
-EVENTS_SAMPLE = BASE / "runs" / "TRACE_PAPER_EVENTS_SAMPLE.jsonl"
-
 CUT_POINTS = ["R1", "R2", "R3", "R4", "R5", "Q0", "Q1", "L0", "L2", "L3", "C1", "C2"]
-K_DEFAULT = 8
+REAL_CODE_CUTS = {"R1", "R2", "R3", "R4", "R5"}
+MODEL_CUTS = set(CUT_POINTS) - REAL_CODE_CUTS
+FORMAL_PER_CUT = 2500
+EXP_ID = "paper-e2-trace"
 GOOD = "Let me solve.\n</think>\nThe answer is 42.\n###Response\n\\boxed{42}"
-BAD = "Let me solve.\n</think>\nThe answer is 43.\n###Response\n\\boxed{43}"
-# v1 与 v2 值级发散的样本（v1=1, v2=0）：用于真正考验 AUTO_FIX 的值修正
 DIVERGENT = "Let me solve.\n</think>\nThe answer is 42.0.\n###Response\n\\boxed{42.0}"
+
+SCHEDULE_LEVELS = {
+    "kill_time": [0.1, 0.35, 0.65, 0.9],
+    "ack_loss": [False, True],
+    "attempt_order": ["forward", "reverse", "interleaved"],
+    "revision": ["v1", "v2", "v3"],
+    "group_size": [4, 8, 16],
+    "checkpoint_delay": [0, 1, 4],
+}
+RELEVANT_DIMENSIONS = {
+    "R1": ["kill_time", "group_size"],
+    "R2": ["revision", "group_size"],
+    "R3": ["revision", "group_size"],
+    "R4": ["attempt_order", "revision"],
+    "R5": ["attempt_order", "revision"],
+    "Q0": ["kill_time", "attempt_order", "revision", "group_size"],
+    "Q1": ["kill_time", "attempt_order", "group_size"],
+    "L0": ["kill_time", "checkpoint_delay"],
+    "L2": ["kill_time", "attempt_order", "group_size", "checkpoint_delay"],
+    "L3": ["kill_time", "checkpoint_delay"],
+    "C1": ["kill_time", "revision", "checkpoint_delay"],
+    "C2": ["kill_time", "ack_loss", "attempt_order", "revision", "checkpoint_delay"],
+}
+
+
+class TrialFailure(RuntimeError):
+    def __init__(self, record):
+        super().__init__("invalid trial %s/%s" % (record["cut"], record["trial"]))
+        self.record = record
 
 
 class _S:
-    def __init__(self, gi, idx, rid, resp, label):
-        self.group_index, self.index, self.rollout_id = gi, idx, rid
-        self.response, self.label = resp, label
+    def __init__(self, group_index, index, rollout_id, response, label):
+        self.group_index = group_index
+        self.index = index
+        self.rollout_id = rollout_id
+        self.response = response
+        self.label = label
 
 
-def _reset(gidx, fault, k=K_DEFAULT, autofix=False):
-    m.RUN_DIR = os.environ["RTX_RUN_DIR"]
+def _utc_now():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _canonical(value):
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+
+def _sha_bytes(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def _sha_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _write_json(path, value):
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+def _append_jsonl(handle, value):
+    handle.write(json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n")
+    handle.flush()
+
+
+def _git_output(*args):
+    result = subprocess.run(["git"] + list(args), cwd=str(BASE), text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    return result.returncode, result.stdout.strip()
+
+
+def _git_identity():
+    return_code, commit = _git_output("rev-parse", "HEAD")
+    if return_code:
+        return "UNKNOWN", False
+    # Formal provenance is bound to tracked source plus explicit source hashes.
+    # Run artifacts themselves are normally untracked, so counting untracked
+    # output would make a completed formal run impossible to rerun.
+    status_code, status = _git_output("status", "--porcelain", "--untracked-files=no")
+    return commit, status_code == 0 and not status
+
+
+def _dimension_value(seed, cut, trial, dimension):
+    levels = SCHEDULE_LEVELS[dimension]
+    material = "%s:%s:%s" % (seed, cut, dimension)
+    local = random.Random(int(hashlib.sha256(material.encode("utf-8")).hexdigest()[:16], 16))
+    permutation = list(levels)
+    local.shuffle(permutation)
+    return permutation[trial % len(permutation)]
+
+
+def build_schedule(seed, per_cut):
+    trials = []
+    for cut in CUT_POINTS:
+        for trial in range(per_cut):
+            dimensions = {name: _dimension_value(seed, cut, trial, name)
+                          for name in SCHEDULE_LEVELS}
+            core = {"cut": cut, "trial": trial, "dimensions": dimensions,
+                    "relevant_dimensions": RELEVANT_DIMENSIONS[cut]}
+            trials.append({**core, "schedule_id": _sha_bytes(_canonical(core))[:20]})
+    return trials
+
+
+def schedule_coverage(trials):
+    coverage = {}
+    for row in trials:
+        cut = row["cut"]
+        coverage.setdefault(cut, {})
+        for dimension in row["relevant_dimensions"]:
+            key = json.dumps(row["dimensions"][dimension], sort_keys=True)
+            coverage[cut].setdefault(dimension, {})[key] = coverage[cut].setdefault(dimension, {}).get(key, 0) + 1
+    return coverage
+
+
+def _schedule_values(row):
+    return dict(row["dimensions"])
+
+
+def _prepare_output(path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        superseded = path.with_name("%s.superseded.%s.%s" % (path.name, stamp, os.getpid()))
+        path.rename(superseded)
+    path.mkdir(parents=True)
+    (path / "manifests").mkdir()
+
+
+def _reset_trial(run_dir, fault="none", group_size=8, autofix=False, revision="v1"):
+    os.environ["RTX_RUN_DIR"] = str(run_dir)
+    os.environ["RTX_CAS_INDEX_DIR"] = str(run_dir / "cas")
+    (run_dir / "cas").mkdir(parents=True, exist_ok=True)
+    m.RUN_DIR = str(run_dir)
     m.SEAL, m.GROUP_RM, m.AUTO_FIX = True, True, autofix
-    m.K = k
-    m.FAULT = fault
+    m.K, m.FAULT = group_size, fault
+    m.V2_MODE = "strict" if revision in ("v1", "v3") else "relaxed"
     m._WINDOWS = {}
     m._seal_state.clear()
     m._seen_logical.clear()
     m._pending_samples.clear()
+    m._reset_cas_connection()
 
 
-def _batch(gidx, k, resp=GOOD, label="42"):
-    return [_S(gidx, i, i, resp, label) for i in range(k)]
+def _batch(group_index, group_size, mixed=False):
+    half = group_size // 2
+    return [_S(group_index, index, index,
+               DIVERGENT if mixed and index >= half else GOOD, "42")
+            for index in range(group_size)]
 
 
-def _batch_mixed(gidx, k):
-    """前一半 GOOD（v1 值 1），后一半 DIVERGENT（v1 值 1 / v2 值 0）：
-    skew/dup 注入后版本 tag 与值同时混合，AUTO_FIX 必须把后一半修正回 v1=1。"""
-    half = k // 2
-    return [_S(gidx, i, i, GOOD if i < half else DIVERGENT, "42") for i in range(k)]
+def _read_jsonl(path):
+    if not path.exists():
+        return []
+    rows = []
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                rows.append(json.loads(line))
+    return rows
 
 
-def _v1(gidx, k, mixed=False, **kw):
-    samples = _batch_mixed(gidx, k) if mixed else _batch(gidx, k, **kw)
-    return asyncio.run(m._rm_batch_group(samples))
+def _r_events(cut, trial_dir, group_index, schedule, worker_results=None):
+    events = []
+    for record in _read_jsonl(trial_dir / "rewards.jsonl"):
+        if record.get("group_index") != group_index:
+            continue
+        committed = cut in ("R2", "R3", "R4", "R5") and record.get("reward") is not None
+        events.append({"type": "reward", "ts": float(record.get("ts", 0.0)), "step": schedule["trial"],
+                       "logical_id": record.get("logical_id"),
+                       "payload": {**record, "op": "cas_write", "committed": committed}})
+    for record in _read_jsonl(trial_dir / "cas_rejects.jsonl"):
+        if record.get("group_index") != group_index:
+            continue
+        events.append({"type": "reward", "ts": float(record.get("ts", 0.0)), "step": schedule["trial"],
+                       "logical_id": record.get("logical_id"),
+                       "payload": {**record, "op": "cas_reject", "committed": False}})
+    for record in _read_jsonl(trial_dir / "seals.jsonl"):
+        if record.get("group_index") != group_index:
+            continue
+        events.append({"type": "group", "ts": float(record.get("ts", 0.0)), "step": schedule["trial"],
+                       "group_ids": [group_index], "payload": record})
+    for result in worker_results or []:
+        events.append({"type": "learner", "ts": time.time(), "step": schedule["trial"],
+                       "payload": {"op": "recovery_worker_exit", **result}})
+    events.sort(key=lambda event: event["ts"])
+    events.append({"type": "fault", "ts": (events[-1]["ts"] + 1e-6 if events else time.time()),
+                   "step": schedule["trial"], "payload": {"cut": cut,
+                   "kill_time": schedule["dimensions"]["kill_time"]}})
+    return events
 
 
-# --------------------------------------------------------------------------
-# R1–R5：真实 phase2_seal_rm 代码路径
-# --------------------------------------------------------------------------
+def _reward_authority(events):
+    return [{"logical_id": event["logical_id"],
+             "authoritative_reward": float(m._v1_reward(event["payload"].get("response", ""),
+                                                         event["payload"].get("label", "")))}
+            for event in events if event.get("type") == "reward"
+            and event.get("payload", {}).get("op") == "cas_write"
+            and event.get("payload", {}).get("committed")]
 
-def fixture_r1(rng, it):
-    """crm_crash：RM 计算中崩溃 → 组不得部分提交；崩溃样本持久化可恢复。"""
-    gidx = it
-    k = rng.choice([4, 8, 16])   # 随机化维度：group 大小
-    _reset(gidx, "none", k=k)
-    m._WINDOWS = {"crm_crash": [gidx, gidx]}
+
+def fixture_r1(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    group_size = values["group_size"]
+    _reset_trial(trial_dir, group_size=group_size, revision=values["revision"])
+    samples = _batch(group_index, group_size)
+    completed = min(group_size - 1, int(values["kill_time"] * group_size))
+    for sample in samples[:completed]:
+        asyncio.run(m._rm_one(sample))
+    m._WINDOWS = {"crm_crash": [group_index, group_index]}
     try:
-        _v1(gidx, k)
-        return [], False, "期望 RuntimeError 未触发"
+        asyncio.run(m._rm_one(samples[completed]))
     except RuntimeError:
         pass
-    crash = [r for r in _read_jsonl("rewards.jsonl") if r.get("reward") is None and r.get("group_index") == gidx]
-    seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
-    ok = len(crash) >= 1 and all(r.get("response") for r in crash) and seals == []
-    return _events("R1", gidx), ok, {"k": k, "crash_persisted": len(crash), "seal_entries": len(seals)}
+    events = _r_events("R1", trial_dir, group_index, schedule)
+    return events, {"steps": [], "rewards": []}
 
 
-def fixture_r2(rng, it):
-    """dup：陈旧 retry 混入 → ABORTED（AUTO_FIX 后返回值全部为权威 v1），无混版本提交。"""
-    gidx = it
-    k = rng.choice([4, 8, 16])
-    _reset(gidx, "none", k=k, autofix=True)
-    m._WINDOWS = {"dup": [gidx, gidx]}
-    out = _v1(gidx, k, mixed=True)
-    seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
-    aborted = any(s["status"] == "ABORTED" for s in seals)
-    expected = [m._v1_reward(GOOD if i < k // 2 else DIVERGENT, "42") for i in range(k)]
-    all_v1 = all(abs(float(r) - float(e)) < 1e-9 for r, e in zip(out, expected))
-    ok = aborted and all_v1 and not any(s["status"] == "SEALED" for s in seals)
-    return _events("R2", gidx), ok, {"k": k, "seal": seals[0]["status"] if seals else None, "autofix_values": all_v1}
+def _fixture_mixed(cut, schedule, trial_dir, group_index):
+    values = _schedule_values(schedule)
+    group_size = values["group_size"]
+    _reset_trial(trial_dir, group_size=group_size, autofix=True, revision=values["revision"])
+    m._WINDOWS = {("dup" if cut == "R2" else "skew"): [group_index, group_index]}
+    asyncio.run(m._rm_batch_group(_batch(group_index, group_size, mixed=True)))
+    events = _r_events(cut, trial_dir, group_index, schedule)
+    return events, {"steps": [], "rewards": _reward_authority(events)}
 
 
-def fixture_r3(rng, it):
-    """skew：同组前后半不同 verifier → ABORTED + AUTO_FIX 权威化，0 混版本提交。"""
-    gidx = it
-    k = rng.choice([4, 8, 16])
-    _reset(gidx, "none", k=k, autofix=True)
-    m._WINDOWS = {"skew": [gidx, gidx]}
-    out = _v1(gidx, k, mixed=True)
-    seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
-    aborted = any(s["status"] == "ABORTED" for s in seals)
-    expected = [m._v1_reward(GOOD if i < k // 2 else DIVERGENT, "42") for i in range(k)]
-    all_v1 = all(abs(float(r) - float(e)) < 1e-9 for r, e in zip(out, expected))
-    ok = aborted and all_v1
-    return _events("R3", gidx), ok, {"k": k, "seal": seals[0]["status"] if seals else None, "autofix_values": all_v1}
+def fixture_r2(schedule, trial_dir, group_index, worker_timeout):
+    return _fixture_mixed("R2", schedule, trial_dir, group_index)
 
 
-def fixture_r4(rng, it):
-    """nondeterministic conflict：同 logical_id 第二次写不同 digest → 阻断，禁止 LWW。"""
-    gidx = it
-    _reset(gidx, "none")
-    lid = f"r4:{it}:0"  # 独立命名空间，避免与 R1–R3 批次记录冲突
-    ok1 = m._cas_write({"group_index": gidx, "index": 0, "rollout_id": 0, "reward": 1.0,
-                        "verifier": "v1", "digest": "d1", "logical_id": lid})
-    ok2 = m._cas_write({"group_index": gidx, "index": 0, "rollout_id": 0, "reward": 0.0,
-                        "verifier": "v1", "digest": "d2", "logical_id": lid})  # 同 revision 不同 digest
-    recs = [r for r in _read_jsonl("rewards.jsonl") if r.get("logical_id") == lid]
-    rejects = [r for r in _read_jsonl("cas_rejects.jsonl") if r.get("logical_id") == lid]
-    ok = ok1 and not ok2 and len(recs) == 1 and recs[0]["reward"] == 1.0 and len(rejects) == 1
-    return _events("R4", gidx), ok, {"second_write_blocked": not ok2, "records": len(recs)}
+def fixture_r3(schedule, trial_dir, group_index, worker_timeout):
+    return _fixture_mixed("R3", schedule, trial_dir, group_index)
 
 
-def _r5_worker(lid):
-    os.environ["RTX_RUN_DIR"] = os.environ["RTX_R5_DIR"]
-    import phase2_seal_rm as wm
-    wm.RUN_DIR = os.environ["RTX_R5_DIR"]
-    wm._seen_logical.clear()
-    wm._cas_write({"group_index": 0, "index": 0, "rollout_id": 0, "reward": 1.0,
-                   "verifier": "v1", "logical_id": lid})
+def fixture_r4(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    _reset_trial(trial_dir, revision=values["revision"])
+    logical_id = "r4:%s:0" % group_index
+    first = {"group_index": group_index, "index": 0, "rollout_id": 0,
+             "reward": 1.0, "verifier": values["revision"], "digest": "d-authority",
+             "logical_id": logical_id, "response": GOOD, "label": "42"}
+    # Both attempts carry the same externally correct reward but different
+    # payload digests.  This lets the schedule vary real arrival order without
+    # changing the oracle answer; the invariant under test is first-writer CAS,
+    # not a scheduler-dependent definition of reward correctness.
+    second = {**first, "digest": "d-conflict", "response": DIVERGENT}
+    attempts = [first, second]
+    if values["attempt_order"] == "reverse":
+        attempts = [second, first]
+    elif values["attempt_order"] == "interleaved":
+        attempts[1]["attempt"] = "interleaved"
+    m._cas_write(attempts[0])
+    m._cas_write(attempts[1])
+    events = _r_events("R4", trial_dir, group_index, schedule)
+    return events, {"steps": [], "rewards": [{"logical_id": logical_id, "authoritative_reward": 1.0}]}
 
 
-def fixture_r5(rng, it):
-    """并发 recovery worker：2 进程写同一组 → 唯一 CAS winner，旧 epoch 写入为 0。"""
-    lid = f"r5:{it}:0"
-    os.environ["RTX_R5_DIR"] = os.environ["RTX_RUN_DIR"]
-    ps = [mp.Process(target=_r5_worker, args=(lid,)) for _ in range(2)]
-    for p in ps:
-        p.start()
-    for p in ps:
-        p.join()
-    recs = [r for r in _read_jsonl("rewards.jsonl") if r.get("logical_id") == lid]
-    ok = all(p.exitcode == 0 for p in ps) and len(recs) == 1
-    return _events("R5", 0), ok, {"workers": 2, "authoritative_records": len(recs)}
+def _r5_worker(run_dir, logical_id, group_index, revision):
+    os.environ["RTX_RUN_DIR"] = run_dir
+    os.environ["RTX_CAS_INDEX_DIR"] = str(Path(run_dir) / "cas")
+    import phase2_seal_rm as worker_module
+    worker_module.RUN_DIR = run_dir
+    worker_module._seen_logical.clear()
+    worker_module._reset_cas_connection()
+    worker_module._cas_write({"group_index": group_index, "index": 0, "rollout_id": 0,
+                              "reward": 1.0, "verifier": revision, "logical_id": logical_id,
+                              "response": GOOD, "label": "42"})
 
 
-# --------------------------------------------------------------------------
-# Q0/Q1/L0/L2/L3/C1/C2：确定性协议模型 fixture（与真实进程实验分表报告）
-# --------------------------------------------------------------------------
-
-def _ev(t, step, **kw):
-    ev = {"type": t, "ts": 0.0, "exp_id": "paper-e2-trace", "step": step, **kw}
-    return ev
-
-
-# --------------------------------------------------------------------------
-# Q0/Q1/L0/L2/L3/C1/C2：确定性协议模型 fixture + 日志解释器（oracle 从事件日志
-# 反推状态判定，非构造即真；参数由 rng 随机化以覆盖状态空间）
-# --------------------------------------------------------------------------
-
-def _groups_of(evs, types, op=None):
-    out = []
-    for e in evs:
-        if e["type"] in types and (op is None or e.get("payload", {}).get("op") == op):
-            out.extend(e.get("group_ids", []))
-    return out
-
-
-def _tokens_claimed(evs):
-    return {e.get("step_token") for e in evs
-            if e["type"] == "checkpoint" and e.get("payload", {}).get("role", "commit") == "commit"
-            and e.get("step_token")}
-
-
-def _tokens_applied(evs):
-    return [e.get("payload", {}).get("step_token") for e in evs
-            if e["type"] == "learner" and e.get("payload", {}).get("op") == "apply"]
+def fixture_r5(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    _reset_trial(trial_dir, revision=values["revision"])
+    logical_id = "r5:%s:0" % group_index
+    processes = [mp.Process(target=_r5_worker,
+                            args=(str(trial_dir), logical_id, group_index, values["revision"]))
+                 for _ in range(2)]
+    start_order = list(range(2))
+    if values["attempt_order"] == "reverse":
+        start_order.reverse()
+    for index in start_order:
+        processes[index].start()
+    deadline = time.monotonic() + worker_timeout
+    worker_results = []
+    for process in processes:
+        remaining = max(0.0, deadline - time.monotonic())
+        process.join(remaining)
+        timed_out = process.is_alive()
+        if timed_out:
+            process.terminate()
+            process.join(1.0)
+        worker_results.append({"pid": process.pid, "exit_code": process.exitcode,
+                               "timed_out": timed_out})
+    events = _r_events("R5", trial_dir, group_index, schedule, worker_results)
+    return events, {"steps": [], "rewards": [{"logical_id": logical_id, "authoritative_reward": 1.0}]}
 
 
-def _dup_count(items):
-    from collections import Counter
-    return sum(1 for v in Counter(items).values() if v > 1)
+def _ev(typ, step, ts, **extra):
+    return {"type": typ, "ts": float(ts), "step": step, **extra}
 
 
-def fixture_q0(rng, it):
-    """mark-consumed 后、get-data 前 kill。状态：consumed / committed(manifest) 两集合。
-    协议要求：已消费未提交样本必须被 reissue（或由 manifest 判定已提交）；已提交样本不得重投。"""
-    n = rng.randint(2, 32)
-    consumed = list(range(n))
-    n_committed = rng.randint(0, n // 2)
-    committed = set(rng.sample(consumed, n_committed))
-    evs = [_ev("queue", it, group_ids=[g], payload={"op": "mark_consumed", "index": g}) for g in consumed]
+def _ordered(values, order):
+    values = list(values)
+    if order == "reverse":
+        return list(reversed(values))
+    if order == "interleaved":
+        return values[::2] + values[1::2]
+    return values
+
+
+def fixture_q0(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    ordered = _ordered(range(group_index, group_index + values["group_size"]), values["attempt_order"])
+    consumed_count = max(1, int(len(ordered) * values["kill_time"]))
+    consumed = ordered[:consumed_count]
+    committed = set(consumed[:consumed_count // 2])
+    events = [_ev("queue", schedule["trial"], i, group_ids=[gid],
+                  payload={"op": "mark_consumed", "index": gid}) for i, gid in enumerate(consumed)]
     if committed:
-        evs.append(_ev("group", it, group_ids=sorted(committed), payload={"status": "COMMITTED", "versions": ["v1"]}))
-    evs.append(_ev("fault", it, payload={"cut": "Q0", "exit_code": -9}))
-    need_reissue = sorted(set(consumed) - committed)
-    if need_reissue:
-        evs.append(_ev("recovery", it, group_ids=need_reissue, recovery_decision="reissue"))
-    return evs, None
+        events.append(_ev("group", schedule["trial"], len(events), group_ids=sorted(committed),
+                          payload={"status": "COMMITTED", "versions": [values["revision"]]}))
+    events.append(_ev("fault", schedule["trial"], len(events),
+                      payload={"cut": "Q0", "kill_time": values["kill_time"]}))
+    need = [gid for gid in consumed if gid not in committed]
+    if need:
+        events.append(_ev("recovery", schedule["trial"], len(events), group_ids=need,
+                          recovery_decision="reissue", payload={"attempt_order": values["attempt_order"]}))
+    return events, {"steps": [], "rewards": []}
 
 
-def verify_q0(evs, auth=None):
-    consumed = set(_groups_of(evs, ["queue"], "mark_consumed"))
-    committed = set(_groups_of(evs, ["group"]))
-    reissued = _groups_of(evs, ["recovery"])
-    need = consumed - committed
-    reissued_set = set(reissued)
-    lost = sorted(need - reissued_set)
-    over = sorted(reissued_set - need)
-    ok = lost == [] and over == [] and _dup_count(reissued) == 0
-    return ok, {"consumed": len(consumed), "committed": len(committed),
-                "reissued": len(reissued), "lost": len(lost), "over_reissue": len(over)}
+def fixture_q1(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    ordered = _ordered(range(group_index, group_index + values["group_size"]), values["attempt_order"])
+    fetched = ordered[:max(1, int(len(ordered) * values["kill_time"]))]
+    events = [_ev("queue", schedule["trial"], i, group_ids=[gid],
+                  payload={"op": "get_data", "index": gid}) for i, gid in enumerate(fetched)]
+    events.append(_ev("fault", schedule["trial"], len(events), payload={"cut": "Q1"}))
+    events.append(_ev("recovery", schedule["trial"], len(events), group_ids=fetched,
+                      recovery_decision="reissue", payload={"attempt_order": values["attempt_order"]}))
+    return events, {"steps": [], "rewards": []}
 
 
-def fixture_q1(rng, it):
-    """get-data 后、StepManifest 前 kill learner。未提交数据必须恰好一次进入恢复计划。"""
-    n = rng.randint(1, 16)
-    fetched = list(range(n))
-    evs = [_ev("queue", it, group_ids=[g], payload={"op": "get_data", "index": g}) for g in fetched]
-    evs.append(_ev("fault", it, payload={"cut": "Q1", "exit_code": -9}))
-    evs.append(_ev("recovery", it, group_ids=fetched, recovery_decision="reissue"))
-    return evs, None
+def fixture_l0(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    in_memory = max(1, int(8 * values["kill_time"]))
+    events = [_ev("learner", schedule["trial"], 0, payload={"op": "pre_manifest",
+              "in_memory_steps": in_memory, "checkpoint_delay": values["checkpoint_delay"]}),
+              _ev("fault", schedule["trial"], values["kill_time"], payload={"cut": "L0"}),
+              _ev("recovery", schedule["trial"], 1 + values["checkpoint_delay"],
+                  recovery_decision="cold_start")]
+    return events, {"steps": [], "rewards": []}
 
 
-def verify_q1(evs, auth=None):
-    fetched = set(_groups_of(evs, ["queue"], "get_data"))
-    planned = _groups_of(evs, ["recovery"])
-    ok = set(planned) == fetched and _dup_count(planned) == 0 and len(planned) == len(fetched)
-    return ok, {"fetched": len(fetched), "planned": len(planned),
-                "dup": _dup_count(planned), "missing": len(fetched - set(planned))}
+def fixture_l2(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    ranks = values["group_size"]
+    done = min(ranks - 1, int(ranks * values["kill_time"]))
+    order = _ordered(range(ranks), values["attempt_order"])
+    token = "pre-%s-%s" % (schedule["cut"], schedule["trial"])
+    checkpoint_hash = "h-%s-d%s" % (token, values["checkpoint_delay"])
+    events = [_ev("learner", schedule["trial"], 0,
+                  payload={"op": "optimizer_start", "ranks": ranks})]
+    for seq, rank in enumerate(order[:done], 1):
+        events.append(_ev("learner", schedule["trial"], seq,
+                          payload={"op": "rank_apply", "rank": rank, "durable": False}))
+    events.append(_ev("fault", schedule["trial"], done + values["kill_time"], payload={"cut": "L2"}))
+    events.append(_ev("recovery", schedule["trial"], done + 1, recovery_decision="rollback"))
+    events.append(_ev("checkpoint", schedule["trial"], done + 1 + values["checkpoint_delay"],
+                      checkpoint_hash=checkpoint_hash, step_token=token,
+                      payload={"state": "pre_step", "role": "commit"}))
+    authority = {"steps": [{"step": schedule["trial"], "step_token": token,
+                             "checkpoint_hash": checkpoint_hash}], "rewards": []}
+    return events, authority
 
 
-def fixture_l0(rng, it):
-    """StepManifest 准备前 kill trainer：内存中已执行步不得被误判为 committed。"""
-    n = rng.randint(1, 8)
-    evs = [_ev("learner", it, payload={"op": "pre_manifest", "in_memory_steps": n})]
-    evs.append(_ev("fault", it, payload={"cut": "L0", "exit_code": -9}))
-    evs.append(_ev("recovery", it, recovery_decision="cold_start"))
-    return evs, None
+def fixture_l3(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    steps = max(1, int(8 * values["kill_time"]))
+    events = [_ev("learner", schedule["trial"], 0,
+                  payload={"op": "optimizer_done", "in_memory": True,
+                           "steps_in_memory": steps, "checkpoint_delay": values["checkpoint_delay"]}),
+              _ev("fault", schedule["trial"], values["kill_time"], payload={"cut": "L3"}),
+              _ev("recovery", schedule["trial"], 1 + values["checkpoint_delay"],
+                  recovery_decision="rollback")]
+    return events, {"steps": [], "rewards": []}
 
 
-def verify_l0(evs, auth=None):
-    claimed = _tokens_claimed(evs)
-    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
-    n = next((e.get("payload", {}).get("in_memory_steps") for e in evs if e["type"] == "learner"), None)
-    ok = claimed == set() and decisions == ["cold_start"]
-    return ok, {"in_memory_steps": n, "committed_claimed": len(claimed), "decision": decisions}
+def _checkpoint_identity(schedule):
+    values = _schedule_values(schedule)
+    token = "%s-t%s-%s" % (schedule["cut"].lower(), schedule["trial"], values["revision"])
+    checkpoint_hash = "sha256:%s:d%s" % (token, values["checkpoint_delay"])
+    return token, checkpoint_hash
 
 
-def fixture_l2(rng, it):
-    """optimizer 执行中 kill：部分 rank 已 apply，必须全 Trainer rollback，不得留下部分提交。"""
-    r = rng.randint(2, 8)          # rank 数
-    done = rng.randint(0, r - 1)   # 已 apply 的 rank（部分）
-    evs = [_ev("learner", it, payload={"op": "optimizer_start", "ranks": r})]
-    for i in range(done):
-        evs.append(_ev("learner", it, payload={"op": "rank_apply", "rank": i, "durable": False}))
-    evs.append(_ev("fault", it, payload={"cut": "L2", "exit_code": -9, "rank": done}))
-    evs.append(_ev("recovery", it, recovery_decision="rollback"))
-    evs.append(_ev("checkpoint", it, checkpoint_hash=f"pre-{it}", step_token=f"t{it}",
-                   payload={"state": "pre_step"}))
-    return evs, None
+def fixture_c1(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    token, checkpoint_hash = _checkpoint_identity(schedule)
+    delay = values["checkpoint_delay"]
+    events = [_ev("checkpoint", schedule["trial"], delay, checkpoint_hash=checkpoint_hash,
+                  step_token=token, payload={"durable": True, "role": "commit",
+                  "revision": values["revision"]}),
+              _ev("fault", schedule["trial"], delay + values["kill_time"],
+                  payload={"cut": "C1", "commit_pointer": False}),
+              _ev("recovery", schedule["trial"], delay + 1, recovery_decision="commit_ack",
+                  step_token=token, checkpoint_hash=checkpoint_hash)]
+    return events, {"steps": [{"step": schedule["trial"], "step_token": token,
+                               "checkpoint_hash": checkpoint_hash}], "rewards": []}
 
 
-def verify_l2(evs, auth=None):
-    claimed = _tokens_claimed(evs)
-    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
-    # 部分 rank 已 apply 的 step 不得被提交（rollback 到 pre_step token）
-    ok = claimed == {f"t{evs[0]['step']}"} and decisions == ["rollback"]
-    return ok, {"claimed_tokens": sorted(claimed), "decision": decisions}
-
-
-def fixture_l3(rng, it):
-    """optimizer 返回后、checkpoint 前 kill：内存更新不得被误认为 durable。"""
-    n = rng.randint(1, 8)
-    evs = [_ev("learner", it, payload={"op": "optimizer_done", "in_memory": True, "steps_in_memory": n})]
-    evs.append(_ev("fault", it, payload={"cut": "L3", "exit_code": -9}))
-    evs.append(_ev("recovery", it, recovery_decision="rollback"))
-    return evs, None
-
-
-def verify_l3(evs, auth=None):
-    claimed = _tokens_claimed(evs)
-    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
-    n = next((e.get("payload", {}).get("steps_in_memory") for e in evs if e["type"] == "learner"), None)
-    ok = claimed == set() and decisions == ["rollback"]
-    return ok, {"steps_in_memory": n, "committed_claimed": len(claimed), "decision": decisions}
-
-
-def fixture_c1(rng, it):
-    """checkpoint durable 后、commit pointer 前 kill → Reconciler 给出唯一判定（commit_ack）。
-    返回 (事件日志, 期望权威映射)：权威映射由 fixture 的外部意图给出，oracle 独立判定。"""
-    step = it
-    tok, h = f"t{step}", f"h{step}"
-    evs = [_ev("checkpoint", step, checkpoint_hash=h, step_token=tok, payload={"durable": True})]
-    evs.append(_ev("fault", step, payload={"cut": "C1", "exit_code": -9, "commit_pointer": False}))
-    evs.append(_ev("recovery", step, recovery_decision="commit_ack", step_token=tok, checkpoint_hash=h))
-    auth = [{"step": step, "step_token": tok, "checkpoint_hash": h}]
-    return evs, auth
-
-
-def verify_c1(evs, auth):
-    viols = trace_oracle.classify_event_log(evs, auth)
-    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
-    ok = viols == [] and decisions == ["commit_ack"]
-    return ok, {"step": auth[0]["step"], "token": auth[0]["step_token"], "violations": len(viols), "verdict": decisions}
-
-
-def fixture_c2(rng, it):
-    """commit pointer 发布后丢 ACK → 恢复后不重复 apply。
-    返回 (事件日志, 期望权威映射)。"""
-    step = it
-    tok, h = f"t{step}", f"h{step}"
-    evs = [_ev("checkpoint", step, checkpoint_hash=h, step_token=tok, payload={"durable": True})]
-    evs.append(_ev("ack", step, step_token=tok, payload={"dropped": True}))
-    evs.append(_ev("recovery", step, recovery_decision="commit_ack", step_token=tok, checkpoint_hash=h))
-    evs.append(_ev("learner", step, payload={"op": "apply", "step_token": tok}))
-    auth = [{"step": step, "step_token": tok, "checkpoint_hash": h}]
-    return evs, auth
-
-
-def verify_c2(evs, auth):
-    viols = trace_oracle.classify_event_log(evs, auth)
-    applies = _tokens_applied(evs)
-    ok = viols == [] and len(applies) == 1
-    return ok, {"step": auth[0]["step"], "token": auth[0]["step_token"], "violations": len(viols), "applies": len(applies)}
+def fixture_c2(schedule, trial_dir, group_index, worker_timeout):
+    values = _schedule_values(schedule)
+    token, checkpoint_hash = _checkpoint_identity(schedule)
+    delay = values["checkpoint_delay"]
+    attempts = _ordered([0, 1, 2], values["attempt_order"])
+    events = [_ev("checkpoint", schedule["trial"], delay, checkpoint_hash=checkpoint_hash,
+                  step_token=token, payload={"durable": True, "role": "commit",
+                  "revision": values["revision"]}),
+              _ev("ack", schedule["trial"], delay + values["kill_time"], step_token=token,
+                  payload={"dropped": values["ack_loss"]}),
+              _ev("fault", schedule["trial"], delay + values["kill_time"] + 0.01,
+                  payload={"cut": "C2"})]
+    for seq, attempt in enumerate(attempts):
+        events.append(_ev("learner", schedule["trial"], delay + 0.1 + seq * 0.01,
+                          payload={"op": "attempt_observed", "attempt": attempt}))
+    events.extend([
+        _ev("recovery", schedule["trial"], delay + 1, recovery_decision="commit_ack",
+            step_token=token, checkpoint_hash=checkpoint_hash),
+        _ev("learner", schedule["trial"], delay + 2,
+            payload={"op": "apply", "step_token": token, "step": schedule["trial"]}),
+    ])
+    return events, {"steps": [{"step": schedule["trial"], "step_token": token,
+                               "checkpoint_hash": checkpoint_hash}], "rewards": []}
 
 
 FIXTURES = {
-    "R1": fixture_r1, "R2": fixture_r2, "R3": fixture_r3,
-    "R4": fixture_r4, "R5": fixture_r5, "Q0": fixture_q0,
-    "Q1": fixture_q1, "L0": fixture_l0, "L2": fixture_l2,
-    "L3": fixture_l3, "C1": fixture_c1, "C2": fixture_c2,
+    "R1": fixture_r1, "R2": fixture_r2, "R3": fixture_r3, "R4": fixture_r4,
+    "R5": fixture_r5, "Q0": fixture_q0, "Q1": fixture_q1, "L0": fixture_l0,
+    "L2": fixture_l2, "L3": fixture_l3, "C1": fixture_c1, "C2": fixture_c2,
 }
-VERIFIERS = {
-    "R1": None, "R2": None, "R3": None, "R4": None, "R5": None,
-    "Q0": verify_q0, "Q1": verify_q1, "L0": verify_l0, "L2": verify_l2,
-    "L3": verify_l3, "C1": verify_c1, "C2": verify_c2,
-}
-REAL_CODE_CUTS = {"R1", "R2", "R3", "R4", "R5"}
-MODEL_CUTS = set(CUT_POINTS) - REAL_CODE_CUTS
 
 
-def _read_jsonl(name):
-    p = Path(os.environ["RTX_RUN_DIR"]) / name
-    if not p.exists():
-        return []
-    return [json.loads(l) for l in p.open(encoding="utf-8") if l.strip()]
+def _annotate(events, schedule, verdict=None):
+    result = []
+    for sequence, source in enumerate(events):
+        event = dict(source)
+        event.update(exp_id=EXP_ID, cut=schedule["cut"], trial=schedule["trial"],
+                     schedule_id=schedule["schedule_id"], sequence=sequence)
+        if verdict is not None:
+            event["oracle_verdict"] = verdict
+        result.append(event)
+    return result
 
 
-def _events(cut, gidx):
-    return [_ev("fault", gidx, payload={"cut": cut})]
+def _artifact_manifest(run_dir):
+    files = []
+    for path in sorted(run_dir.rglob("*")):
+        if not path.is_file() or path.name == "artifact_manifest.json" or path.name.endswith(".tmp"):
+            continue
+        files.append({"path": path.relative_to(run_dir).as_posix(), "bytes": path.stat().st_size,
+                      "sha256": _sha_file(path)})
+    return {"schema_version": "1.0", "files": files}
 
 
-def main():
-    import argparse
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--per-cut", type=int, default=2500, help="每切点注入次数（默认 2500 → 总 30,000）")
-    ap.add_argument("--seed", type=int, default=0x5200e2, help="schedule seed（确定性）")
-    ap.add_argument("--tmp", type=str, default=None, help="临时 run 目录（默认 mkdtemp）")
-    args = ap.parse_args()
+def _source_hashes():
+    names = ["scripts/paper_trace_runner.py", "scripts/trace_oracle.py",
+             "scripts/paper_gates.py", "scripts/phase2_seal_rm.py",
+             "configs/paper_event.schema.json"]
+    return {name: _sha_file(BASE / name) for name in names if (BASE / name).exists()}
 
-    tmp = Path(args.tmp) if args.tmp else Path(tempfile.mkdtemp(prefix="rtx-paper-trace-"))
-    tmp.mkdir(parents=True, exist_ok=True)
-    os.environ["RTX_RUN_DIR"] = str(tmp)
-    os.environ["RTX_CAS_INDEX_DIR"] = str(tmp / "cas")
-    (tmp / "cas").mkdir(exist_ok=True)
-    # 模块级状态同步（模块在设置环境变量前已 import）
-    m.RUN_DIR = str(tmp)
-    m.SEAL, m.GROUP_RM, m.AUTO_FIX = True, True, True
-    m.FAULT = "none"
-    m._WINDOWS = {}
-    m._seal_state.clear()
-    m._seen_logical.clear()
-    m._pending_samples.clear()
 
-    rng = random.Random(args.seed)
-    cut_results, failure_details, sample_events = {}, [], []
-    for cut in CUT_POINTS:
-        fn = FIXTURES[cut]
-        ver = VERIFIERS[cut]
-        n_fail = 0
-        for it in range(args.per_cut):
-            res = fn(rng, it)
-            if isinstance(res, tuple) and len(res) == 3:
-                # R1–R5：真实代码路径，fixture 内嵌断言
-                evs, ok, detail = res
-            else:
-                # Q0/L0/C1 等：协议模型事件日志 (+期望权威映射) + 日志解释器判定
-                evs, auth = res
-                ok, detail = ver(evs, auth)
-            if not ok:
-                n_fail += 1
-                failure_details.append({"cut": cut, "iter": it, "detail": detail, "events": evs})
-            if it < 3:  # 每切点保留前 3 次事件样本供审计
-                sample_events.append({"cut": cut, "iter": it, "events": evs})
-        cut_results[cut] = {"n": args.per_cut, "failures": n_fail}
-        print(f"  {cut}: {args.per_cut - n_fail}/{args.per_cut} PASS")
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("formal", "smoke"), default="formal")
+    parser.add_argument("--per-cut", type=int)
+    parser.add_argument("--seed", type=int, default=0x5200E2)
+    parser.add_argument("--out-dir", type=Path)
+    parser.add_argument("--tmp", type=Path, help="trial scratch root")
+    parser.add_argument("--worker-timeout", type=float, default=10.0)
+    args = parser.parse_args(argv)
+    if args.per_cut is None:
+        args.per_cut = FORMAL_PER_CUT if args.mode == "formal" else 3
+    if args.per_cut <= 0:
+        parser.error("--per-cut must be positive")
+    if args.mode == "formal" and args.per_cut != FORMAL_PER_CUT:
+        parser.error("formal mode requires exactly 2500 trials per cut; use --mode smoke for smaller runs")
+    if args.worker_timeout <= 0:
+        parser.error("--worker-timeout must be positive")
+    if args.out_dir is None:
+        args.out_dir = BASE / "runs" / ("paper-e2-trace-formal" if args.mode == "formal"
+                                        else "paper-e2-trace-smoke")
+    elif not args.out_dir.is_absolute():
+        args.out_dir = BASE / args.out_dir
+    return args
+
+
+def run(args):
+    started = time.monotonic()
+    created_at = _utc_now()
+    _prepare_output(args.out_dir)
+    _write_json(args.out_dir / "verdict.json", {"status": "RUNNING", "started_at": created_at})
+    _write_json(args.out_dir / "exit_status.json",
+                {"completed": False, "return_code": None, "finished_at": None})
+    (args.out_dir / "stdout.log").write_text("", encoding="utf-8")
+    (args.out_dir / "stderr.log").write_text("", encoding="utf-8")
+    (args.out_dir / "events.jsonl").write_text("", encoding="utf-8")
+    (args.out_dir / "verdicts.jsonl").write_text("", encoding="utf-8")
+    (args.out_dir / "resource.jsonl").write_text("", encoding="utf-8")
+
+    commit_sha, working_tree_clean = _git_identity()
+    config = {
+        "schema_version": "2.0", "mode": args.mode, "seed": args.seed,
+        "per_cut": args.per_cut, "cuts": CUT_POINTS, "schedule_levels": SCHEDULE_LEVELS,
+        "relevant_dimensions": RELEVANT_DIMENSIONS, "worker_timeout_seconds": args.worker_timeout,
+        "out_dir": str(args.out_dir), "scratch_root_request": str(args.tmp) if args.tmp else None,
+        "python_version": sys.version, "fail_fast_on_first_invalid_commit": True,
+        "fixture_environment": {
+            "RTX_SEAL": "1", "RTX_GROUP_RM": "1", "RTX_SEAL_AUTO_FIX": "cut-dependent",
+            "RTX_FAULT": "schedule-dependent", "RTX_GROUP_SIZE": "schedule.group_size",
+            "RTX_RUN_DIR": "fresh-directory-per-trial",
+            "RTX_CAS_INDEX_DIR": "fresh-directory-per-trial/cas",
+        },
+    }
+    _write_json(args.out_dir / "config.json", config)
+    config_sha = _sha_file(args.out_dir / "config.json")
+    schedule_rows = build_schedule(args.seed, args.per_cut)
+    schedule_doc = {"schema_version": "2.0", "seed": args.seed, "trials": schedule_rows,
+                    "coverage": schedule_coverage(schedule_rows)}
+    _write_json(args.out_dir / "schedule.json", schedule_doc)
+    schedule_sha = _sha_file(args.out_dir / "schedule.json")
+    meta = {
+        "exp_id": EXP_ID, "phase": "P1/E2", "stack": "phase2_seal_rm+protocol-model",
+        "baseline": "RewardTxn", "commit_sha": commit_sha, "config_sha256": config_sha,
+        "schedule_sha256": schedule_sha, "seed": args.seed,
+        "group_size_K": 8, "group_size_schedule": SCHEDULE_LEVELS["group_size"],
+        "batch_groups_U": 1,
+        "fault_injection": {"cuts": CUT_POINTS, "schedule": "schedule.json"},
+        "created_at": created_at, "working_tree_clean": working_tree_clean,
+        "source_sha256": _source_hashes(),
+    }
+    _write_json(args.out_dir / "meta.json", meta)
+    _write_json(args.out_dir / "manifests" / "fixture_manifest.json", {
+        "manifest_type": "typed-fixture-evidence", "schema_version": "1.0",
+        "real_code_cuts": sorted(REAL_CODE_CUTS), "model_fixture_cuts": sorted(MODEL_CUTS),
+        "model_fixture_substitution": True,
+        "scope_note": "Model fixtures are deterministic protocol evidence, not model/checkpoint artifacts.",
+    })
+
+    stdout_lines = []
+    stderr_lines = []
+    cut_results = {cut: {"n": 0, "failures": 0} for cut in CUT_POINTS}
+    first_failure = None
+    return_code = 1
+    if args.tmp:
+        args.tmp.mkdir(parents=True, exist_ok=True)
+        scratch_root = Path(tempfile.mkdtemp(prefix="paper-trials-", dir=str(args.tmp)))
+    else:
+        scratch_root = Path(tempfile.mkdtemp(prefix="rtx-paper-trials-"))
+
+    try:
+        if args.mode == "formal" and not working_tree_clean:
+            raise RuntimeError("formal run requires a clean git worktree")
+        row_by_key = {(row["cut"], row["trial"]): row for row in schedule_rows}
+        with (args.out_dir / "events.jsonl").open("a", encoding="utf-8") as events_handle, \
+                (args.out_dir / "verdicts.jsonl").open("a", encoding="utf-8") as verdict_handle:
+            for cut_index, cut in enumerate(CUT_POINTS):
+                for trial in range(args.per_cut):
+                    schedule = row_by_key[(cut, trial)]
+                    trial_dir = scratch_root / cut / ("%06d" % trial)
+                    trial_dir.mkdir(parents=True)
+                    group_index = cut_index * 10_000_000 + trial
+                    events, authoritative = FIXTURES[cut](schedule, trial_dir, group_index,
+                                                          args.worker_timeout)
+                    annotated = _annotate(events, schedule)
+                    ok, detail = trace_oracle.verify_trial(cut, annotated, authoritative,
+                                                           schedule["dimensions"])
+                    annotated = _annotate(events, schedule, "PASS" if ok else "FAIL")
+                    event_sha = _sha_bytes(_canonical(annotated))
+                    for event in annotated:
+                        _append_jsonl(events_handle, event)
+                    record = {"cut": cut, "trial": trial, "schedule_id": schedule["schedule_id"],
+                              "schedule": schedule["dimensions"], "event_count": len(annotated),
+                              "events_sha256": event_sha, "authoritative": authoritative,
+                              "status": "PASS" if ok else "FAIL", "detail": detail}
+                    _append_jsonl(verdict_handle, record)
+                    cut_results[cut]["n"] += 1
+                    if not ok:
+                        cut_results[cut]["failures"] += 1
+                        first_failure = record
+                        raise TrialFailure(record)
+                message = "  %s: %s/%s PASS" % (cut, cut_results[cut]["n"], args.per_cut)
+                stdout_lines.append(message)
+                print(message, flush=True)
+        return_code = 0
+    except BaseException as exc:
+        if isinstance(exc, TrialFailure):
+            stderr_lines.append(str(exc))
+        else:
+            stderr_lines.append("%s: %s" % (type(exc).__name__, exc))
+            stderr_lines.append(traceback.format_exc())
 
     report = trace_oracle.aggregate(cut_results)
-    report["schedule_seed"] = args.seed
-    report["real_code_cuts"] = sorted(REAL_CODE_CUTS)
-    report["model_cuts"] = sorted(MODEL_CUTS)
-    report["note"] = "R1–R5 驱动真实 phase2_seal_rm；Q0/Q1/L0/L2/L3/C1/C2 为确定性协议模型，与真实进程实验分表报告"
-    report["failure_details"] = failure_details
-    report["generated_at"] = __import__("time").strftime("%Y-%m-%dT%H:%M:%S")
-    OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
-    with EVENTS_SAMPLE.open("w", encoding="utf-8") as f:
-        for ev in sample_events:
-            f.write(json.dumps(ev, ensure_ascii=False) + "\n")
-    print(f"=== E2 trace: {report['status']} ({report['total']}) ===")
-    print(f"report: {OUT}")
-    sys.exit(0 if report["status"] == "PASS" else 1)
+    if return_code != 0:
+        report["status"] = "FAIL"
+    report.update({"schema_version": "2.0", "mode": args.mode, "schedule_seed": args.seed,
+                   "commit_sha": commit_sha, "config_sha256": config_sha,
+                   "schedule_sha256": schedule_sha, "first_failure": first_failure,
+                   "real_code_cuts": sorted(REAL_CODE_CUTS), "model_cuts": sorted(MODEL_CUTS),
+                   "generated_at": _utc_now()})
+    _write_json(args.out_dir / "TRACE_REPORT_PAPER.json", report)
+    elapsed = time.monotonic() - started
+    _write_json(args.out_dir / "metrics.json", {
+        "status": report["status"], "cutpoints": report["cutpoints"], "total": report["total"],
+        "elapsed_seconds": round(elapsed, 6), "fail_fast": first_failure is not None,
+    })
+    with (args.out_dir / "resource.jsonl").open("a", encoding="utf-8") as resource_handle:
+        _append_jsonl(resource_handle, {
+            "ts": time.time(), "cpu_only": True, "elapsed_seconds": round(elapsed, 6),
+            "scratch_root": str(scratch_root),
+        })
+    verdict = {"status": "PASS" if return_code == 0 and report["status"] == "PASS" else "FAIL",
+               "fail_fast": first_failure is not None, "first_failure": first_failure,
+               "completed_trials": report["total"]["n"]}
+    _write_json(args.out_dir / "verdict.json", verdict)
+    stdout_lines.append("=== E2 trace: %s (%s trials) ===" % (verdict["status"], report["total"]["n"]))
+    stdout_lines.append("report: %s" % (args.out_dir / "TRACE_REPORT_PAPER.json"))
+    (args.out_dir / "stdout.log").write_text("\n".join(stdout_lines) + "\n", encoding="utf-8")
+    (args.out_dir / "stderr.log").write_text("\n".join(stderr_lines) + ("\n" if stderr_lines else ""),
+                                                encoding="utf-8")
+    _write_json(args.out_dir / "exit_status.json",
+                {"completed": True, "return_code": return_code, "finished_at": _utc_now()})
+    _write_json(args.out_dir / "artifact_manifest.json", _artifact_manifest(args.out_dir))
+    for line in stdout_lines[-2:]:
+        print(line, flush=True)
+    if stderr_lines:
+        print(stderr_lines[0], file=sys.stderr, flush=True)
+    return return_code
+
+
+def main(argv=None):
+    return run(_parse_args(argv))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

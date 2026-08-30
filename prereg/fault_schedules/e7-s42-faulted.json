@@ -11,30 +11,35 @@
   "events": [
     {
       "step": 56,
-      "cut": "R4",
+      "cut": "Q0",
       "params": {
         "groups": [
-          224
+          224,
+          225,
+          226,
+          227
         ],
-        "same_id": true,
-        "second_digest": "d-x",
-        "expect": "blocked"
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
       }
     },
     {
       "step": 70,
-      "cut": "R5",
+      "cut": "R3",
       "params": {
         "groups": [
-          280
+          280,
+          281,
+          282,
+          283
         ],
-        "workers": 2,
-        "expect": "single_winner"
+        "verifier": "v2",
+        "digest": "d2"
       }
     },
     {
       "step": 144,
-      "cut": "R1",
+      "cut": "L3",
       "params": {
         "groups": [
           576,
@@ -42,13 +47,14 @@
           578,
           579
         ],
-        "mechanism": "crm_crash",
-        "crash_frac": 0.5
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
       }
     },
     {
       "step": 188,
-      "cut": "C1",
+      "cut": "C2",
       "params": {
         "groups": [
           752,
@@ -56,14 +62,13 @@
           754,
           755
         ],
-        "after": "checkpoint_durable",
-        "before": "commit_pointer",
-        "expect": "unique_verdict"
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
       }
     },
     {
       "step": 267,
-      "cut": "C2",
+      "cut": "R2",
       "params": {
         "groups": [
           1068,
@@ -71,13 +76,14 @@
           1070,
           1071
         ],
-        "ack_drop": true,
-        "expect": "no_duplicate_apply"
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
       }
     },
     {
       "step": 330,
-      "cut": "R3",
+      "cut": "C1",
       "params": {
         "groups": [
           1320,
@@ -85,13 +91,14 @@
           1322,
           1323
         ],
-        "verifier": "v2",
-        "digest": "d2"
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
       }
     },
     {
       "step": 368,
-      "cut": "L3",
+      "cut": "R1",
       "params": {
         "groups": [
           1472,
@@ -99,38 +106,31 @@
           1474,
           1475
         ],
-        "after": "optimizer_return",
-        "before": "checkpoint",
-        "expect": "not_committed"
+        "mechanism": "crm_crash",
+        "crash_frac": 0.5
       }
     },
     {
       "step": 370,
-      "cut": "R2",
+      "cut": "R5",
       "params": {
         "groups": [
-          1480,
-          1481,
-          1482,
-          1483
+          1480
         ],
-        "retry": "stale",
-        "verifier": "v1",
-        "stale_verifier": "retry-stale"
+        "workers": 2,
+        "expect": "single_winner"
       }
     },
     {
       "step": 412,
-      "cut": "Q0",
+      "cut": "R4",
       "params": {
         "groups": [
-          1648,
-          1649,
-          1650,
-          1651
+          1648
         ],
-        "after": "get_meta",
-        "expect": "reclaim_or_manifest"
+        "same_id": true,
+        "second_digest": "d-x",
+        "expect": "blocked"
       }
     }
   ]
