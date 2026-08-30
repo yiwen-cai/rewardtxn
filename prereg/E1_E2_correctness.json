@@ -2,6 +2,8 @@
   "experiment": "E1_E2",
   "name": "跨栈问题复现 + Crash-consistency 全切点安全性",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "sample_sizes": {
     "E1_real_process_per_cutpoint": 10,
     "E1_interface_level_per_case": 100,
@@ -28,7 +30,10 @@
     "每切点 ≥1,500 次；聚合按 rule of three 给 95% 失败率上界（≈10^-4），单切点按实际 n 单独报告上界"
   ],
   "statistics": {
+    "independent_analysis_unit": "一次具有独立随机种子和隔离状态目录的 fault-injection run；run 内事件不是独立样本",
     "proportion_ci": "Wilson / Clopper-Pearson 95%",
+    "confidence_level": 0.95,
+    "zero_failure_required": true,
     "trace_randomization_dims": ["kill_time", "ack_loss", "attempt_order", "revision", "group_size", "checkpoint_delay"],
     "oracle": "附录 C.2：混版本 committed 组 / StepToken 重复或缺失 / checkpoint hash 绑定不符 / 错误 reward 进入 committed gradient"
   }

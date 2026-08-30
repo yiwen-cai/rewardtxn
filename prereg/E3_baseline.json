@@ -2,13 +2,16 @@
   "experiment": "E3",
   "name": "强 baseline 公平对比 (B0–B6)",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "config": {
     "model": "Qwen2.5-1.5B-Instruct",
     "K": 8,
     "U": 4,
     "gpus": 4,
-    "short_run_steps": "20-30",
-    "checkpoint_frequency": "统一，另给剥离结果"
+    "short_run_steps": 30,
+    "checkpoint_frequency_steps": null,
+    "checkpoint_frequency_rule": "pilot 只按系统可行性确定一个正整数；所有 baseline 共用，正式结果不可用于选择；另给 checkpoint-off 剥离结果"
   },
   "sample_sizes": {
     "full_fault_matrix_baselines": ["B0", "B2", "B5", "B6"],
@@ -20,8 +23,23 @@
     "paired_steps": 120
   },
   "parameter_freeze": {
-    "rule": "B2/B4/B5 策略参数在预实验后冻结并写入本文件，不能为 RewardTxn 单独调优",
+    "status": "pending_pilot",
+    "rule": "B2/B4/B5 参数仅按协议定义和 pilot 可行性冻结，所有正式 cell 启动前写入；不能查看正式结果或为 RewardTxn 单独调优",
+    "required_params": {
+      "B2": ["incomplete_group_policy", "retry_scope", "max_retry_attempts"],
+      "B4": ["reservation_timeout_seconds", "reclaim_policy", "consume_ack_policy"],
+      "B5": ["checkpoint_frequency_steps", "restart_scope", "checkpoint_durability"]
+    },
     "frozen_params": null
+  },
+  "baseline_semantics": {
+    "B0": "默认开源栈，不加额外保护",
+    "B1": "explicit group ID + exact group-size validation",
+    "B2": "drop incomplete group + whole-group retry",
+    "B3": "logical ID + idempotent dedup",
+    "B4": "Reserve/Occupy/Consume + timeout/reclaim（mechanism-equivalent）",
+    "B5": "per-step checkpoint + full-step/full-group restart（mechanism-equivalent）",
+    "B6": "RewardTxn：Seal + fencing + checkpoint-bound StepToken + Reconciler + Selective Replay"
   },
   "exclusion_rules": [
     "同一对比表中任何变体未满足 §4.3 公平性控制（模型/数据顺序/seed/global batch/K/U/步数/GPU 数/checkpoint 频率/verifier 版本）时整行排除",
@@ -37,7 +55,10 @@
     "若 B5 同等安全下成本差异 <20%，Selective Replay 不作为主要性能贡献（预注册声明）"
   ],
   "statistics": {
+    "independent_analysis_unit": "同一 seed、故障 schedule 与 launch block 下的一对 baseline/RewardTxn run",
     "recovery_time": "p50/p95 + 95% CI (paired bootstrap 10,000)",
+    "bootstrap_iterations": 10000,
+    "confidence_level": 0.95,
     "correctness": "零容忍，逐 cell 计数"
   }
 }

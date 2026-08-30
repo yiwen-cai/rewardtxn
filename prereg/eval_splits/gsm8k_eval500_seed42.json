@@ -1,11 +1,12 @@
 {
   "dataset": "gsm8k-dapo-format",
   "source": "models/datasets/gsm8k/dapo-gsm8k-train.jsonl",
+  "source_sha256": "39518db04de7132a50ebcd7ca76715e8aa6ac54f5ede36e0fe6d5dd07856b113",
+  "split_algorithm": "python-random-shuffle-v1",
   "total": 7473,
   "train_count": 6973,
   "eval_count": 500,
   "seed": 42,
-  "split_hash": "97a4d24a8e815d3b394de58c82dd045ed7dbad0b4e4f545d0da22d443b43eb3f",
   "eval_indices": [
     27,
     35,
@@ -507,5 +508,6 @@
     7454,
     7455,
     7466
-  ]
+  ],
+  "split_hash": "8515f17ae7db9573a63556e11de731b44893392da8f249b714f17f7b178ddc20"
 }

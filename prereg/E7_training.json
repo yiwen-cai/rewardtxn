@@ -2,6 +2,8 @@
   "experiment": "E7",
   "name": "训练语义与多 seed",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "groups": ["Clean Oracle", "Clean RewardTxn", "Faulted Default", "Faulted B5", "Faulted RewardTxn"],
   "seeds": [17, 29, 42, 73, 101],
   "config": {
@@ -10,7 +12,11 @@
     "K": 8,
     "U": 4,
     "gpus": 4,
-    "steps": ">=500（资源允许延长至 1,000）",
+    "formal_steps": 500,
+    "formal_extension": {
+      "allowed": false,
+      "rule": "正式 confirmatory endpoint 固定为 step 500；任何 1,000-step 运行只能作为预先标记的 exploratory 追加，不能替代、筛选或改变 step-500 分析"
+    },
     "eval_every_steps": 50,
     "fault_schedule": "prereg/fault_schedules/e7-s{seed}-faulted.json，同 seed 三组 Faulted 变体播放完全相同 schedule"
   },
@@ -22,11 +28,36 @@
   "equivalence": {
     "test": "TOST（不是'不显著'=等价）",
     "margin": "见 tost_margin.json（pilot 后冻结为单一值，禁止事后二选一）",
-    "pairs": "Clean RewardTxn vs Clean Oracle"
+    "pairs": [{"treatment": "Clean RewardTxn", "reference": "Clean Oracle", "endpoint": "final_eval_accuracy"}],
+    "alpha_each_one_sided": 0.05,
+    "multiplicity": "单一 confirmatory equivalence comparison，无校正"
   },
   "faulted_comparison": {
-    "test": "同 seed 配对比较，均值 + 95% CI + 效果量",
+    "test": "同 seed 配对非劣检验，均值 + 单侧 95% CI + 效果量",
+    "confirmatory_pairs": [
+      {"treatment": "Faulted RewardTxn", "reference": "Clean Oracle", "endpoint": "final_eval_accuracy", "higher_is_better": true},
+      {"treatment": "Faulted RewardTxn", "reference": "Faulted B5", "endpoint": "final_eval_accuracy", "higher_is_better": true}
+    ],
+    "margin_source": "prereg/tost_margin.json:faulted_noninferiority.frozen_margin_pp",
+    "alpha": 0.05,
+    "multiplicity": {"method": "Holm-Bonferroni", "family": "两个 confirmatory faulted non-inferiority pairs", "familywise_alpha": 0.05},
+    "exploratory_pairs": ["Faulted RewardTxn vs Faulted Default"],
     "claim_rule": "若 Faulted Default 无显著学习退化，不宣称 RewardTxn 提升模型质量，只主张系统语义正确性/可恢复性/资源节省"
+  },
+  "pilot_power_precision": {
+    "status": "pending_pilot",
+    "pilot_pairs_min": 3,
+    "pilot_data_excluded_from_formal_analysis": true,
+    "formal_seed_count": 5,
+    "target_power": 0.8,
+    "alpha_each_one_sided": 0.05,
+    "precision_rule": "以 pilot 配对差值 SD 计算固定 n=5 的 TOST 90% t-CI 半宽；必须同时满足近似 power>=0.80 且半宽<=冻结 margin 才启用等价性 claim",
+    "power_rule": "假设真实配对均差为 0，使用 scripts/paper_statistics.py 的 paired_tost_pilot_normal_approximation；只使用 pilot，不查看正式结果",
+    "fallback_rule": "若固定 n=5 不满足功效或精度门禁，仍按计划跑 5 seeds 但不做 clean 等价性 claim；不得依据正式结果增加 seed 或更换 margin",
+    "pilot_sd_difference_pp": null,
+    "equivalence_claim_enabled": null,
+    "planned_power_at_zero": null,
+    "planned_90pct_ci_half_width_pp": null
   },
   "exclusion_rules": [
     "schedule 播放失败（事件未注入或注入错步）的 run 排除并记 exclusion log",
@@ -41,7 +72,10 @@
     "Faulted 组不劣于 oracle margin，或如实降级为系统正确性论文"
   ],
   "statistics": {
+    "independent_analysis_unit": "seed；同 seed 内 eval 样本、训练 step 与故障事件不是独立重复",
     "equivalence_ci": "TOST 90% CI（等价性检验双侧）",
-    "paired_ci": "paired bootstrap 10,000"
+    "paired_ci": "paired bootstrap 10,000",
+    "bootstrap_iterations": 10000,
+    "paired_confidence_level": 0.95
   }
 }

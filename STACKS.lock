@@ -1,7 +1,8 @@
 # RewardTxn 三栈版本锁定文件 (STACKS.lock)
 # 依据: RewardTxn H100 自包含实验指导.md 第 4 节
-# 更新时间: 2026-08-25T00:10:00Z (本地搭建验证)
-# 所有 SHA 均已通过 git ls-remote / git rev-parse 实测核对。
+# 更新时间: 2026-08-30T00:00:00Z
+# commit SHA 已通过 git rev-parse 核对。容器 registry digest 与本地 image ID
+# 是不同标识；正式 run 以 freeze_paper_inputs.py 从本机 Docker 和输入内容生成的清单为准。
 
 stacks:
   slime:
@@ -9,19 +10,25 @@ stacks:
     ref: v0.3.1
     commit_sha: a6272da0d4f3d0a08520c99a2f3b4f6c887960dc
     image: slimerl/slime:v0.3.1
-    image_digest: sha256:2feaad36b157ee1f790f139aeb6d2669a466b914f28426f468df70b2324807a7
+    registry_digest_expected: sha256:2feaad36b157ee1f790f139aeb6d2669a466b914f28426f468df70b2324807a7
+    registry_digest_source: 历史搭建记录；当前受限环境无法访问 Docker daemon，正式实验前须由 RepoDigests 重新核对
+    local_image_id: sha256:420e89724ba199e5c48c70214d956afb7e98af9b92a21af625462e7ecdce04e2
+    local_image_id_note: 这是完整本地 config/image ID，不是 registry digest；正式 run 仍由冻结脚本现场核对
     local_path: third_party/slime
     role: 主力实验栈 (首选)
     verified: true
     smoke: 3 卡 (0,1,6) fully_async 冒烟通过 (ray job succeeded, 2026-08-24)
-    notes: 镜像经 docker.m.daocloud.io 国内镜像拉取, digest 与文档锁定前缀 sha256:2feaad36 一致
+    notes: registry digest 不能由 tag 或本地 image ID 推导；冻结脚本无法 inspect 时会写 null 并拒绝形成 frozen 清单
 
   areal:
     repo: https://github.com/areal-project/AReaL
     ref: main (pinned)
     commit_sha: b83d1f40196e5bd7d9f83092563443561870d550
-    image: ghcr.io/areal-project/areal-runtime:v2.0.0-sglang
-    image_digest: (本地导入, image ID/config = sha256:c0573bb8412a..., 53.4GB)
+    image: areal-project/areal-runtime:v2.0.0-sglang
+    registry_digest_expected: null
+    registry_digest_note: 本地导入镜像没有 RepoDigest，不伪造 registry digest
+    local_image_id: sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469
+    local_image_id_note: 这是完整本地 config/image ID，不是 registry digest
     local_path: third_party/areal
     role: 语义复核第二栈 (B0/B2 对照)
     verified: true
@@ -41,18 +48,70 @@ stacks:
 models:
   qwen2.5-0.5b-instruct:
     source: modelscope://Qwen/Qwen2.5-0.5B-Instruct (HF 不可达, 走国内源)
+    source_commit: 186d8559ad54c32cf47dc3a8225f993742c507b8
     local_path: models/Qwen2.5-0.5B-Instruct
     status: done
+    content_sha256: pending_freeze_manifest
   qwen2.5-0.5b-instruct-torch-dist:
     source: tools/convert_hf_to_torch_dist.py (容器内 GPU0 转换)
     local_path: models/Qwen2.5-0.5B-Instruct_torch_dist
     size: 943M
     status: done
+    content_sha256: pending_freeze_manifest
+  qwen2.5-1.5b-instruct:
+    source: modelscope://Qwen/Qwen2.5-1.5B-Instruct
+    source_commit: 3c3787b7c81927cc64ad45dc32ff1c9ce2a5de34
+    local_path: models/Qwen2.5-1.5B-Instruct
+    status: present_pending_hash
+    content_sha256: pending_freeze_manifest
+  qwen2.5-1.5b-instruct-torch-dist:
+    source: tools/convert_hf_to_torch_dist.py
+    local_path: models/Qwen2.5-1.5B-Instruct_torch_dist
+    status: present_pending_hash
+    content_sha256: pending_freeze_manifest
+  qwen2.5-3b-instruct:
+    source: pending_source_verification
+    local_path: models/Qwen2.5-3B-Instruct
+    status: present_pending_hash
+    content_sha256: pending_freeze_manifest
+  qwen2.5-3b-instruct-torch-dist:
+    source: tools/convert_hf_to_torch_dist.py
+    local_path: models/Qwen2.5-3B-Instruct_torch_dist
+    status: present_pending_hash
+    content_sha256: pending_freeze_manifest
+
+datasets:
   dapo-math-17k:
     source: hf-mirror.com/datasets/zhuzilin/dapo-math-17k
     local_path: models/datasets/dapo-math-17k/dapo-math-17k.jsonl
     rows: 17398
     status: done
+    content_sha256: pending_freeze_manifest
+  gsm8k:
+    source: local conversion; upstream source must be recorded before paper-e0
+    local_path: models/datasets/gsm8k
+    status: present_pending_source_and_hash
+    content_sha256: pending_freeze_manifest
+  humaneval:
+    source: pending
+    local_path: models/datasets/humaneval
+    status: missing_pending_freeze
+    content_sha256: pending
+  mbpp:
+    source: pending
+    local_path: models/datasets/mbpp
+    status: missing_pending_freeze
+    content_sha256: pending
+
+paper_eval_freeze:
+  manifest_generator: scripts/freeze_paper_inputs.py
+  manifest_status: pending
+  required_before_formal_run:
+    - full local image ID from docker image inspect
+    - registry digest only when present in Docker RepoDigests
+    - RewardTxn and used third_party commit plus clean dirty-state hash
+    - content SHA-256 for the exact model, torch-dist model, dataset, and schedule used
+  policy: RTX_PAPER_MODE=1 refuses draft/mismatched manifests and dirty repositories
 
 network:
   dockerhub_registry: registry-1.docker.io (不可达, 超时)

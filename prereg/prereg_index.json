@@ -3,7 +3,9 @@
   "status": "pending_pilot",
   "frozen_at": null,
   "freeze_commit": null,
-  "note": "P0 冻结时填入 frozen_at/freeze_commit；冻结后正式统计一律使用本版本",
+  "freeze_tag": "paper-e0",
+  "freeze_contract": "freeze_commit 是首次提交全部 pilot 数值决策的内容锚点；随后只允许写入 status/frozen_at/freeze_commit 冻结元数据。paper-e0 必须指向该锚点的后代，且忽略这些元数据后的 prereg/*.json 内容必须一致，以避免 commit SHA 自引用。",
+  "note": "pilot 后、正式实验前填入 frozen_at/freeze_commit 并创建 paper-e0；冻结后正式统计一律使用本版本",
   "changelog": [],
   "experiments": {
     "E1_E2": "prereg/E1_E2_correctness.json",

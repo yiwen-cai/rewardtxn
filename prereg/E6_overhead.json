@@ -2,12 +2,25 @@
   "experiment": "E6",
   "name": "正常路径开销与可扩展性",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "two_tier_design": {
-    "core_cell": {"model": "Qwen2.5-1.5B-Instruct", "gpus": 4, "K": 8, "variants": ["group-RM only", "完整 RewardTxn"]},
+    "core_cell": {"model": "Qwen2.5-1.5B-Instruct", "gpus": 4, "K": 8, "U": 4, "reward_concurrency": 32, "primary_checkpoint_mode": "off", "variants": ["group-RM only", "完整 RewardTxn"]},
     "core_reps": 5,
     "core_paired": true,
+    "core_paired_seeds": [17, 29, 42, 73, 101],
     "screening_reps": 1,
-    "screening_rule": "其余格点先 1 次筛选，仅对接近门禁（95% CI 上界 <5%）的格点补足重复",
+    "screening_inference": "descriptive_only",
+    "screening_repetition_rule": {
+      "selection": "fixed_predeclared",
+      "rule": "筛选格点一律 1 次且不作推断；不因观测开销接近门禁而补重复。仅下列预先指定的 scale confirmatory cells 跑满 5 个配对 seed",
+      "scale_confirmatory_cells": [
+        {"model": "Qwen2.5-1.5B-Instruct", "gpus": 2, "K": 8, "U": 4, "reward_concurrency": 32, "primary_checkpoint_mode": "off", "variants": ["group-RM only", "完整 RewardTxn"]},
+        {"model": "Qwen2.5-1.5B-Instruct", "gpus": 8, "K": 8, "U": 4, "reward_concurrency": 32, "primary_checkpoint_mode": "off", "variants": ["group-RM only", "完整 RewardTxn"]}
+      ],
+      "confirmatory_reps": 5,
+      "confirmatory_paired_seeds": [17, 29, 42, 73, 101]
+    },
     "steps_per_run": {"warmup": 20, "measured": 100}
   },
   "matrix": {
@@ -16,6 +29,12 @@
     "K": [4, 8, 16],
     "reward_concurrency": [16, 32, 64],
     "variants": ["Slime default", "group-RM only", "Seal+CAS", "完整 RewardTxn"]
+  },
+  "reward_concurrency_definition": {
+    "parameter": "RTX_SGLANG_CONCURRENCY",
+    "unit": "每个实验 run 的最大奖励请求 in-flight 数",
+    "values": [16, 32, 64],
+    "core_value": 32
   },
   "measurement": {
     "gpu_segments": "CUDA Event",
@@ -29,7 +48,7 @@
   ],
   "stop_rules": [
     "核心 cell 5 次配对完成即停止；筛选矩阵 1 次完成即停止",
-    "预算超支 20% 触发裁剪评审（先删远离门禁的筛选格点）"
+    "预算超支 20% 时仅暂停尚未启动的 descriptive screening cells；不得根据已观测开销选择保留格点，也不得裁剪 core 与预先指定的 2/8 卡 confirmatory cells"
   ],
   "gates": [
     "核心 4 卡 1.5B 配置：RewardTxn 相对同 group-RM baseline 开销 95% CI 上界 <5%",
@@ -37,6 +56,10 @@
     "CAS/manifest 数据量随 committed groups 近似线性且 retention 后稳定"
   ],
   "statistics": {
-    "ci": "paired bootstrap 10,000"
+    "independent_analysis_unit": "同一 seed 与 launch wave 下的一对 group-RM/RewardTxn run；step 仅用于 run 内聚合",
+    "ci": "paired bootstrap 10,000",
+    "bootstrap_iterations": 10000,
+    "confidence_level": 0.95,
+    "core_overhead_ci_upper_gate_fraction": 0.05
   }
 }

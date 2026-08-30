@@ -2,6 +2,8 @@
   "experiment": "E8",
   "name": "工作负载泛化与长期 soak",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "workloads": {
     "math": "确定性答案匹配 (DAPO-Math-17k + GSM8K)",
     "code": "HumanEval 164 / MBPP 378 + 确定性本地 CPU sandbox（附录 C.4）",
@@ -13,6 +15,17 @@
     "fault_process": "Poisson，平均每 30 分钟 1 次真实进程/ACK/队列故障（schedule 见 prereg/fault_schedules/e8-soak-*.json）",
     "optional_24h": false,
     "optional_7B": false
+  },
+  "rto_freeze": {
+    "status": "pending_pilot",
+    "metric": "从 fault 注入事件时间戳到其后首个 oracle-valid committed step 的 wall-clock 秒数",
+    "pilot_runs_min": 3,
+    "pilot_quantile": 0.99,
+    "threshold_rule": "仅用 pilot 恢复时延：ceil(max(60, 2*p99)/10)*10 秒；正式结果不可改变阈值",
+    "hard_cap_seconds": 600,
+    "cap_rule": "若规则所得阈值 >600 秒，则正式 soak 被阻断并先修复系统，不将阈值截断到 600 后启动",
+    "pilot_p99_recovery_seconds": null,
+    "frozen_max_recovery_seconds": null
   },
   "monitoring": ["CAS 大小", "WAL/manifest", "checkpoint retention", "内存", "磁盘", "恢复次数", "训练进度"],
   "exclusion_rules": [
@@ -28,5 +41,9 @@
     "每次故障均在预设 RTO 内恢复，连续无进度 ≤10 分钟",
     "retention 后磁盘与 metadata 增长有界",
     "数学与代码 reward 均通过相同 group-to-optimizer invariant"
-  ]
+  ],
+  "statistics": {
+    "independent_analysis_unit": "一次 8 小时 soak run；run 内故障事件只用于 run 级 RTO 分布与零失败门禁，不作为独立重复",
+    "confidence_level": 0.95
+  }
 }

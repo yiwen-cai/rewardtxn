@@ -1,6 +1,8 @@
 {
   "doc_version": "1.0",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "global_stop_rules": [
     "正式实验不得因结果好看而提前停止",
     "只有预注册的安全门禁、资源故障或序贯规则允许提前终止",

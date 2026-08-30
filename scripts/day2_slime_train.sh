@@ -19,6 +19,50 @@ DATA_PATH=${DATA_PATH:-/root/datasets/dapo-math-17k/dapo-math-17k.jsonl}
 SAVE_DIR=${SAVE_DIR:-/workspace/runs/p1-slime-B0-K8-s42-20260824/checkpoints}
 NUM_ROLLOUT=${RTX_NUM_ROLLOUT:-20}
 CUSTOM_RM=${RTX_CUSTOM_RM:-}
+SEED=${RTX_SEED:-42}
+BASELINE_MODE=${RTX_BASELINE_MODE:-b0}
+SCHEDULE_PATH=${RTX_SCHEDULE:-}
+PAPER_MODE=${RTX_PAPER_MODE:-0}
+
+case "${SEED}" in
+   ''|*[!0-9]*) echo "RTX_SEED must be a non-negative integer (got ${SEED})" >&2; exit 2 ;;
+esac
+case "${BASELINE_MODE}" in
+   b0)
+      [ "${RTX_SEAL:-0}" = "0" ] && [ "${RTX_GROUP_RM:-0}" = "0" ] \
+         && [ "${RTX_SEAL_AUTO_FIX:-0}" = "0" ] \
+         || { echo "b0 requires RTX_SEAL=0 RTX_GROUP_RM=0 RTX_SEAL_AUTO_FIX=0" >&2; exit 2; }
+      if [ "${PAPER_MODE}" = "1" ] && [ "${CUSTOM_RM}" != "day2_custom_rm.rm_function" ]; then
+         echo "formal b0 requires RTX_CUSTOM_RM=day2_custom_rm.rm_function" >&2
+         exit 2
+      fi
+      ;;
+   b6)
+      [ "${RTX_SEAL:-0}" = "1" ] && [ "${RTX_GROUP_RM:-0}" = "1" ] \
+         && [ "${RTX_SEAL_AUTO_FIX:-0}" = "1" ] \
+         || { echo "b6 requires RTX_SEAL=1 RTX_GROUP_RM=1 RTX_SEAL_AUTO_FIX=1" >&2; exit 2; }
+      if [ "${PAPER_MODE}" = "1" ] && [ "${CUSTOM_RM}" != "phase2_seal_rm.rm_function" ]; then
+         echo "formal b6 requires RTX_CUSTOM_RM=phase2_seal_rm.rm_function" >&2
+         exit 2
+      fi
+      ;;
+   b1|b2|b3|b4|b5)
+      if [ "${PAPER_MODE}" = "1" ]; then
+         echo "baseline ${BASELINE_MODE}: mechanism implementation missing; formal run refused" >&2
+         exit 2
+      fi
+      ;;
+   *) echo "RTX_BASELINE_MODE must be b0..b6 (got ${BASELINE_MODE})" >&2; exit 2 ;;
+esac
+if [ -n "${SCHEDULE_PATH}" ] && [ ! -f "${SCHEDULE_PATH}" ]; then
+   echo "RTX_SCHEDULE does not exist in container: ${SCHEDULE_PATH}" >&2
+   exit 2
+fi
+if [ "${PAPER_MODE}" = "1" ] && [ -z "${SCHEDULE_PATH}" ]; then
+   echo "formal run requires RTX_SCHEDULE" >&2
+   exit 2
+fi
+echo "[train] baseline=${BASELINE_MODE} seed=${SEED} schedule=${SCHEDULE_PATH:-none}"
 
 # Memory/I/O guardrails.  The previous slime default was 512 requests per
 # engine; with three rollout engines that allowed 1536 in-flight requests and
@@ -126,7 +170,7 @@ SGLANG_ARGS=(
 )
 
 MISC_ARGS=(
-   --seed 42
+   --seed "${SEED}"
    --attention-dropout 0.0
    --hidden-dropout 0.0
    --accumulate-allreduce-grads-in-fp32
@@ -180,7 +224,11 @@ RUNTIME_ENV_JSON="{
     \"PYTHONPATH\": \"/root/Megatron-LM/:${SCRIPT_DIR}:/workspace/scripts\",
     \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
     \"NCCL_NVLS_ENABLE\": \"${HAS_NVLINK}\",
-    \"RTX_CAS_INDEX_DIR\": \"${RTX_CAS_INDEX_DIR:-${RTX_RUN_DIR:-/workspace/runs}/cas}\"
+    \"RTX_CAS_INDEX_DIR\": \"${RTX_CAS_INDEX_DIR:-${RTX_RUN_DIR:-/workspace/runs}/cas}\",
+    \"RTX_SEED\": \"${SEED}\",
+    \"RTX_BASELINE_MODE\": \"${BASELINE_MODE}\",
+    \"RTX_SCHEDULE\": \"${SCHEDULE_PATH}\",
+    \"RTX_PAPER_MODE\": \"${PAPER_MODE}\"
   }
 }"
 

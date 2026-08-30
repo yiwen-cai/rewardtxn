@@ -2,6 +2,8 @@
   "experiment": "E4",
   "name": "逐模块消融 (A0–A7)",
   "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
   "sample_sizes": {
     "deterministic_per_variant_fault": 100,
     "real_system_faults_per_variant": "1-2 个直接相关故障",
@@ -30,8 +32,12 @@
     "纯性能模块（A6）需显著效果量"
   ],
   "statistics": {
+    "independent_analysis_unit": "同一 seed、故障 schedule 与 launch block 下的一对 A0/消融 run",
     "correctness_ci": "Wilson 95%",
     "performance_ci": "paired bootstrap 95% + Cliff's delta",
-    "multi_comparison": "Holm–Bonferroni"
+    "bootstrap_iterations": 10000,
+    "confidence_level": 0.95,
+    "multi_comparison": "Holm–Bonferroni",
+    "familywise_alpha": 0.05
   }
 }

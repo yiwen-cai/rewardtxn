@@ -19,8 +19,16 @@
     },
     "attempt": { "type": "integer", "minimum": 0, "description": "attempt/epoch 编号" },
     "verifier_digest": { "type": "string", "description": "verifier 版本/digest（如 v1/v2 或镜像 digest）" },
-    "checkpoint_hash": { "type": "string, null" },
-    "step_token": { "type": "string", "description": "StepToken 或 null" },
+    "checkpoint_hash": { "type": ["string", "null"] },
+    "step_token": { "type": ["string", "null"], "description": "StepToken 或 null" },
+    "cut": {
+      "type": "string",
+      "enum": ["R1", "R2", "R3", "R4", "R5", "Q0", "Q1", "L0", "L2", "L3", "C1", "C2"]
+    },
+    "trial": { "type": "integer", "minimum": 0 },
+    "schedule_id": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "logical_id": { "type": ["string", "null"] },
     "exit_code": { "type": "integer", "description": "进程退出码（fault/learner 事件）" },
     "recovery_decision": {
       "type": "string",
@@ -34,15 +42,15 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "type": { "const": "group" } } },
+      "if": { "required": ["type"], "properties": { "type": { "const": "group" } } },
       "then": { "required": ["group_ids"] }
     },
     {
-      "if": { "properties": { "type": { "const": "checkpoint" } } },
-      "then": { "required": ["checkpoint_hash"] }
+      "if": { "required": ["type"], "properties": { "type": { "const": "checkpoint" } } },
+      "then": { "required": ["checkpoint_hash", "step_token", "step"] }
     },
     {
-      "if": { "properties": { "type": { "const": "recovery" } } },
+      "if": { "required": ["type"], "properties": { "type": { "const": "recovery" } } },
       "then": { "required": ["recovery_decision"] }
     }
   ],

@@ -2,12 +2,20 @@
   "endpoint": "final_eval_accuracy",
   "test": "TOST",
   "status": "pending_pilot",
+  "confidence_unit": "absolute percentage points",
   "proposed_margin_pp": 1.0,
-  "proposed_margin_sd_ratio": 0.2,
   "frozen_margin_pp": null,
+  "alpha_each_one_sided": 0.05,
   "frozen_at": null,
   "frozen_commit": null,
-  "rule": "pilot 后、查看正式结果前冻结为单一 margin 值；禁止在 ±1 绝对百分点与 0.2×seed 标准差之间事后二选一。同时报告标准化效应量。",
+  "rule": "pilot 后、查看正式结果前冻结一个正数 margin_pp；首选 1.0 绝对百分点。pilot 只判断该 margin 下固定 5 seeds 能否达到功效/精度门禁，不允许改用 SD 倍数或查看正式结果后改 margin。",
+  "faulted_noninferiority": {
+    "endpoint": "final_eval_accuracy",
+    "frozen_margin_pp": null,
+    "default_rule": "与 clean TOST 使用同一个 frozen_margin_pp；本预注册不允许另选 faulted margin",
+    "alpha": 0.05,
+    "multiplicity": "E7 两个 confirmatory faulted pairs 使用 Holm-Bonferroni，familywise alpha=0.05"
+  },
   "auxiliary": {
     "loss_mae": "仅作辅助指标，不作为等价性主判据",
     "report": "原始点或 seed 曲线，不只画均值柱状图"
