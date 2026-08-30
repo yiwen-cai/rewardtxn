@@ -97,6 +97,6 @@
     "Q1"
   ],
   "note": "R1–R5 驱动真实 phase2_seal_rm；Q0/Q1/L0/L2/L3/C1/C2 为确定性协议模型，与真实进程实验分表报告",
-  "failure_details": {},
-  "generated_at": "2026-08-30T11:13:56"
+  "failure_details": [],
+  "generated_at": "2026-08-30T12:32:52"
 }

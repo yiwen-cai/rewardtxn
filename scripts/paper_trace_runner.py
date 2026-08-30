@@ -5,9 +5,11 @@ P0: E2 Trace Runner — 12 切点确定性随机化调度（附录 C.1/C.2）
 覆盖切点: R1 R2 R3 R4 R5 Q0 Q1 L0 L2 L3 C1 C2（每切点 >= 1,500 次，默认 2,500 次 → 30,000 总注入）
 
 fixture 性质（如实标注，真实进程实验另行开展）:
-  R1/R2/R3/R4/R5 —— 驱动真实 phase2_seal_rm 代码路径（CAS/SQLite/Seal/AUTO_FIX）；
-  Q0/Q1/L0/L2/L3/C1/C2 —— 确定性协议模型 fixture（队列/checkpoint/ACK 状态机），
-                         与真实进程实验分表报告（§1 原则）。
+  R1/R2/R3/R4/R5 —— 驱动真实 phase2_seal_rm 代码路径（CAS/SQLite/Seal/AUTO_FIX），
+                    fixture 内嵌断言，随机化维度含 group 大小 K∈{4,8,16}；
+  Q0/Q1/L0/L2/L3/C1/C2 —— 确定性协议模型 fixture（队列/checkpoint/ACK 状态机）：
+                    fixture 只产生事件日志，判定由日志解释器（VERIFIERS）完成，
+                    oracle 从日志反推状态，非构造即真；与真实进程实验分表报告（§1 原则）。
 
 oracle（附录 C.2）: 混版本 committed 组 / StepToken 重复或缺失 / checkpoint hash 绑定不符 /
 错误 reward 进入 committed gradient —— 由 scripts/trace_oracle.py 与各 fixture 内嵌断言共同判定。
@@ -43,6 +45,8 @@ CUT_POINTS = ["R1", "R2", "R3", "R4", "R5", "Q0", "Q1", "L0", "L2", "L3", "C1", 
 K_DEFAULT = 8
 GOOD = "Let me solve.\n</think>\nThe answer is 42.\n###Response\n\\boxed{42}"
 BAD = "Let me solve.\n</think>\nThe answer is 43.\n###Response\n\\boxed{43}"
+# v1 与 v2 值级发散的样本（v1=1, v2=0）：用于真正考验 AUTO_FIX 的值修正
+DIVERGENT = "Let me solve.\n</think>\nThe answer is 42.0.\n###Response\n\\boxed{42.0}"
 
 
 class _S:
@@ -66,8 +70,16 @@ def _batch(gidx, k, resp=GOOD, label="42"):
     return [_S(gidx, i, i, resp, label) for i in range(k)]
 
 
-def _v1(gidx, k, **kw):
-    return asyncio.run(m._rm_batch_group(_batch(gidx, k, **kw)))
+def _batch_mixed(gidx, k):
+    """前一半 GOOD（v1 值 1），后一半 DIVERGENT（v1 值 1 / v2 值 0）：
+    skew/dup 注入后版本 tag 与值同时混合，AUTO_FIX 必须把后一半修正回 v1=1。"""
+    half = k // 2
+    return [_S(gidx, i, i, GOOD if i < half else DIVERGENT, "42") for i in range(k)]
+
+
+def _v1(gidx, k, mixed=False, **kw):
+    samples = _batch_mixed(gidx, k) if mixed else _batch(gidx, k, **kw)
+    return asyncio.run(m._rm_batch_group(samples))
 
 
 # --------------------------------------------------------------------------
@@ -77,44 +89,48 @@ def _v1(gidx, k, **kw):
 def fixture_r1(rng, it):
     """crm_crash：RM 计算中崩溃 → 组不得部分提交；崩溃样本持久化可恢复。"""
     gidx = it
-    _reset(gidx, "none")
+    k = rng.choice([4, 8, 16])   # 随机化维度：group 大小
+    _reset(gidx, "none", k=k)
     m._WINDOWS = {"crm_crash": [gidx, gidx]}
     try:
-        _v1(gidx, K_DEFAULT)
+        _v1(gidx, k)
         return [], False, "期望 RuntimeError 未触发"
     except RuntimeError:
         pass
-    recs = m.load_jsonl(Path(m.RUN_DIR) / "rewards.jsonl") if hasattr(m, "load_jsonl") else None
     crash = [r for r in _read_jsonl("rewards.jsonl") if r.get("reward") is None and r.get("group_index") == gidx]
     seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
     ok = len(crash) >= 1 and all(r.get("response") for r in crash) and seals == []
-    return _events("R1", gidx), ok, {"crash_persisted": len(crash), "seal_entries": len(seals)}
+    return _events("R1", gidx), ok, {"k": k, "crash_persisted": len(crash), "seal_entries": len(seals)}
 
 
 def fixture_r2(rng, it):
     """dup：陈旧 retry 混入 → ABORTED（AUTO_FIX 后返回值全部为权威 v1），无混版本提交。"""
     gidx = it
-    _reset(gidx, "none", autofix=True)
+    k = rng.choice([4, 8, 16])
+    _reset(gidx, "none", k=k, autofix=True)
     m._WINDOWS = {"dup": [gidx, gidx]}
-    out = _v1(gidx, K_DEFAULT)
+    out = _v1(gidx, k, mixed=True)
     seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
     aborted = any(s["status"] == "ABORTED" for s in seals)
-    all_v1 = all(abs(float(r) - float(m._v1_reward(GOOD, "42"))) < 1e-9 for r in out)
+    expected = [m._v1_reward(GOOD if i < k // 2 else DIVERGENT, "42") for i in range(k)]
+    all_v1 = all(abs(float(r) - float(e)) < 1e-9 for r, e in zip(out, expected))
     ok = aborted and all_v1 and not any(s["status"] == "SEALED" for s in seals)
-    return _events("R2", gidx), ok, {"seal": seals[0]["status"] if seals else None, "autofix": all_v1}
+    return _events("R2", gidx), ok, {"k": k, "seal": seals[0]["status"] if seals else None, "autofix_values": all_v1}
 
 
 def fixture_r3(rng, it):
     """skew：同组前后半不同 verifier → ABORTED + AUTO_FIX 权威化，0 混版本提交。"""
     gidx = it
-    _reset(gidx, "none", autofix=True)
+    k = rng.choice([4, 8, 16])
+    _reset(gidx, "none", k=k, autofix=True)
     m._WINDOWS = {"skew": [gidx, gidx]}
-    out = _v1(gidx, K_DEFAULT)
+    out = _v1(gidx, k, mixed=True)
     seals = [s for s in _read_jsonl("seals.jsonl") if s.get("group_index") == gidx]
     aborted = any(s["status"] == "ABORTED" for s in seals)
-    all_v1 = all(abs(float(r) - float(m._v1_reward(GOOD, "42"))) < 1e-9 for r in out)
+    expected = [m._v1_reward(GOOD if i < k // 2 else DIVERGENT, "42") for i in range(k)]
+    all_v1 = all(abs(float(r) - float(e)) < 1e-9 for r, e in zip(out, expected))
     ok = aborted and all_v1
-    return _events("R3", gidx), ok, {"seal": seals[0]["status"] if seals else None}
+    return _events("R3", gidx), ok, {"k": k, "seal": seals[0]["status"] if seals else None, "autofix_values": all_v1}
 
 
 def fixture_r4(rng, it):
@@ -164,91 +180,176 @@ def _ev(t, step, **kw):
     return ev
 
 
+# --------------------------------------------------------------------------
+# Q0/Q1/L0/L2/L3/C1/C2：确定性协议模型 fixture + 日志解释器（oracle 从事件日志
+# 反推状态判定，非构造即真；参数由 rng 随机化以覆盖状态空间）
+# --------------------------------------------------------------------------
+
+def _groups_of(evs, types, op=None):
+    out = []
+    for e in evs:
+        if e["type"] in types and (op is None or e.get("payload", {}).get("op") == op):
+            out.extend(e.get("group_ids", []))
+    return out
+
+
+def _tokens_claimed(evs):
+    return {e.get("step_token") for e in evs
+            if e["type"] == "checkpoint" and e.get("payload", {}).get("role", "commit") == "commit"
+            and e.get("step_token")}
+
+
+def _tokens_applied(evs):
+    return [e.get("payload", {}).get("step_token") for e in evs
+            if e["type"] == "learner" and e.get("payload", {}).get("op") == "apply"]
+
+
+def _dup_count(items):
+    from collections import Counter
+    return sum(1 for v in Counter(items).values() if v > 1)
+
+
 def fixture_q0(rng, it):
-    """mark-consumed 后、get-data 前 kill → 样本可 reclaim 或由 manifest 判定恢复。"""
-    n = rng.randint(1, 32)
+    """mark-consumed 后、get-data 前 kill。状态：consumed / committed(manifest) 两集合。
+    协议要求：已消费未提交样本必须被 reissue（或由 manifest 判定已提交）；已提交样本不得重投。"""
+    n = rng.randint(2, 32)
     consumed = list(range(n))
+    n_committed = rng.randint(0, n // 2)
+    committed = set(rng.sample(consumed, n_committed))
     evs = [_ev("queue", it, group_ids=[g], payload={"op": "mark_consumed", "index": g}) for g in consumed]
+    if committed:
+        evs.append(_ev("group", it, group_ids=sorted(committed), payload={"status": "COMMITTED", "versions": ["v1"]}))
     evs.append(_ev("fault", it, payload={"cut": "Q0", "exit_code": -9}))
-    reissued = set(rng.sample(consumed, n))  # 恢复：全部重投递（无 manifest 依据时）
-    evs += [_ev("recovery", it, group_ids=sorted(reissued), recovery_decision="reissue") for _ in [0]]
-    lost = [g for g in consumed if g not in reissued]
-    ok = lost == []
-    return evs, ok, {"consumed": n, "reissued": len(reissued), "lost": len(lost)}
+    need_reissue = sorted(set(consumed) - committed)
+    if need_reissue:
+        evs.append(_ev("recovery", it, group_ids=need_reissue, recovery_decision="reissue"))
+    return evs, None
+
+
+def verify_q0(evs, auth=None):
+    consumed = set(_groups_of(evs, ["queue"], "mark_consumed"))
+    committed = set(_groups_of(evs, ["group"]))
+    reissued = _groups_of(evs, ["recovery"])
+    need = consumed - committed
+    reissued_set = set(reissued)
+    lost = sorted(need - reissued_set)
+    over = sorted(reissued_set - need)
+    ok = lost == [] and over == [] and _dup_count(reissued) == 0
+    return ok, {"consumed": len(consumed), "committed": len(committed),
+                "reissued": len(reissued), "lost": len(lost), "over_reissue": len(over)}
 
 
 def fixture_q1(rng, it):
-    """数据已取出、StepManifest 前 kill learner → 未提交数据恰好一次进入计划。"""
+    """get-data 后、StepManifest 前 kill learner。未提交数据必须恰好一次进入恢复计划。"""
     n = rng.randint(1, 16)
     fetched = list(range(n))
     evs = [_ev("queue", it, group_ids=[g], payload={"op": "get_data", "index": g}) for g in fetched]
     evs.append(_ev("fault", it, payload={"cut": "Q1", "exit_code": -9}))
-    plan = list(fetched)  # 恢复计划恰好一次覆盖
-    evs.append(_ev("recovery", it, group_ids=plan, recovery_decision="reissue"))
-    dup = len(plan) != len(set(plan))
-    missing = set(fetched) - set(plan)
-    ok = not dup and not missing
-    return evs, ok, {"fetched": n, "plan": len(plan), "dup": dup, "missing": len(missing)}
+    evs.append(_ev("recovery", it, group_ids=fetched, recovery_decision="reissue"))
+    return evs, None
+
+
+def verify_q1(evs, auth=None):
+    fetched = set(_groups_of(evs, ["queue"], "get_data"))
+    planned = _groups_of(evs, ["recovery"])
+    ok = set(planned) == fetched and _dup_count(planned) == 0 and len(planned) == len(fetched)
+    return ok, {"fetched": len(fetched), "planned": len(planned),
+                "dup": _dup_count(planned), "missing": len(fetched - set(planned))}
 
 
 def fixture_l0(rng, it):
-    """StepManifest 准备前 kill trainer → 无 committed-step 误判（如实冷启动）。"""
-    step = it
-    evs = [_ev("learner", step, payload={"op": "pre_manifest"})]
-    evs.append(_ev("fault", step, payload={"cut": "L0", "exit_code": -9}))
-    evs.append(_ev("recovery", step, recovery_decision="cold_start"))
-    ok = True  # 无 committed 声明 = 无误判
-    return evs, ok, {"decision": "cold_start", "committed_claimed": 0}
+    """StepManifest 准备前 kill trainer：内存中已执行步不得被误判为 committed。"""
+    n = rng.randint(1, 8)
+    evs = [_ev("learner", it, payload={"op": "pre_manifest", "in_memory_steps": n})]
+    evs.append(_ev("fault", it, payload={"cut": "L0", "exit_code": -9}))
+    evs.append(_ev("recovery", it, recovery_decision="cold_start"))
+    return evs, None
+
+
+def verify_l0(evs, auth=None):
+    claimed = _tokens_claimed(evs)
+    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
+    n = next((e.get("payload", {}).get("in_memory_steps") for e in evs if e["type"] == "learner"), None)
+    ok = claimed == set() and decisions == ["cold_start"]
+    return ok, {"in_memory_steps": n, "committed_claimed": len(claimed), "decision": decisions}
 
 
 def fixture_l2(rng, it):
-    """optimizer 执行中 kill → 全 Trainer rollback，无部分 optimizer state。"""
-    step = it
-    evs = [_ev("learner", step, payload={"op": "optimizer_start"})]
-    evs.append(_ev("fault", step, payload={"cut": "L2", "exit_code": -9}))
-    evs.append(_ev("recovery", step, recovery_decision="rollback"))
-    evs.append(_ev("checkpoint", step, checkpoint_hash=f"ck{step}", step_token=f"t{step}",
+    """optimizer 执行中 kill：部分 rank 已 apply，必须全 Trainer rollback，不得留下部分提交。"""
+    r = rng.randint(2, 8)          # rank 数
+    done = rng.randint(0, r - 1)   # 已 apply 的 rank（部分）
+    evs = [_ev("learner", it, payload={"op": "optimizer_start", "ranks": r})]
+    for i in range(done):
+        evs.append(_ev("learner", it, payload={"op": "rank_apply", "rank": i, "durable": False}))
+    evs.append(_ev("fault", it, payload={"cut": "L2", "exit_code": -9, "rank": done}))
+    evs.append(_ev("recovery", it, recovery_decision="rollback"))
+    evs.append(_ev("checkpoint", it, checkpoint_hash=f"pre-{it}", step_token=f"t{it}",
                    payload={"state": "pre_step"}))
-    ok = True
-    return evs, ok, {"decision": "rollback", "partial_apply": 0}
+    return evs, None
+
+
+def verify_l2(evs, auth=None):
+    claimed = _tokens_claimed(evs)
+    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
+    # 部分 rank 已 apply 的 step 不得被提交（rollback 到 pre_step token）
+    ok = claimed == {f"t{evs[0]['step']}"} and decisions == ["rollback"]
+    return ok, {"claimed_tokens": sorted(claimed), "decision": decisions}
 
 
 def fixture_l3(rng, it):
-    """optimizer 返回后、checkpoint 前 kill → 内存更新不被误认为 durable。"""
-    step = it
-    evs = [_ev("learner", step, payload={"op": "optimizer_done", "in_memory": True})]
-    evs.append(_ev("fault", step, payload={"cut": "L3", "exit_code": -9}))
-    evs.append(_ev("recovery", step, recovery_decision="rollback"))
-    committed = [e for e in evs if e["type"] in ("checkpoint", "ack") and e.get("step_token")]
-    ok = committed == []  # 无 token/checkpoint → 该 step 未提交
-    return evs, ok, {"committed_claimed": len(committed)}
+    """optimizer 返回后、checkpoint 前 kill：内存更新不得被误认为 durable。"""
+    n = rng.randint(1, 8)
+    evs = [_ev("learner", it, payload={"op": "optimizer_done", "in_memory": True, "steps_in_memory": n})]
+    evs.append(_ev("fault", it, payload={"cut": "L3", "exit_code": -9}))
+    evs.append(_ev("recovery", it, recovery_decision="rollback"))
+    return evs, None
+
+
+def verify_l3(evs, auth=None):
+    claimed = _tokens_claimed(evs)
+    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
+    n = next((e.get("payload", {}).get("steps_in_memory") for e in evs if e["type"] == "learner"), None)
+    ok = claimed == set() and decisions == ["rollback"]
+    return ok, {"steps_in_memory": n, "committed_claimed": len(claimed), "decision": decisions}
 
 
 def fixture_c1(rng, it):
-    """checkpoint durable 后、commit pointer 前 kill → Reconciler 给出唯一判定。"""
+    """checkpoint durable 后、commit pointer 前 kill → Reconciler 给出唯一判定（commit_ack）。
+    返回 (事件日志, 期望权威映射)：权威映射由 fixture 的外部意图给出，oracle 独立判定。"""
     step = it
     tok, h = f"t{step}", f"h{step}"
     evs = [_ev("checkpoint", step, checkpoint_hash=h, step_token=tok, payload={"durable": True})]
     evs.append(_ev("fault", step, payload={"cut": "C1", "exit_code": -9, "commit_pointer": False}))
     evs.append(_ev("recovery", step, recovery_decision="commit_ack", step_token=tok, checkpoint_hash=h))
-    viols = trace_oracle.classify_event_log(evs, [{"step": step, "step_token": tok, "checkpoint_hash": h}])
-    ok = viols == []
-    return evs, ok, {"verdict": "commit_ack", "violations": len(viols)}
+    auth = [{"step": step, "step_token": tok, "checkpoint_hash": h}]
+    return evs, auth
+
+
+def verify_c1(evs, auth):
+    viols = trace_oracle.classify_event_log(evs, auth)
+    decisions = [e["recovery_decision"] for e in evs if e["type"] == "recovery"]
+    ok = viols == [] and decisions == ["commit_ack"]
+    return ok, {"step": auth[0]["step"], "token": auth[0]["step_token"], "violations": len(viols), "verdict": decisions}
 
 
 def fixture_c2(rng, it):
-    """commit pointer 发布后丢 ACK → 恢复不重复 apply。"""
+    """commit pointer 发布后丢 ACK → 恢复后不重复 apply。
+    返回 (事件日志, 期望权威映射)。"""
     step = it
     tok, h = f"t{step}", f"h{step}"
     evs = [_ev("checkpoint", step, checkpoint_hash=h, step_token=tok, payload={"durable": True})]
     evs.append(_ev("ack", step, step_token=tok, payload={"dropped": True}))
     evs.append(_ev("recovery", step, recovery_decision="commit_ack", step_token=tok, checkpoint_hash=h))
-    # 恢复后 apply 恰好一次
     evs.append(_ev("learner", step, payload={"op": "apply", "step_token": tok}))
-    applies = [e for e in evs if e.get("payload", {}).get("op") == "apply"]
-    viols = trace_oracle.classify_event_log(evs, [{"step": step, "step_token": tok, "checkpoint_hash": h}])
-    ok = len(applies) == 1 and viols == []
-    return evs, ok, {"applies": len(applies), "violations": len(viols)}
+    auth = [{"step": step, "step_token": tok, "checkpoint_hash": h}]
+    return evs, auth
+
+
+def verify_c2(evs, auth):
+    viols = trace_oracle.classify_event_log(evs, auth)
+    applies = _tokens_applied(evs)
+    ok = viols == [] and len(applies) == 1
+    return ok, {"step": auth[0]["step"], "token": auth[0]["step_token"], "violations": len(viols), "applies": len(applies)}
 
 
 FIXTURES = {
@@ -256,6 +357,11 @@ FIXTURES = {
     "R4": fixture_r4, "R5": fixture_r5, "Q0": fixture_q0,
     "Q1": fixture_q1, "L0": fixture_l0, "L2": fixture_l2,
     "L3": fixture_l3, "C1": fixture_c1, "C2": fixture_c2,
+}
+VERIFIERS = {
+    "R1": None, "R2": None, "R3": None, "R4": None, "R5": None,
+    "Q0": verify_q0, "Q1": verify_q1, "L0": verify_l0, "L2": verify_l2,
+    "L3": verify_l3, "C1": verify_c1, "C2": verify_c2,
 }
 REAL_CODE_CUTS = {"R1", "R2", "R3", "R4", "R5"}
 MODEL_CUTS = set(CUT_POINTS) - REAL_CODE_CUTS
@@ -295,15 +401,23 @@ def main():
     m._pending_samples.clear()
 
     rng = random.Random(args.seed)
-    cut_results, failure_details, sample_events = {}, {}, []
+    cut_results, failure_details, sample_events = {}, [], []
     for cut in CUT_POINTS:
         fn = FIXTURES[cut]
+        ver = VERIFIERS[cut]
         n_fail = 0
         for it in range(args.per_cut):
-            evs, ok, detail = fn(rng, it)
+            res = fn(rng, it)
+            if isinstance(res, tuple) and len(res) == 3:
+                # R1–R5：真实代码路径，fixture 内嵌断言
+                evs, ok, detail = res
+            else:
+                # Q0/L0/C1 等：协议模型事件日志 (+期望权威映射) + 日志解释器判定
+                evs, auth = res
+                ok, detail = ver(evs, auth)
             if not ok:
                 n_fail += 1
-                failure_details.setdefault(cut, []).append({"iter": it, "detail": detail, "events": evs})
+                failure_details.append({"cut": cut, "iter": it, "detail": detail, "events": evs})
             if it < 3:  # 每切点保留前 3 次事件样本供审计
                 sample_events.append({"cut": cut, "iter": it, "events": evs})
         cut_results[cut] = {"n": args.per_cut, "failures": n_fail}
