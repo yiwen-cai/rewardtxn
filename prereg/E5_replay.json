@@ -1,0 +1,31 @@
+{
+  "experiment": "E5",
+  "name": "Selective Replay 恢复收益边界",
+  "status": "pending_pilot",
+  "grid": {
+    "K": [4, 8, 16],
+    "U": [1, 4, 8],
+    "failed_group_fraction": [0.125, 0.25, 0.5, 1.0],
+    "reward_cost": ["lightweight", "sandbox", "injected_100ms", "injected_1s", "injected_5s"],
+    "faults": ["R1", "R3", "Q0", "C1"],
+    "models": ["Qwen2.5-0.5B-Instruct", "Qwen2.5-1.5B-Instruct"]
+  },
+  "comparison": ["whole-group retry", "whole-step replay", "latest-checkpoint restart", "RewardTxn selective replay"],
+  "metrics": ["重复 rollout tokens", "reward CPU/GPU seconds", "sandbox seconds", "重复 optimizer steps", "RTO", "总 GPU-hours"],
+  "exclusion_rules": [
+    "不同对比项未使用相同 K/U/失效组/verifier 成本/模型/seed 时排除",
+    "verifier 成本注入不生效（如 sandbox 未按注入延迟）时排除该 cell"
+  ],
+  "stop_rules": [
+    "每个网格点 1 次确定性成本核算 + 核心 workload 5 次重复",
+    "禁止只挑收益最高的格点汇报"
+  ],
+  "gates": [
+    "报告收益随失效比例与 reward 成本变化的曲线，不只给单一数字",
+    "核心 workload 中位节省 ≥30% 且 95% CI 下界 >20%",
+    "明确报告整步全失效（fraction=1.0）时 selective replay 收益趋近零的边界"
+  ],
+  "statistics": {
+    "ci": "paired bootstrap 10,000, median + 95% CI"
+  }
+}

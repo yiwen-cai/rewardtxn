@@ -1,0 +1,21 @@
+{
+  "doc_version": "1.0",
+  "status": "pending_pilot",
+  "frozen_at": null,
+  "freeze_commit": null,
+  "note": "P0 冻结时填入 frozen_at/freeze_commit；冻结后正式统计一律使用本版本",
+  "changelog": [],
+  "experiments": {
+    "E1_E2": "prereg/E1_E2_correctness.json",
+    "E3": "prereg/E3_baseline.json",
+    "E4": "prereg/E4_ablation.json",
+    "E5": "prereg/E5_replay.json",
+    "E6": "prereg/E6_overhead.json",
+    "E7": "prereg/E7_training.json",
+    "E8": "prereg/E8_soak.json"
+  },
+  "tost_margin": "prereg/tost_margin.json",
+  "stop_rules": "prereg/stop_rules.json",
+  "fault_schedules": "prereg/fault_schedules/",
+  "eval_splits": "prereg/eval_splits/"
+}

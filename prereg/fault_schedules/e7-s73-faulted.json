@@ -1,0 +1,137 @@
+{
+  "schedule_id": "e7-s73-faulted",
+  "seed": 73,
+  "schedule_seed": 1797245993,
+  "stack": "slime",
+  "model": "Qwen2.5-1.5B-Instruct",
+  "steps": 500,
+  "k": 8,
+  "u": 4,
+  "generator": "scripts/fault_schedule_gen.py",
+  "events": [
+    {
+      "step": 62,
+      "cut": "R3",
+      "params": {
+        "groups": [
+          248,
+          249,
+          250,
+          251
+        ],
+        "verifier": "v2",
+        "digest": "d2"
+      }
+    },
+    {
+      "step": 154,
+      "cut": "Q0",
+      "params": {
+        "groups": [
+          616,
+          617,
+          618,
+          619
+        ],
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
+      }
+    },
+    {
+      "step": 238,
+      "cut": "R5",
+      "params": {
+        "groups": [
+          952
+        ],
+        "workers": 2,
+        "expect": "single_winner"
+      }
+    },
+    {
+      "step": 248,
+      "cut": "R4",
+      "params": {
+        "groups": [
+          992
+        ],
+        "same_id": true,
+        "second_digest": "d-x",
+        "expect": "blocked"
+      }
+    },
+    {
+      "step": 323,
+      "cut": "R2",
+      "params": {
+        "groups": [
+          1292,
+          1293,
+          1294,
+          1295
+        ],
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
+      }
+    },
+    {
+      "step": 342,
+      "cut": "L3",
+      "params": {
+        "groups": [
+          1368,
+          1369,
+          1370,
+          1371
+        ],
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
+      }
+    },
+    {
+      "step": 352,
+      "cut": "C1",
+      "params": {
+        "groups": [
+          1408,
+          1409,
+          1410,
+          1411
+        ],
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
+      }
+    },
+    {
+      "step": 360,
+      "cut": "C2",
+      "params": {
+        "groups": [
+          1440,
+          1441,
+          1442,
+          1443
+        ],
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
+      }
+    },
+    {
+      "step": 409,
+      "cut": "R1",
+      "params": {
+        "groups": [
+          1636,
+          1637,
+          1638,
+          1639
+        ],
+        "mechanism": "crm_crash",
+        "crash_frac": 0.5
+      }
+    }
+  ]
+}

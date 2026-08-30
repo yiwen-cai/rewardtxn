@@ -1,0 +1,102 @@
+{
+  "cutpoints": {
+    "C1": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "C2": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "L0": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "L2": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "L3": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "Q0": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "Q1": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "R1": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "R2": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "R3": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "R4": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    },
+    "R5": {
+      "n": 30,
+      "failures": 0,
+      "wilson_upper": 0.11351709,
+      "cp_upper": 0.09503385
+    }
+  },
+  "total": {
+    "n": 360,
+    "failures": 0,
+    "rule_of_three_upper": 0.00833333
+  },
+  "status": "PASS",
+  "schedule_seed": 5374178,
+  "real_code_cuts": [
+    "R1",
+    "R2",
+    "R3",
+    "R4",
+    "R5"
+  ],
+  "model_cuts": [
+    "C1",
+    "C2",
+    "L0",
+    "L2",
+    "L3",
+    "Q0",
+    "Q1"
+  ],
+  "note": "R1–R5 驱动真实 phase2_seal_rm；Q0/Q1/L0/L2/L3/C1/C2 为确定性协议模型，与真实进程实验分表报告",
+  "failure_details": {},
+  "generated_at": "2026-08-30T11:13:56"
+}

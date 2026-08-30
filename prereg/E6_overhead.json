@@ -1,0 +1,42 @@
+{
+  "experiment": "E6",
+  "name": "正常路径开销与可扩展性",
+  "status": "pending_pilot",
+  "two_tier_design": {
+    "core_cell": {"model": "Qwen2.5-1.5B-Instruct", "gpus": 4, "K": 8, "variants": ["group-RM only", "完整 RewardTxn"]},
+    "core_reps": 5,
+    "core_paired": true,
+    "screening_reps": 1,
+    "screening_rule": "其余格点先 1 次筛选，仅对接近门禁（95% CI 上界 <5%）的格点补足重复",
+    "steps_per_run": {"warmup": 20, "measured": 100}
+  },
+  "matrix": {
+    "gpus": [2, 4, 8],
+    "models": ["Qwen2.5-0.5B-Instruct", "Qwen2.5-1.5B-Instruct", "Qwen2.5-3B-Instruct"],
+    "K": [4, 8, 16],
+    "reward_concurrency": [16, 32, 64],
+    "variants": ["Slime default", "group-RM only", "Seal+CAS", "完整 RewardTxn"]
+  },
+  "measurement": {
+    "gpu_segments": "CUDA Event",
+    "end_to_end": "wall clock",
+    "checkpoint": "on/off 分图，不把 checkpoint 代价计入协议元数据",
+    "topology": "§4.2 固定卡号布局"
+  },
+  "exclusion_rules": [
+    "warmup 不足 20 步或测量不足 100 步的运行排除",
+    "运行期间出现外部任务抢卡（GPU util 异常尖峰）且无法配对解释时排除该 block"
+  ],
+  "stop_rules": [
+    "核心 cell 5 次配对完成即停止；筛选矩阵 1 次完成即停止",
+    "预算超支 20% 触发裁剪评审（先删远离门禁的筛选格点）"
+  ],
+  "gates": [
+    "核心 4 卡 1.5B 配置：RewardTxn 相对同 group-RM baseline 开销 95% CI 上界 <5%",
+    "2→4→8 卡协议开销不随卡数超线性增长",
+    "CAS/manifest 数据量随 committed groups 近似线性且 retention 后稳定"
+  ],
+  "statistics": {
+    "ci": "paired bootstrap 10,000"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "doc_version": "1.0",
+  "status": "pending_pilot",
+  "global_stop_rules": [
+    "正式实验不得因结果好看而提前停止",
+    "只有预注册的安全门禁、资源故障或序贯规则允许提前终止",
+    "外部 GPU 抢占、磁盘故障、网络中断单独标记，不静默删点",
+    "排除任何 run 必须保留原始日志并在 exclusion log 中给出原因",
+    "所有分析脚本从 immutable raw JSON/JSONL 生成表格，禁止手改论文数字",
+    "每阶段预算超支 20% 触发裁剪评审（先删可选模型/规模点，不降核心 baseline、消融与 seed 数）"
+  ],
+  "resource_gates": [
+    "/public 与根盘可用空间低于安全门禁时拒绝启动（scripts/resource_gate.py）",
+    "目标 GPU 显存不足时拒绝启动",
+    "RTX_ALLOW_REUSE=0：已有数据的 run 目录拒绝复用"
+  ],
+  "exclusion_log_contract": {
+    "location": "runs/EXCLUSION_LOG.jsonl",
+    "fields": ["exp_id", "reason", "evidence_path", "timestamp", "decision"]
+  }
+}

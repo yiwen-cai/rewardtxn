@@ -1,0 +1,253 @@
+{
+  "schedule_id": "e8-soak-run2",
+  "seed": 2,
+  "stack": "slime",
+  "model": "Qwen2.5-1.5B-Instruct",
+  "kind": "soak",
+  "hours": 8.0,
+  "rate_per_hour": 2.0,
+  "fault_process": "poisson",
+  "generator": "scripts/fault_schedule_gen.py",
+  "events": [
+    {
+      "wall_clock_min": 11,
+      "step": 11,
+      "cut": "R3",
+      "params": {
+        "groups": [
+          44,
+          45,
+          46,
+          47
+        ],
+        "verifier": "v2",
+        "digest": "d2"
+      }
+    },
+    {
+      "wall_clock_min": 18,
+      "step": 18,
+      "cut": "Q0",
+      "params": {
+        "groups": [
+          72,
+          73,
+          74,
+          75
+        ],
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
+      }
+    },
+    {
+      "wall_clock_min": 36,
+      "step": 37,
+      "cut": "C2",
+      "params": {
+        "groups": [
+          148,
+          149,
+          150,
+          151
+        ],
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
+      }
+    },
+    {
+      "wall_clock_min": 47,
+      "step": 48,
+      "cut": "R2",
+      "params": {
+        "groups": [
+          192,
+          193,
+          194,
+          195
+        ],
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
+      }
+    },
+    {
+      "wall_clock_min": 94,
+      "step": 97,
+      "cut": "L3",
+      "params": {
+        "groups": [
+          388,
+          389,
+          390,
+          391
+        ],
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
+      }
+    },
+    {
+      "wall_clock_min": 131,
+      "step": 136,
+      "cut": "C1",
+      "params": {
+        "groups": [
+          544,
+          545,
+          546,
+          547
+        ],
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
+      }
+    },
+    {
+      "wall_clock_min": 190,
+      "step": 197,
+      "cut": "R5",
+      "params": {
+        "groups": [
+          788
+        ],
+        "workers": 2,
+        "expect": "single_winner"
+      }
+    },
+    {
+      "wall_clock_min": 198,
+      "step": 206,
+      "cut": "R1",
+      "params": {
+        "groups": [
+          824,
+          825,
+          826,
+          827
+        ],
+        "mechanism": "crm_crash",
+        "crash_frac": 0.5
+      }
+    },
+    {
+      "wall_clock_min": 238,
+      "step": 247,
+      "cut": "R3",
+      "params": {
+        "groups": [
+          988,
+          989,
+          990,
+          991
+        ],
+        "verifier": "v2",
+        "digest": "d2"
+      }
+    },
+    {
+      "wall_clock_min": 286,
+      "step": 297,
+      "cut": "Q0",
+      "params": {
+        "groups": [
+          1188,
+          1189,
+          1190,
+          1191
+        ],
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
+      }
+    },
+    {
+      "wall_clock_min": 332,
+      "step": 345,
+      "cut": "C2",
+      "params": {
+        "groups": [
+          1380,
+          1381,
+          1382,
+          1383
+        ],
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
+      }
+    },
+    {
+      "wall_clock_min": 350,
+      "step": 364,
+      "cut": "R2",
+      "params": {
+        "groups": [
+          1456,
+          1457,
+          1458,
+          1459
+        ],
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
+      }
+    },
+    {
+      "wall_clock_min": 380,
+      "step": 395,
+      "cut": "L3",
+      "params": {
+        "groups": [
+          1580,
+          1581,
+          1582,
+          1583
+        ],
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
+      }
+    },
+    {
+      "wall_clock_min": 404,
+      "step": 420,
+      "cut": "C1",
+      "params": {
+        "groups": [
+          1680,
+          1681,
+          1682,
+          1683
+        ],
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
+      }
+    },
+    {
+      "wall_clock_min": 428,
+      "step": 445,
+      "cut": "R5",
+      "params": {
+        "groups": [
+          1780
+        ],
+        "workers": 2,
+        "expect": "single_winner"
+      }
+    },
+    {
+      "wall_clock_min": 467,
+      "step": 486,
+      "cut": "R1",
+      "params": {
+        "groups": [
+          1944,
+          1945,
+          1946,
+          1947
+        ],
+        "mechanism": "crm_crash",
+        "crash_frac": 0.5
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "experiment": "E3",
+  "name": "强 baseline 公平对比 (B0–B6)",
+  "status": "pending_pilot",
+  "config": {
+    "model": "Qwen2.5-1.5B-Instruct",
+    "K": 8,
+    "U": 4,
+    "gpus": 4,
+    "short_run_steps": "20-30",
+    "checkpoint_frequency": "统一，另给剥离结果"
+  },
+  "sample_sizes": {
+    "full_fault_matrix_baselines": ["B0", "B2", "B5", "B6"],
+    "reduced_fault_matrix_baselines": ["B1", "B3", "B4"],
+    "reps_per_cell": 10,
+    "fault_types": ["R3", "Q0", "L2", "C1_C2"],
+    "paired_perf_baselines": ["B0", "B2", "B6"],
+    "paired_reps": 5,
+    "paired_steps": 120
+  },
+  "parameter_freeze": {
+    "rule": "B2/B4/B5 策略参数在预实验后冻结并写入本文件，不能为 RewardTxn 单独调优",
+    "frozen_params": null
+  },
+  "exclusion_rules": [
+    "同一对比表中任何变体未满足 §4.3 公平性控制（模型/数据顺序/seed/global batch/K/U/步数/GPU 数/checkpoint 频率/verifier 版本）时整行排除",
+    "机器负载异常（block 内出现其他任务抢卡）且无法配对解释时排除该 block"
+  ],
+  "stop_rules": [
+    "每个 cell 重复数达到 10 后停止；不因结果好看提前停止",
+    "资源门禁失败拒绝启动"
+  ],
+  "gates": [
+    "RewardTxn 是唯一覆盖全部 invariant 的变体，或明确承认与其他系统等价",
+    "相比达到同等安全性的最强 baseline，昂贵重算中位节省 ≥30%",
+    "若 B5 同等安全下成本差异 <20%，Selective Replay 不作为主要性能贡献（预注册声明）"
+  ],
+  "statistics": {
+    "recovery_time": "p50/p95 + 95% CI (paired bootstrap 10,000)",
+    "correctness": "零容忍，逐 cell 计数"
+  }
+}

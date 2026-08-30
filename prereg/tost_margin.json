@@ -1,0 +1,16 @@
+{
+  "endpoint": "final_eval_accuracy",
+  "test": "TOST",
+  "status": "pending_pilot",
+  "proposed_margin_pp": 1.0,
+  "proposed_margin_sd_ratio": 0.2,
+  "frozen_margin_pp": null,
+  "frozen_at": null,
+  "frozen_commit": null,
+  "rule": "pilot 后、查看正式结果前冻结为单一 margin 值；禁止在 ±1 绝对百分点与 0.2×seed 标准差之间事后二选一。同时报告标准化效应量。",
+  "auxiliary": {
+    "loss_mae": "仅作辅助指标，不作为等价性主判据",
+    "report": "原始点或 seed 曲线，不只画均值柱状图"
+  },
+  "changelog": []
+}

@@ -1,0 +1,32 @@
+{
+  "experiment": "E8",
+  "name": "工作负载泛化与长期 soak",
+  "status": "pending_pilot",
+  "workloads": {
+    "math": "确定性答案匹配 (DAPO-Math-17k + GSM8K)",
+    "code": "HumanEval 164 / MBPP 378 + 确定性本地 CPU sandbox（附录 C.4）",
+    "optional": "nondeterministic judge 仅作边界实验，不作为主正确性 oracle"
+  },
+  "soak": {
+    "runs": 3,
+    "hours_per_run": 8,
+    "fault_process": "Poisson，平均每 30 分钟 1 次真实进程/ACK/队列故障（schedule 见 prereg/fault_schedules/e8-soak-*.json）",
+    "optional_24h": false,
+    "optional_7B": false
+  },
+  "monitoring": ["CAS 大小", "WAL/manifest", "checkpoint retention", "内存", "磁盘", "恢复次数", "训练进度"],
+  "exclusion_rules": [
+    "soak 期间外部任务抢占导致 GPU 不可用的时段单独标记，不静默删点",
+    "任何排除必须保留原始日志并写 exclusion log"
+  ],
+  "stop_rules": [
+    "恢复连续失败 3 次转为人工告警（沿用 phase3_auto_recover 幂等上限）",
+    "连续无进度超过 10 分钟且非预注册故障窗口时停止该 run"
+  ],
+  "gates": [
+    "零 invalid commit",
+    "每次故障均在预设 RTO 内恢复，连续无进度 ≤10 分钟",
+    "retention 后磁盘与 metadata 增长有界",
+    "数学与代码 reward 均通过相同 group-to-optimizer invariant"
+  ]
+}

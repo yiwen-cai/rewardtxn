@@ -1,0 +1,137 @@
+{
+  "schedule_id": "e7-s101-faulted",
+  "seed": 101,
+  "schedule_seed": 2608141292,
+  "stack": "slime",
+  "model": "Qwen2.5-1.5B-Instruct",
+  "steps": 500,
+  "k": 8,
+  "u": 4,
+  "generator": "scripts/fault_schedule_gen.py",
+  "events": [
+    {
+      "step": 39,
+      "cut": "R1",
+      "params": {
+        "groups": [
+          156,
+          157,
+          158,
+          159
+        ],
+        "mechanism": "crm_crash",
+        "crash_frac": 0.5
+      }
+    },
+    {
+      "step": 54,
+      "cut": "R5",
+      "params": {
+        "groups": [
+          216
+        ],
+        "workers": 2,
+        "expect": "single_winner"
+      }
+    },
+    {
+      "step": 96,
+      "cut": "R3",
+      "params": {
+        "groups": [
+          384,
+          385,
+          386,
+          387
+        ],
+        "verifier": "v2",
+        "digest": "d2"
+      }
+    },
+    {
+      "step": 105,
+      "cut": "C1",
+      "params": {
+        "groups": [
+          420,
+          421,
+          422,
+          423
+        ],
+        "after": "checkpoint_durable",
+        "before": "commit_pointer",
+        "expect": "unique_verdict"
+      }
+    },
+    {
+      "step": 259,
+      "cut": "R2",
+      "params": {
+        "groups": [
+          1036,
+          1037,
+          1038,
+          1039
+        ],
+        "retry": "stale",
+        "verifier": "v1",
+        "stale_verifier": "retry-stale"
+      }
+    },
+    {
+      "step": 261,
+      "cut": "L3",
+      "params": {
+        "groups": [
+          1044,
+          1045,
+          1046,
+          1047
+        ],
+        "after": "optimizer_return",
+        "before": "checkpoint",
+        "expect": "not_committed"
+      }
+    },
+    {
+      "step": 271,
+      "cut": "C2",
+      "params": {
+        "groups": [
+          1084,
+          1085,
+          1086,
+          1087
+        ],
+        "ack_drop": true,
+        "expect": "no_duplicate_apply"
+      }
+    },
+    {
+      "step": 390,
+      "cut": "R4",
+      "params": {
+        "groups": [
+          1560
+        ],
+        "same_id": true,
+        "second_digest": "d-x",
+        "expect": "blocked"
+      }
+    },
+    {
+      "step": 452,
+      "cut": "Q0",
+      "params": {
+        "groups": [
+          1808,
+          1809,
+          1810,
+          1811
+        ],
+        "after": "get_meta",
+        "expect": "reclaim_or_manifest"
+      }
+    }
+  ]
+}

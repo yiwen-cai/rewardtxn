@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rewardtxn/paper-event-line/1.0",
+  "title": "RewardTxn paper-eval events.jsonl 行 schema",
+  "description": "§10 数据契约：每个 run 的 events.jsonl 每行必须满足本 schema。type 覆盖 group / reward / queue / learner / checkpoint / ack / recovery / fault 八类时间线事件。",
+  "type": "object",
+  "required": ["type", "ts", "exp_id"],
+  "properties": {
+    "type": {
+      "enum": ["group", "reward", "queue", "learner", "checkpoint", "ack", "recovery", "fault"]
+    },
+    "ts": { "type": "number", "description": "epoch 秒（float）" },
+    "exp_id": { "type": "string", "minLength": 1 },
+    "step": { "type": "integer", "minimum": 0 },
+    "group_ids": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "description": "受影响组（全局 group_index）"
+    },
+    "attempt": { "type": "integer", "minimum": 0, "description": "attempt/epoch 编号" },
+    "verifier_digest": { "type": "string", "description": "verifier 版本/digest（如 v1/v2 或镜像 digest）" },
+    "checkpoint_hash": { "type": "string, null" },
+    "step_token": { "type": "string", "description": "StepToken 或 null" },
+    "exit_code": { "type": "integer", "description": "进程退出码（fault/learner 事件）" },
+    "recovery_decision": {
+      "type": "string",
+      "enum": ["replay", "reissue", "rollback", "cold_start", "commit_ack", "none"]
+    },
+    "oracle_verdict": { "enum": ["PASS", "FAIL", null] },
+    "payload": {
+      "type": "object",
+      "description": "类型特有负载：revision 向量、rewards、丢失样本数、恢复计划等"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "group" } } },
+      "then": { "required": ["group_ids"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "checkpoint" } } },
+      "then": { "required": ["checkpoint_hash"] }
+    },
+    {
+      "if": { "properties": { "type": { "const": "recovery" } } },
+      "then": { "required": ["recovery_decision"] }
+    }
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,35 @@
+{
+  "experiment": "E1_E2",
+  "name": "跨栈问题复现 + Crash-consistency 全切点安全性",
+  "status": "pending_pilot",
+  "sample_sizes": {
+    "E1_real_process_per_cutpoint": 10,
+    "E1_interface_level_per_case": 100,
+    "E2_total_trace_injections": 30000,
+    "E2_min_per_cutpoint": 1500,
+    "E2_cutpoints": ["R1", "R2", "R3", "R4", "R5", "Q0", "Q1", "L0", "L2", "L3", "C1", "C2"],
+    "E2_real_process_key_cutpoints": {"R3": 20, "Q0": 20, "L2": 20, "C1": 20, "C2": 20},
+    "E2_real_process_R5_concurrent": 10
+  },
+  "exclusion_rules": [
+    "外部 GPU 抢占导致注入时序失真（记录抢占起止时间，写 exclusion log）",
+    "磁盘/网络故障导致事件记录不完整且无法对拍（保留原始日志）",
+    "任何被排除的 run 必须在 exclusion log 中给出原因，不静默删除"
+  ],
+  "stop_rules": [
+    "RewardTxn 出现首个 invalid committed step 时立即停止该 cell 并进入根因分析，不继续凑样本",
+    "预注册安全门禁（resource_gate）失败时拒绝启动",
+    "禁止因结果好看而提前停止"
+  ],
+  "gates": [
+    "至少两个独立系统边界出现可复现错误",
+    "至少一类错误在完整组 + 普通 dedup 后仍然存在",
+    "RewardTxn 真实注入与 30,000 次 trace 均为 0 invalid commit",
+    "每切点 ≥1,500 次；聚合按 rule of three 给 95% 失败率上界（≈10^-4），单切点按实际 n 单独报告上界"
+  ],
+  "statistics": {
+    "proportion_ci": "Wilson / Clopper-Pearson 95%",
+    "trace_randomization_dims": ["kill_time", "ack_loss", "attempt_order", "revision", "group_size", "checkpoint_delay"],
+    "oracle": "附录 C.2：混版本 committed 组 / StepToken 重复或缺失 / checkpoint hash 绑定不符 / 错误 reward 进入 committed gradient"
+  }
+}

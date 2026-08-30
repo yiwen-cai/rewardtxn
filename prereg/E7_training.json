@@ -1,0 +1,47 @@
+{
+  "experiment": "E7",
+  "name": "训练语义与多 seed",
+  "status": "pending_pilot",
+  "groups": ["Clean Oracle", "Clean RewardTxn", "Faulted Default", "Faulted B5", "Faulted RewardTxn"],
+  "seeds": [17, 29, 42, 73, 101],
+  "config": {
+    "model": "Qwen2.5-1.5B-Instruct",
+    "dataset": "DAPO-Math-17k + GSM8K (划分见 prereg/eval_splits/)",
+    "K": 8,
+    "U": 4,
+    "gpus": 4,
+    "steps": ">=500（资源允许延长至 1,000）",
+    "eval_every_steps": 50,
+    "fault_schedule": "prereg/fault_schedules/e7-s{seed}-faulted.json，同 seed 三组 Faulted 变体播放完全相同 schedule"
+  },
+  "endpoints": {
+    "primary": ["最终评测准确率", "代码 verifier 为 pass@1"],
+    "secondary": ["loss MAE（仅辅助）", "梯度 cosine", "有效样本率", "wall-clock-to-quality"],
+    "note": "reward AUC 仅用于可选 learned judge 边界实验，不作为确定性 verifier 主指标"
+  },
+  "equivalence": {
+    "test": "TOST（不是'不显著'=等价）",
+    "margin": "见 tost_margin.json（pilot 后冻结为单一值，禁止事后二选一）",
+    "pairs": "Clean RewardTxn vs Clean Oracle"
+  },
+  "faulted_comparison": {
+    "test": "同 seed 配对比较，均值 + 95% CI + 效果量",
+    "claim_rule": "若 Faulted Default 无显著学习退化，不宣称 RewardTxn 提升模型质量，只主张系统语义正确性/可恢复性/资源节省"
+  },
+  "exclusion_rules": [
+    "schedule 播放失败（事件未注入或注入错步）的 run 排除并记 exclusion log",
+    "资源抢占导致超过 30% steps 无效的 run 排除"
+  ],
+  "stop_rules": [
+    "Clean RewardTxn 未通过等价性时先定位协议是否改变数据顺序/样本分布，不能用更多 seed 掩盖",
+    "到达步数或预注册停止条件即停"
+  ],
+  "gates": [
+    "clean 等价性通过预注册 TOST",
+    "Faulted 组不劣于 oracle margin，或如实降级为系统正确性论文"
+  ],
+  "statistics": {
+    "equivalence_ci": "TOST 90% CI（等价性检验双侧）",
+    "paired_ci": "paired bootstrap 10,000"
+  }
+}

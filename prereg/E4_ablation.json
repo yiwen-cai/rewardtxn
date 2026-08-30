@@ -1,0 +1,37 @@
+{
+  "experiment": "E4",
+  "name": "逐模块消融 (A0–A7)",
+  "status": "pending_pilot",
+  "sample_sizes": {
+    "deterministic_per_variant_fault": 100,
+    "real_system_faults_per_variant": "1-2 个直接相关故障",
+    "real_system_reps_per_cell": 10
+  },
+  "variants": {
+    "A0": {"removed": "无（完整 RewardTxn）", "expected": "零 invalid commit，最低正确恢复成本"},
+    "A1": {"removed": "Group Seal/revision check", "expected": "完整混版本组可进入训练"},
+    "A2": {"removed": "Reward CAS", "expected": "并发写产生多份权威结果"},
+    "A3": {"removed": "epoch/attempt fencing（保留 CAS）", "expected": "迟到旧 attempt 有机会覆盖或复活状态"},
+    "A4": {"removed": "checkpoint-bound StepToken", "expected": "恢复无法唯一判断 committed step"},
+    "A5": {"removed": "Reconciler（latest checkpoint 直接重启）", "expected": "重复、丢失或恢复空转"},
+    "A6": {"removed": "Selective Replay（换 whole-step replay）", "expected": "正确性相同但重算成本显著升高"},
+    "A7": {"removed": "group-RM（换 single-sample RM）", "expected": "持久审计可修正，但已返回训练器的 reward 无法撤回"}
+  },
+  "exclusion_rules": [
+    "同一变体多次只移除一个模块；配置与 A0 完全一致，否则排除",
+    "feature flag 未按附录 A 独立开关时排除"
+  ],
+  "stop_rules": [
+    "预注册反例出现即记录（正例证据），不提前终止该 cell 的剩余重复",
+    "资源门禁失败拒绝启动"
+  ],
+  "gates": [
+    "每个核心 correctness 模块至少一个预注册反例",
+    "纯性能模块（A6）需显著效果量"
+  ],
+  "statistics": {
+    "correctness_ci": "Wilson 95%",
+    "performance_ci": "paired bootstrap 95% + Cliff's delta",
+    "multi_comparison": "Holm–Bonferroni"
+  }
+}
