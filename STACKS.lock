@@ -4,6 +4,15 @@
 # commit SHA 已通过 git rev-parse 核对。容器 registry digest 与本地 image ID
 # 是不同标识；正式 run 以 freeze_paper_inputs.py 从本机 Docker 和输入内容生成的清单为准。
 
+# paper-e0 冻结标记 (2026-08-30T16:14:19+08:00)
+# git tag: paper-e0 @ commit d667a86f999af503ac33aac78729985fde1ba7a6
+# E2 全量 30k trace 验证完成（门禁 PASS）
+# 关键镜像 digest:
+#   - slime v0.3.1: local_image_id sha256:420e89724ba1...
+#   - areal-runtime v2.0.0-sglang: local_image_id sha256:c0573bb8412a...
+#   - ⚠️ 勿用 slime latest 旧镜像 sha256:8b75cc58197e...
+# 下一步: prereg 冻结 (tost_margin.json) + GPU pilot
+
 stacks:
   slime:
     repo: https://github.com/THUDM/slime
