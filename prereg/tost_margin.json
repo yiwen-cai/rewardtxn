@@ -4,10 +4,10 @@
   "status": "pending_pilot",
   "confidence_unit": "absolute percentage points",
   "proposed_margin_pp": 1.0,
-  "frozen_margin_pp": null,
+  "frozen_margin_pp": 1.0,
   "alpha_each_one_sided": 0.05,
-  "frozen_at": null,
-  "frozen_commit": null,
+  "frozen_at": "2026-09-02T02:49:17.005430+00:00",
+  "frozen_commit": "ca73c31c8d9b955d8c110fafe546f85dc9a60591",
   "rule": "pilot 后、查看正式结果前冻结一个正数 margin_pp；首选 1.0 绝对百分点。pilot 只判断该 margin 下固定 5 seeds 能否达到功效/精度门禁，不允许改用 SD 倍数或查看正式结果后改 margin。",
   "faulted_noninferiority": {
     "endpoint": "final_eval_accuracy",
@@ -20,5 +20,12 @@
     "loss_mae": "仅作辅助指标，不作为等价性主判据",
     "report": "原始点或 seed 曲线，不只画均值柱状图"
   },
-  "changelog": []
+  "changelog": [
+    {
+      "action": "freeze_margin_and_commit",
+      "margin_pp": 1.0,
+      "commit": "ca73c31c8d9b955d8c110fafe546f85dc9a60591",
+      "timestamp": "2026-09-02T02:49:17.005430+00:00"
+    }
+  ]
 }
