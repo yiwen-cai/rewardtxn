@@ -46,13 +46,20 @@ case "${BASELINE_MODE}" in
          exit 2
       fi
       ;;
+   group_rm)
+      [ "${RTX_SEAL:-0}" = "0" ] && [ "${RTX_GROUP_RM:-0}" = "1" ] \
+         && [ "${RTX_SEAL_AUTO_FIX:-0}" = "0" ] \
+         || { echo "group_rm requires RTX_SEAL=0 RTX_GROUP_RM=1 RTX_SEAL_AUTO_FIX=0" >&2; exit 2; }
+      [ "${CUSTOM_RM}" = "day2_custom_rm.rm_function" ] \
+         || { echo "group_rm requires RTX_CUSTOM_RM=day2_custom_rm.rm_function" >&2; exit 2; }
+      ;;
    b1|b2|b3|b4|b5)
       if [ "${PAPER_MODE}" = "1" ]; then
          echo "baseline ${BASELINE_MODE}: mechanism implementation missing; formal run refused" >&2
          exit 2
       fi
       ;;
-   *) echo "RTX_BASELINE_MODE must be b0..b6 (got ${BASELINE_MODE})" >&2; exit 2 ;;
+   *) echo "RTX_BASELINE_MODE must be b0..b6 or group_rm (got ${BASELINE_MODE})" >&2; exit 2 ;;
 esac
 if [ -n "${SCHEDULE_PATH}" ] && [ ! -f "${SCHEDULE_PATH}" ]; then
    echo "RTX_SCHEDULE does not exist in container: ${SCHEDULE_PATH}" >&2
@@ -67,13 +74,13 @@ echo "[train] baseline=${BASELINE_MODE} seed=${SEED} schedule=${SCHEDULE_PATH:-n
 # Memory/I/O guardrails.  The previous slime default was 512 requests per
 # engine; with three rollout engines that allowed 1536 in-flight requests and
 # let fully-async retain a large Python/Ray backlog.
-SGLANG_CONCURRENCY=${RTX_SGLANG_CONCURRENCY:-64}
+SGLANG_CONCURRENCY=${RTX_SGLANG_CONCURRENCY:-24}
 RAY_OBJECT_STORE_MEMORY=${RTX_RAY_OBJECT_STORE_MEMORY:-17179869184}  # 16 GiB
 RAY_TMP_DIR=${RTX_RAY_TMP_DIR:-/tmp/rtx-ray}
 RAY_PLASMA_DIR=${RTX_RAY_PLASMA_DIR:-/dev/shm}
 RAY_SPILL_DIR=${RTX_RAY_SPILL_DIR:-${RAY_TMP_DIR}/spill}
-MAX_TOKENS_PER_GPU=${RTX_MAX_TOKENS_PER_GPU:-4096}
-SGLANG_MEM_FRACTION_STATIC=${RTX_SGLANG_MEM_FRACTION_STATIC:-0.55}
+MAX_TOKENS_PER_GPU=${RTX_MAX_TOKENS_PER_GPU:-3072}
+SGLANG_MEM_FRACTION_STATIC=${RTX_SGLANG_MEM_FRACTION_STATIC:-0.45}
 NO_SAVE_OPTIM=${RTX_NO_SAVE_OPTIM:-0}
 FULLY_ASYNC=${RTX_FULLY_ASYNC:-1}
 # Keep the latest two completed full checkpoints; the previous one is the
@@ -92,6 +99,15 @@ CKPT_ARGS=(
    --save "${SAVE_DIR}"
    --save-interval ${RTX_SAVE_INTERVAL:-10}
 )
+
+# Save HuggingFace checkpoints alongside Megatron checkpoints for direct
+# evaluation without conversion.  HF checkpoints are saved every N iterations
+# (same as Megatron save-interval) to ${SAVE_DIR}/iter_{rollout_id:07d}_hf/.
+# DEFAULT: Disabled (RTX_SAVE_HF=0) to save disk space. Each HF checkpoint is ~3GB.
+if [ "${RTX_SAVE_HF:-0}" = "1" ]; then
+   CKPT_ARGS+=(--save-hf "${SAVE_DIR}/iter_{rollout_id:07d}_hf")
+fi
+
 if [ "${NO_SAVE_OPTIM}" = "1" ]; then
    # Appropriate for non-resumable long baselines only.  Phase 3B recovery
    # must leave this disabled because optimizer state is needed for --load.
@@ -157,8 +173,9 @@ GRPO_ARGS=(
 
 OPTIMIZER_ARGS=(
    --optimizer adam
-   --lr 1e-4
+   --lr "${RTX_LR:-5e-5}"
    --lr-decay-style constant
+   --lr-warmup-iters 10
    --weight-decay 0.1
    --adam-beta1 0.9
    --adam-beta2 0.98
@@ -176,6 +193,7 @@ MISC_ARGS=(
    --accumulate-allreduce-grads-in-fp32
    --attention-softmax-in-fp32
    --attention-backend flash
+   --clip-grad 0.5
 )
 
 NUM_GPUS=${NUM_GPUS:-4}
@@ -237,7 +255,7 @@ ROLLOUT_GPUS=${ROLLOUT_GPUS:-$((NUM_GPUS - ACTOR_GPUS))}
 
 ray job submit --address="http://127.0.0.1:8265" \
    --runtime-env-json="${RUNTIME_ENV_JSON}" \
-   -- python3 train_async.py \
+   -- python3 "${RTX_TRAIN_ENTRY:-train_async.py}" \
    --actor-num-nodes 1 \
    --actor-num-gpus-per-node "${ACTOR_GPUS}" \
    --rollout-num-gpus "${ROLLOUT_GPUS}" \

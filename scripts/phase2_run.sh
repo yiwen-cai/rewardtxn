@@ -59,6 +59,14 @@ case "${BASELINE_MODE}" in
       exit 2
     fi
     ;;
+  group_rm)
+    SEAL=${RTX_SEAL:-0}; GROUP_RM=${RTX_GROUP_RM:-1}; SEAL_AUTO_FIX=${RTX_SEAL_AUTO_FIX:-0}
+    [ "${SEAL}/${GROUP_RM}/${SEAL_AUTO_FIX}" = "0/1/0" ] \
+      || { echo "group_rm requires RTX_SEAL=0 RTX_GROUP_RM=1 RTX_SEAL_AUTO_FIX=0" >&2; exit 2; }
+    CUSTOM_RM=${RTX_CUSTOM_RM:-day2_custom_rm.rm_function}
+    [ "${CUSTOM_RM}" = "day2_custom_rm.rm_function" ] \
+      || { echo "group_rm requires RTX_CUSTOM_RM=day2_custom_rm.rm_function" >&2; exit 2; }
+    ;;
   b1|b2|b3|b4|b5)
     if [ "${PAPER_MODE}" = "1" ]; then
       echo "baseline ${BASELINE_MODE}: mechanism implementation missing; formal run refused" >&2
@@ -67,7 +75,7 @@ case "${BASELINE_MODE}" in
     SEAL=${RTX_SEAL:-0}; GROUP_RM=${RTX_GROUP_RM:-0}; SEAL_AUTO_FIX=${RTX_SEAL_AUTO_FIX:-0}
     CUSTOM_RM=${RTX_CUSTOM_RM:-day2_custom_rm.rm_function}
     ;;
-  *) echo "RTX_BASELINE_MODE must be b0..b6 (got ${BASELINE_MODE})" >&2; exit 2 ;;
+  *) echo "RTX_BASELINE_MODE must be b0..b6 or group_rm (got ${BASELINE_MODE})" >&2; exit 2 ;;
 esac
 
 GPU_CSV=$(python3 - "${RAW_GPUS}" <<'EOF'
@@ -92,7 +100,7 @@ EOF
 NUM_GPUS=${RTX_NUM_GPUS:-${GPU_COUNT}}
 [ "${NUM_GPUS}" = "${GPU_COUNT}" ] \
   || { echo "RTX_NUM_GPUS=${NUM_GPUS} does not match RTX_GPUS count ${GPU_COUNT}" >&2; exit 2; }
-DOCKER_GPUS="device=${GPU_CSV}"
+DOCKER_GPUS="\"device=${GPU_CSV}\""
 
 host_path_for_container() {
   case "$1" in
@@ -240,9 +248,14 @@ meta = {
     "created_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
     "params": {
         "num_rollout": int(nroll), "rollout_batch_size": 4, "n_samples_per_prompt": 8,
-        "global_batch_size": 32, "lr": 1e-4, "kl_loss_coef": 0.01,
+        "global_batch_size": 32, "lr": float(os.environ.get("RTX_LR", "5e-5")), "kl_loss_coef": 0.01,
+        "train_entry": os.environ.get("RTX_TRAIN_ENTRY", "train_async.py"),
+        "use_rollout_logprobs": "--use-rollout-logprobs" in os.environ.get("RTX_EXTRA_MODEL_ARGS", "").split(),
+        "restart_protocol_sha256": os.environ.get("RTX_RESTART_PROTOCOL_SHA256"),
+        "fully_async_rollout": os.environ.get("RTX_FULLY_ASYNC", "1") == "1",
+        "save_hf": os.environ.get("RTX_SAVE_HF", "0") == "1",
         "save_interval": int(os.environ.get("RTX_SAVE_INTERVAL", "10")),
-        "sglang_server_concurrency": int(os.environ.get("RTX_SGLANG_CONCURRENCY", "64")),
+        "sglang_server_concurrency": int(os.environ.get("RTX_SGLANG_CONCURRENCY", "24")),
         "ray_object_store_memory": int(os.environ.get("RTX_RAY_OBJECT_STORE_MEMORY", "17179869184")),
         "checkpoint_keep": int(os.environ.get("RTX_CKPT_KEEP", "2")),
         "no_save_optim": os.environ.get("RTX_NO_SAVE_OPTIM", "0") == "1",
@@ -287,6 +300,8 @@ fi
 
 docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d --name "$NAME" --gpus "$DOCKER_GPUS" -e NUM_GPUS="$NUM_GPUS" \
+  -e CUDA_VISIBLE_DEVICES=0,1,2,3 \
+  -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   -e ACTOR_GPUS="${RTX_ACTOR_GPUS:-1}" \
   -e ROLLOUT_GPUS="${RTX_ROLLOUT_GPUS:-$((NUM_GPUS - 1))}" \
   -e SAVE_DIR="${RTX_SAVE_DIR:-/workspace/runs/$EXP_ID/checkpoints}" \
@@ -303,7 +318,7 @@ docker run -d --name "$NAME" --gpus "$DOCKER_GPUS" -e NUM_GPUS="$NUM_GPUS" \
   -e RTX_PAPER_MODE="$PAPER_MODE" \
   -e RTX_EXTRA_MODEL_ARGS="${RTX_EXTRA_MODEL_ARGS:-}" \
   -e RTX_SAVE_INTERVAL="${RTX_SAVE_INTERVAL:-10}" \
-  -e RTX_SGLANG_CONCURRENCY="${RTX_SGLANG_CONCURRENCY:-64}" \
+  -e RTX_SGLANG_CONCURRENCY="${RTX_SGLANG_CONCURRENCY:-24}" \
   -e RTX_RAY_OBJECT_STORE_MEMORY="${RTX_RAY_OBJECT_STORE_MEMORY:-17179869184}" \
   -e RTX_RAY_PLASMA_DIR="${RTX_RAY_PLASMA_DIR:-/dev/shm}" \
   -e RTX_RAY_TMP_DIR="${RTX_RAY_TMP_DIR:-/rtx-scratch/ray}" \
@@ -314,6 +329,9 @@ docker run -d --name "$NAME" --gpus "$DOCKER_GPUS" -e NUM_GPUS="$NUM_GPUS" \
   -e RTX_CKPT_RETENTION_INTERVAL="${RTX_CKPT_RETENTION_INTERVAL:-15}" \
   -e RTX_CKPT_RETENTION_MIN_AGE="${RTX_CKPT_RETENTION_MIN_AGE:-30}" \
   -e RTX_FULLY_ASYNC="${RTX_FULLY_ASYNC:-1}" \
+  -e RTX_TRAIN_ENTRY="${RTX_TRAIN_ENTRY:-train_async.py}" \
+  -e RTX_LR="${RTX_LR:-5e-5}" \
+  -e RTX_SAVE_HF="${RTX_SAVE_HF:-0}" \
   -e RTX_MAX_TOKENS_PER_GPU="${RTX_MAX_TOKENS_PER_GPU:-4096}" \
   -e RTX_SGLANG_MEM_FRACTION_STATIC="${RTX_SGLANG_MEM_FRACTION_STATIC:-0.55}" \
   -e RTX_V2_MODE="${RTX_V2_MODE:-strict}" \
