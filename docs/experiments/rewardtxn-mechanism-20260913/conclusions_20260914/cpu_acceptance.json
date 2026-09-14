@@ -1,0 +1,14 @@
+{
+  "sample_rows_rechecked": 672000,
+  "duplicate_version_entries": 0,
+  "sample_aggregates_match": true,
+  "report_links_valid": true,
+  "parser_statistics_tests": 25,
+  "real_variants_validated": 7,
+  "formal_blocks": 21,
+  "warmup_blocks": 3,
+  "retained_blocks": 18,
+  "cpu_experiment_retimed": false,
+  "original_files_unchanged": 21800,
+  "figures_rebuilt_identically": 5
+}

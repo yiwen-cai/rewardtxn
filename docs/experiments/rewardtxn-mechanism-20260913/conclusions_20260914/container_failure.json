@@ -1,0 +1,243 @@
+{
+  "time": "2026-09-14T08:55:52.185324+08:00",
+  "container_state": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 128,
+    "Error": "failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error running hook #0: error running hook: exit status 1, stdout: , stderr: Auto-detected mode as 'legacy'\nnvidia-container-cli: detection error: nvml error: gpu requires reset: unknown",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "docker_run_exitcode": 125,
+  "training_started": false,
+  "resource_gate": {
+    "ts": 1789347311.180628,
+    "pass": true,
+    "thresholds": {
+      "min_pub_gb": 200,
+      "min_root_gb": 100,
+      "min_gpu_free_gb": 30,
+      "max_gpu_util_percent": 10.0,
+      "allow_compute_processes": false
+    },
+    "checks": {
+      "storage_public": {
+        "avail_gb": 401.0,
+        "min_gb": 200,
+        "pass": true
+      },
+      "storage_root": {
+        "avail_gb": 270.0,
+        "min_gb": 100,
+        "pass": true
+      },
+      "gpu_memory": {
+        "min_free_gb": 30,
+        "gpus": [
+          {
+            "index": 1,
+            "uuid": "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-57adc905-df4c-7006-349f-bfccb8f6f358",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          }
+        ],
+        "pass": true
+      },
+      "gpu_utilization": {
+        "max_percent": 10.0,
+        "gpus": [
+          {
+            "index": 1,
+            "uuid": "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 2,
+            "uuid": "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 3,
+            "uuid": "GPU-57adc905-df4c-7006-349f-bfccb8f6f358",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          },
+          {
+            "index": 4,
+            "uuid": "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605",
+            "free_gb": 79.2,
+            "used_gb": 0.0,
+            "utilization": 0.0,
+            "memory_pass": true,
+            "utilization_pass": true
+          }
+        ],
+        "pass": true
+      },
+      "gpu_compute_processes": {
+        "allow_existing": false,
+        "processes": [],
+        "query_errors": [],
+        "pass": true
+      }
+    },
+    "provenance": {
+      "cpu_numa": {
+        "model": "Intel(R) Xeon(R) Gold 6430",
+        "logical_cpus": 64,
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63
+        ],
+        "numa_nodes": [
+          {
+            "node": "node0",
+            "cpulist": "0-31"
+          },
+          {
+            "node": "node1",
+            "cpulist": "32-63"
+          }
+        ],
+        "numa_balancing": "1"
+      },
+      "io": [
+        {
+          "path": "/public",
+          "available_gb": 401.0,
+          "source": "/dev/nvme1n1p1",
+          "target": "/public",
+          "fstype": "ext4",
+          "options": "rw,relatime"
+        },
+        {
+          "path": "/",
+          "available_gb": 270.0,
+          "source": "/dev/nvme0n1p2",
+          "target": "/",
+          "fstype": "ext4",
+          "options": "rw,relatime"
+        },
+        {
+          "path": "/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191",
+          "available_gb": 270.0,
+          "source": "/dev/nvme0n1p2",
+          "target": "/",
+          "fstype": "ext4",
+          "options": "rw,relatime"
+        }
+      ]
+    },
+    "note": "\u6240\u6709\u68c0\u67e5\u901a\u8fc7\u624d\u5141\u8bb8\u542f\u52a8\u5b9e\u9a8c; RTX_SKIP_GATE=1 \u53ef\u8df3\u8fc7(\u4e0d\u63a8\u8350)"
+  },
+  "recovery_status_sha256": "a6d5c967cb1942cb7257fab7cfa29ee1a04d05f787c8e79c0f5c3791f21427d7",
+  "note": "Only GPU1-4 requested. OCI NVIDIA hook failed with nvml gpu requires reset; container remains Created. No automatic retry or GPU reset."
+}

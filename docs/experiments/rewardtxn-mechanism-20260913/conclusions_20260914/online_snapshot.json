@@ -1,0 +1,80 @@
+{
+  "captured_at": "2026-09-14T09:04:51.127663+08:00",
+  "batch": "/home/caiyiwen-rewardtxn-results/sqlite-s191-0913",
+  "freeze_sha256": "7785055aa762ecbccdfcb5db8862f9823e5f4d197170376336aca434b43e3e66",
+  "runs": {
+    "sqlite-00-R-s191": {
+      "status": "technical_success",
+      "steps": 500,
+      "seed": 191,
+      "unit": {
+        "label": "R",
+        "arm": "R",
+        "seed": 191,
+        "finished": "2026-09-13T15:53:02.309725+00:00",
+        "success_sha256": "25defdce9ca7f1e2006f4c47e104e95b1fe44bf2470ce5c95c4fa330b7e425a4"
+      },
+      "audit": {
+        "consumed": 16000,
+        "consumed_payload_coverage": 1.0,
+        "consumed_reward_mismatches": 0,
+        "consumed_source_label_and_rescore_mismatches": 0,
+        "unknown_attempt_terminal_count": 0
+      },
+      "source_sha256": {
+        "run_success.json": "25defdce9ca7f1e2006f4c47e104e95b1fe44bf2470ce5c95c4fa330b7e425a4",
+        "consumption_audit.json": "ee07ad2602614dcd46c3fab5a21b83eada1f1fc51580f668274f7d0675083d46",
+        "sqlite_unit.json": "15429ab3c88b4b47b7458c96ab45e920f50e820ba16bacd6957e5635018d55a1",
+        "evaluation.json": "9facdf7ca9c075e4a322b17b91ca3619dde7bb36d68d4dbd04a4572e9ee4d920",
+        "meta.json": "f2313f3be71846a380e83358403bb598bc15f0199aba56922903fa3272cab800"
+      }
+    },
+    "sqlite-01-DBM-s191": {
+      "status": "technical_success",
+      "steps": 500,
+      "seed": 191,
+      "unit": {
+        "label": "DBM",
+        "arm": "DBM",
+        "seed": 191,
+        "finished": "2026-09-13T16:23:53.122157+00:00",
+        "success_sha256": "01d30e73f462595ecfd8d201d34e07667447bb8137762c44914f7d13ddd539fa"
+      },
+      "audit": {
+        "consumed": 16000,
+        "consumed_payload_coverage": 1.0,
+        "consumed_reward_mismatches": 0,
+        "consumed_source_label_and_rescore_mismatches": 0,
+        "unknown_attempt_terminal_count": 0
+      },
+      "source_sha256": {
+        "run_success.json": "01d30e73f462595ecfd8d201d34e07667447bb8137762c44914f7d13ddd539fa",
+        "consumption_audit.json": "9bfa24c6e40c5ab3e9be2b646dae405240b98945d77277478f20d0b5774230d9",
+        "sqlite_unit.json": "189e4191b71d4ad1eeda99ec357dec4dd3c6430623800574927d74d91c29d436",
+        "evaluation.json": "735e8dd580f7c16a9c198f4f5125594a7ea2721840a8a420ada722e333091013",
+        "meta.json": "d8133c72992b75c43cbe650c9a2cab433ea74fc7867cd430654b24e1dee976a7"
+      }
+    }
+  },
+  "original_status": {
+    "state": "failed",
+    "time": "2026-09-13T16:38:33.322081+00:00",
+    "current": {
+      "index": 2,
+      "label": "R_repeat",
+      "arm": "R",
+      "seed": 191
+    },
+    "error": "RuntimeError(('GPU contention', [{'gpu_uuid': 'GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', 'pid': 3362874, 'process_name': 'VLLM::Worker', 'used_gpu_memory_mib': 38972.0}]))",
+    "traceback": "Traceback (most recent call last):\n  File \"/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-mechanism-20260913/sqlite_feasibility/run.py\", line 127, in work\n    path = Path(runner.run_one(BATCH, arm, 191, 500, index, phase_override='sqlite', total_runs=3))\n  File \"/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_run.py\", line 198, in run_one\n    state=wait_container(name,client,supervisor,run,training=True); logger.wait(timeout=10)\n  File \"/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_run.py\", line 155, in wait_container\n    state=_wait_container(name,client,supervisor,run,training=True)\n  File \"/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_run.py\", line 145, in _wait_container\n    client.fatal('foreign_gpu_process',processes=foreign); raise RuntimeError(('GPU contention',foreign))\nRuntimeError: ('GPU contention', [{'gpu_uuid': 'GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', 'pid': 3362874, 'process_name': 'VLLM::Worker', 'used_gpu_memory_mib': 38972.0}])\n",
+    "automatic_retry": false
+  },
+  "recovery_status": {
+    "state": "failed",
+    "time": "2026-09-14T00:55:12.922800+00:00",
+    "error": "CalledProcessError(125, ['docker', 'run', '--gpus', '\"device=1,2,3,4\"', '--shm-size=64g', '--ulimit', 'memlock=-1', '--ulimit', 'stack=67108864', '-v', '/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit:/workspace:ro', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913:/home/caiyiwen-rewardtxn-results/sqlite-s191-0913', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/slime:/root/slime', '-v', '/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/models:/root/models:ro', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/ray:/rtx-ray', '-e', 'PYTHONDONTWRITEBYTECODE=1', '-e', 'PYTHONUNBUFFERED=1', '-e', 'PYTHONPATH=/workspace/scripts:/root/slime:/root/Megatron-LM', '-w', '/root/slime', '-v', '/public/home/caiyiwen/rewardtxn:/public/home/caiyiwen/rewardtxn:ro', '-d', '--name', 'rtxa-86a4a277410c', '-e', 'NUM_GPUS=4', '-e', 'CUDA_VISIBLE_DEVICES=0,1,2,3', '-e', 'ACTOR_GPUS=1', '-e', 'ROLLOUT_GPUS=3', '-e', 'PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True', '-e', 'ABLATION_RUN_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191', '-e', 'ABLATION_VARIANT=R', '-e', 'ABLATION_STEPS=500', '-e', 'ABLATION_RUN_NONCE=86a4a277410c4771a36739d950d012a3', '-e', 'ABLATION_CONTROL_SOCKET=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/control.sock', '-e', 'ABLATION_RM_LIMITS={\"log_bytes\": 134217728, \"db_bytes\": 134217728, \"seen_ids\": 100000, \"rss_bytes\": 17179869184, \"events\": 1000000}', '-e', 'RTX_RUN_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191', '-e', 'RTX_CAS_INDEX_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/cas', '-e', 'RTX_BASELINE_MODE=b1', '-e', 'RTX_CUSTOM_RM=ablation_rm.rm_function', '-e', 'RTX_FAULT=none', '-e', 'RTX_FAULT_START=-1', '-e', 'RTX_FAULT_END=-1', '-e', 'RTX_FAULT_WINDOWS=', '-e', 'RTX_SEAL=1', '-e', 'RTX_SEAL_AUTO_FIX=1', '-e', 'RTX_GROUP_RM=1', '-e', 'RTX_GROUP_SIZE=8', '-e', 'RTX_SEED=191', '-e', 'RTX_NUM_ROLLOUT=500', '-e', 'RTX_SAVE_INTERVAL=50', '-e', 'RTX_SAVE_HF=1', '-e', 'RTX_NO_SAVE_OPTIM=1', '-e', 'RTX_CKPT_KEEP=0', '-e', 'RTX_LR=1e-6', '-e', 'RTX_FULLY_ASYNC=1', '-e', 'RTX_TRAIN_ENTRY=train_async.py', '-e', 'RTX_MAX_TOKENS_PER_GPU=3072', '-e', 'RTX_SGLANG_MEM_FRACTION_STATIC=0.45', '-e', 'RTX_SGLANG_CONCURRENCY=24', '-e', 'RTX_PAPER_MODE=0', '-e', 'RTX_RAY_TMP_DIR=/rtx-ray', '-e', 'RTX_RAY_SPILL_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/spill', '-e', 'RTX_RAY_OBJECT_STORE_MEMORY=17179869184', '-e', 'MODEL_DIR=/root/models/Qwen2.5-0.5B-Instruct', '-e', 'RTX_MODEL_CONFIG=qwen2.5-0.5B.sh', '-e', 'DATA_PATH=/workspace/runs/diagnosis-20260910/train.jsonl', '-e', 'SAVE_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/checkpoints', '-e', 'RTX_EXTRA_MODEL_ARGS=--use-rollout-logprobs --save-debug-rollout-data /home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/rollout_debug/{rollout_id}.pt --check-weight-update-equal', '-e', 'ABLATION_ACTOR_GPU_UUID=GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', 'sha256:420e89724ba199e5c48c70214d956afb7e98af9b92a21af625462e7ecdce04e2', 'bash', '-c', 'pip install -e . --no-deps -q && bash /root/slime/diagnostic_day2.sh'])",
+    "traceback": "Traceback (most recent call last):\n  File \"docs/experiments/rewardtxn-mechanism-20260913/sqlite_feasibility/recover_last.py\", line 66, in main\n    path = Path(runner.run_one(BATCH, 'R', 191, 500, 2, phase_override='recover1', total_runs=3))\n  File \"/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_run.py\", line 195, in run_one\n    subprocess.run(command,check=True,stdout=subprocess.DEVNULL); started.append(name)\n  File \"/usr/lib/python3.8/subprocess.py\", line 516, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command '['docker', 'run', '--gpus', '\"device=1,2,3,4\"', '--shm-size=64g', '--ulimit', 'memlock=-1', '--ulimit', 'stack=67108864', '-v', '/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit:/workspace:ro', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913:/home/caiyiwen-rewardtxn-results/sqlite-s191-0913', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/slime:/root/slime', '-v', '/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/models:/root/models:ro', '-v', '/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/ray:/rtx-ray', '-e', 'PYTHONDONTWRITEBYTECODE=1', '-e', 'PYTHONUNBUFFERED=1', '-e', 'PYTHONPATH=/workspace/scripts:/root/slime:/root/Megatron-LM', '-w', '/root/slime', '-v', '/public/home/caiyiwen/rewardtxn:/public/home/caiyiwen/rewardtxn:ro', '-d', '--name', 'rtxa-86a4a277410c', '-e', 'NUM_GPUS=4', '-e', 'CUDA_VISIBLE_DEVICES=0,1,2,3', '-e', 'ACTOR_GPUS=1', '-e', 'ROLLOUT_GPUS=3', '-e', 'PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True', '-e', 'ABLATION_RUN_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191', '-e', 'ABLATION_VARIANT=R', '-e', 'ABLATION_STEPS=500', '-e', 'ABLATION_RUN_NONCE=86a4a277410c4771a36739d950d012a3', '-e', 'ABLATION_CONTROL_SOCKET=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/control.sock', '-e', 'ABLATION_RM_LIMITS={\"log_bytes\": 134217728, \"db_bytes\": 134217728, \"seen_ids\": 100000, \"rss_bytes\": 17179869184, \"events\": 1000000}', '-e', 'RTX_RUN_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191', '-e', 'RTX_CAS_INDEX_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/cas', '-e', 'RTX_BASELINE_MODE=b1', '-e', 'RTX_CUSTOM_RM=ablation_rm.rm_function', '-e', 'RTX_FAULT=none', '-e', 'RTX_FAULT_START=-1', '-e', 'RTX_FAULT_END=-1', '-e', 'RTX_FAULT_WINDOWS=', '-e', 'RTX_SEAL=1', '-e', 'RTX_SEAL_AUTO_FIX=1', '-e', 'RTX_GROUP_RM=1', '-e', 'RTX_GROUP_SIZE=8', '-e', 'RTX_SEED=191', '-e', 'RTX_NUM_ROLLOUT=500', '-e', 'RTX_SAVE_INTERVAL=50', '-e', 'RTX_SAVE_HF=1', '-e', 'RTX_NO_SAVE_OPTIM=1', '-e', 'RTX_CKPT_KEEP=0', '-e', 'RTX_LR=1e-6', '-e', 'RTX_FULLY_ASYNC=1', '-e', 'RTX_TRAIN_ENTRY=train_async.py', '-e', 'RTX_MAX_TOKENS_PER_GPU=3072', '-e', 'RTX_SGLANG_MEM_FRACTION_STATIC=0.45', '-e', 'RTX_SGLANG_CONCURRENCY=24', '-e', 'RTX_PAPER_MODE=0', '-e', 'RTX_RAY_TMP_DIR=/rtx-ray', '-e', 'RTX_RAY_SPILL_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/spill', '-e', 'RTX_RAY_OBJECT_STORE_MEMORY=17179869184', '-e', 'MODEL_DIR=/root/models/Qwen2.5-0.5B-Instruct', '-e', 'RTX_MODEL_CONFIG=qwen2.5-0.5B.sh', '-e', 'DATA_PATH=/workspace/runs/diagnosis-20260910/train.jsonl', '-e', 'SAVE_DIR=/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/checkpoints', '-e', 'RTX_EXTRA_MODEL_ARGS=--use-rollout-logprobs --save-debug-rollout-data /home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/recover1-02-R-s191/rollout_debug/{rollout_id}.pt --check-weight-update-equal', '-e', 'ABLATION_ACTOR_GPU_UUID=GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', 'sha256:420e89724ba199e5c48c70214d956afb7e98af9b92a21af625462e7ecdce04e2', 'bash', '-c', 'pip install -e . --no-deps -q && bash /root/slime/diagnostic_day2.sh']' returned non-zero exit status 125.\n",
+    "automatic_retry": false
+  },
+  "limitations": "Receipt snapshot, not a completed three-run independent audit. Full artifacts remain at source paths."
+}
