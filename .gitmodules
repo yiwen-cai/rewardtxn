@@ -1,0 +1,3 @@
+[submodule "tq_main"]
+	path = tq_main
+	url = git@github.com:Ascend/TransferQueue
