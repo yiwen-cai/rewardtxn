@@ -1,0 +1,437 @@
+{
+  "schema_version": 1,
+  "name": "rewardtxn-async-sync-plan-20260914",
+  "created_at_utc": "2026-09-14T08:32:54.349995+00:00",
+  "status": "proposal_only_not_implemented",
+  "authorization_scope": "prepare_plan_only",
+  "execution_started": false,
+  "training_performed_for_this_plan": false,
+  "runnable": false,
+  "execution_freeze": null,
+  "question": "取消跨批生成与训练重叠，是否缩小 R 相对 Oracle 的终点准确率差距？",
+  "interpretation": "单个新 seed 的方法×执行方式机制筛查；不确认稳定回退、显著性、等效性或唯一根因。",
+  "conditions": [
+    {
+      "id": "OA",
+      "method": "O",
+      "execution_mode": "fully_async",
+      "training_seed": 193,
+      "training_steps": 500
+    },
+    {
+      "id": "RA",
+      "method": "R",
+      "execution_mode": "fully_async",
+      "training_seed": 193,
+      "training_steps": 500
+    },
+    {
+      "id": "OS",
+      "method": "O",
+      "execution_mode": "batch_sync",
+      "training_seed": 193,
+      "training_steps": 500
+    },
+    {
+      "id": "RS",
+      "method": "R",
+      "execution_mode": "batch_sync",
+      "training_seed": 193,
+      "training_steps": 500
+    }
+  ],
+  "order": {
+    "initial": [
+      "OA",
+      "RA",
+      "OS",
+      "RS"
+    ],
+    "algorithm": "Python random.Random(seed).shuffle(list)",
+    "randomization_seed": 20260914,
+    "fixed_result": [
+      "OA",
+      "RA",
+      "OS",
+      "RS"
+    ],
+    "rerandomize": false,
+    "limitation": "单个串行顺序不能排除时段效应。"
+  },
+  "seed_selection": {
+    "new_training_seed": 193,
+    "rollout_and_data_seed": 42,
+    "evaluation_seed": 29,
+    "checked_published_and_confirmation_seeds": [
+      11,
+      23,
+      37,
+      47,
+      59,
+      67,
+      79,
+      83,
+      97,
+      107,
+      127,
+      139,
+      149,
+      163,
+      179,
+      191
+    ],
+    "scope": "仅已查公开运行清单与原确认计划；不声称搜索全部历史项目。"
+  },
+  "baseline_actual_arguments": {
+    "path": "/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/sqlite-00-R-s191/driver_args.json",
+    "sha256": "89f3f681c7e56bec90e12e104e661ddeb0917aa4884fd1b086904cbcc24282b4",
+    "historical_training_seed": 191,
+    "reuse": "只继承下列共同训练参数，不复制旧输出目录、进程状态或完整 argv。"
+  },
+  "common_proposed_arguments": {
+    "rollout_seed": 42,
+    "rollout_batch_size": 4,
+    "n_samples_per_prompt": 8,
+    "global_batch_size": 32,
+    "num_rollout": 500,
+    "lr": 1e-06,
+    "lr_decay_style": "constant",
+    "lr_warmup_iters": 10,
+    "adam_beta1": 0.9,
+    "adam_beta2": 0.98,
+    "adam_eps": 1e-08,
+    "weight_decay": 0.1,
+    "clip_grad": 0.5,
+    "eps_clip": 0.2,
+    "eps_clip_high": 0.28,
+    "rollout_temperature": 1.0,
+    "rollout_top_p": 1.0,
+    "rollout_top_k": -1,
+    "rollout_max_response_len": 1024,
+    "sglang_server_concurrency": 24,
+    "update_weights_interval": 1,
+    "use_rollout_logprobs": true,
+    "use_kl_loss": true,
+    "kl_loss_coef": 0.01,
+    "kl_coef": 0.0,
+    "kl_loss_type": "low_var_kl",
+    "entropy_coef": 0.0,
+    "use_dynamic_batch_size": true,
+    "max_tokens_per_gpu": 3072,
+    "offload_rollout": false,
+    "release_train": false,
+    "save_interval": 50,
+    "check_weight_update_equal": true,
+    "use_tis": false,
+    "use_opsm": false,
+    "grpo_std_normalization": true,
+    "rewards_normalization": true,
+    "normalize_advantages": false,
+    "sglang_enable_deterministic_inference": false,
+    "rollout_global_dataset": true,
+    "rollout_shuffle": true,
+    "seed": 193
+  },
+  "method_contract": {
+    "O": "原 Oracle 路径",
+    "R": "原 RewardTxn 路径，磁盘 SQLite、SQL事务、CAS/Seal、原日志保留",
+    "excluded_interventions": [
+      "DBM",
+      "LITE",
+      "标签修正",
+      "PPO/优势/采样规则修改"
+    ]
+  },
+  "shared_execution": {
+    "candidate_starting_point": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit",
+    "candidate_is_released": false,
+    "new_implementation_required": true,
+    "same_final_driver_and_overlay_for_all_conditions": true,
+    "historical_base_image_digest": "sha256:420e89724ba199e5c48c70214d956afb7e98af9b92a21af625462e7ecdce04e2",
+    "base_model_path": "/public/home/caiyiwen/rewardtxn/models/Qwen2.5-0.5B-Instruct",
+    "model_weights_rehashed_during_plan": false,
+    "training_data_path": "/public/home/caiyiwen/rewardtxn/runs/diagnosis-20260910/train.jsonl",
+    "fresh_base_model_and_workers_per_run": true,
+    "gpu_roles_physical_indices": {
+      "actor": [
+        1
+      ],
+      "rollout": [
+        2,
+        3,
+        4
+      ]
+    },
+    "gpu_uuids": "待实际运行预检绑定；本轮未查询 GPU 状态",
+    "storage": "同一结果盘的独立新目录；待实施时指定，不复用旧 run",
+    "keep_all_checkpoints": true,
+    "dispatch_contract": "共同题目源 shuffle/派发序列；异步沿用原完成消费策略，同步每批只派发下一组4题。",
+    "force_identical_consumed_order_or_responses": false,
+    "sync_contract": [
+      "禁用 driver 提前启动下一批以及持久 worker 跨批预取",
+      "当前权重获全部引擎确认后才派发本批4组，每组8回答",
+      "复用原 generate_and_rm_group 和方法 RM，生成及评分全部结束后才更新 actor",
+      "更新前无在途生成/RM，无跨批队列或待消费余项，不靠丢弃额外预生成回答达到零队列",
+      "等全部引擎确认新权重后才派发下一批；实际版本与事件屏障共同证明",
+      "任一同步合同无法证明或被违反即技术失败"
+    ],
+    "intervention_limit": "同步同时改变 freshness、实际并发和消费时序，不能单独识别滞后或 SQLite。"
+  },
+  "evaluation": {
+    "checkpoint": "iter_0000499_hf",
+    "split_path": "/public/home/caiyiwen/rewardtxn/runs/diagnosis-20260910/validation_split.json",
+    "questions": 100,
+    "decoding": "greedy",
+    "seed": 29,
+    "batch_size": 8,
+    "max_new_tokens": 2048,
+    "endpoint_only": true,
+    "reserved_test500_used": false
+  },
+  "observations": {
+    "all_steps": [
+      "完整消费批及样本映射",
+      "奖励与行为 logprob",
+      "已有 actor 聚合学习指标",
+      "生成/RM/训练耗时",
+      "派发/完成/消费/更新/逐引擎权重确认事件与实际版本",
+      "同步零队列/零在途屏障证据"
+    ],
+    "detailed_snapshot_steps_zero_based": [
+      0,
+      1,
+      49,
+      249,
+      499
+    ],
+    "detailed_snapshot_fields": [
+      "input_tokens",
+      "response_tokens",
+      "loss_mask",
+      "advantages",
+      "behavior_logprobs",
+      "reference_logprobs",
+      "actual_training_forward_logprobs",
+      "sample_microbatch_mapping"
+    ],
+    "actual_training_forward_hook_implemented": false,
+    "no_extra_forward": true,
+    "no_full_gradient_dump": true,
+    "same_observer_for_all_conditions": true,
+    "no_new_async_observation_barrier": true,
+    "existing_common_observer_overhead_limit_percent": 5,
+    "overhead_measured_for_proposed_implementation": false
+  },
+  "analysis": {
+    "units": "accuracy_percent; contrasts in percentage_points",
+    "delta_async_coefficients": {
+      "OA": -1,
+      "RA": 1,
+      "OS": 0,
+      "RS": 0
+    },
+    "delta_sync_coefficients": {
+      "OA": 0,
+      "RA": 0,
+      "OS": -1,
+      "RS": 1
+    },
+    "primary_interaction_coefficients": {
+      "OA": 1,
+      "RA": -1,
+      "OS": -1,
+      "RS": 1
+    },
+    "additional_contrasts": [
+      "RS-RA",
+      "OS-OA"
+    ],
+    "complete_all_four_before_quality_decision": true,
+    "decision_rules": [
+      "delta_async >= 0: 本 seed 未复现异步 R 负差，机制不确定",
+      "delta_async < 0 and interaction > 0: 差距缩小方向一致，不能证明因果根因",
+      "差距缩小但 RS <= RA: 不称 R 恢复，单列 Oracle 的下降",
+      "delta_async < 0 and interaction <= 0: 未观察到缓解，不作正式排除",
+      "任何单元或同步合同失败: 不作完整四格交互结论"
+    ],
+    "confidence_interval_or_significance_claim": false,
+    "equivalence_claim": false,
+    "auto_add_seeds": false,
+    "auto_retry": false,
+    "old_confirmation_results_unblinded": false
+  },
+  "future_engineering_preflight": {
+    "status": "proposed_not_started",
+    "conditions": [
+      "OA",
+      "RA",
+      "OS",
+      "RS"
+    ],
+    "steps_per_condition": 10,
+    "scheduler_total_steps": 500,
+    "quality_evaluation": false,
+    "models_reused_for_full_runs": false,
+    "checks": [
+      "真实同步屏障与权重版本",
+      "每步32条且组映射正确",
+      "step0/1实际 forward 数据落盘",
+      "退出与导出证据"
+    ],
+    "does_not_replace_old_candidate_release_gates": true
+  },
+  "budget": {
+    "full_runs": 4,
+    "full_training_steps_total": 2000,
+    "full_consumed_responses_total": 64000,
+    "endpoint_evaluation_responses_total": 400,
+    "preflight_runs": 4,
+    "preflight_training_steps_total": 40,
+    "preflight_consumed_responses_total": 1280,
+    "total_proposed_training_steps": 2040,
+    "total_proposed_consumed_responses": 65280,
+    "generated_responses_may_exceed_consumed": true,
+    "sync_walltime_measured": false,
+    "walltime_estimate": "待预检实测后给出",
+    "disk_reserve_gib": 200,
+    "disk_budget": "启动前测量全 checkpoint、日志及生成尾部，再加余量",
+    "old_candidate_release_work": "尚欠复审/性能/同版本 smoke 的适用工作及成本另列，未包含在本轮新增训练预算中。"
+  },
+  "source_snapshot": {
+    "purpose": "方案编写时只读依据，非未来运行冻结",
+    "files": {
+      "/home/caiyiwen-rewardtxn-results/sqlite-s191-0913/runs/sqlite-00-R-s191/driver_args.json": {
+        "bytes": 56064,
+        "sha256": "89f3f681c7e56bec90e12e104e661ddeb0917aa4884fd1b086904cbcc24282b4"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-reproducibility-20260914/REPORT.md": {
+        "bytes": 9424,
+        "sha256": "0e2a71cb99816861b002be50c41ff87b5acb7306bd005128aa3b3290e69e118e"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-reproducibility-20260914/runs.csv": {
+        "bytes": 12119,
+        "sha256": "bf11ec8b998b96d3e356fcccb5452ba93232fa207214e0df7c0f1fc66dd7f7c8"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/confirmation_plan.json": {
+        "bytes": 58594,
+        "sha256": "0cf110aa9074e9655dc945c67779863c1e8c7eca8a66b38bbad60d7d44b18ac3"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-learning-signal-20260914/results/inputs.json": {
+        "bytes": 316382,
+        "sha256": "f6b9c94d66ba94ea28ec7db1038a747bb010be805650a4cd5b5d9614eb8d33e2"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-mechanism-20260913/SQLITE_ONLINE_PLAN.md": {
+        "bytes": 3214,
+        "sha256": "687633498dce4d58bcbe8c45068d84867a8f14b5d95ded2379c3069354278ab4"
+      },
+      "/public/home/caiyiwen/rewardtxn/runs/diagnosis-20260910/train.jsonl": {
+        "bytes": 2986809,
+        "sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5"
+      },
+      "/public/home/caiyiwen/rewardtxn/runs/diagnosis-20260910/validation_split.json": {
+        "bytes": 1184,
+        "sha256": "60c4fd427c01eadca84bbfcf1011087384aee50ffe5b6107a43529d779b72f4b"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/evidence/package_manifest.json": {
+        "bytes": 16246,
+        "sha256": "f9b050dcd4db4996e9d4cd970a44f91d010de62bc222b5159866b2d559acc858"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/CPU_RESULTS.md": {
+        "bytes": 2347,
+        "sha256": "f4848da3da54244bb2196041af2cd52c3cb5db511dfe2a8e941e5238fc0132d3"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_run.py": {
+        "bytes": 16074,
+        "sha256": "83f9b76cf7ab84064e27d56220ec435f992998ec1cd16899f33514e9e28bf3f8"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/scripts/ablation_overlay.py": {
+        "bytes": 8894,
+        "sha256": "382511c5b29e5f2853c7866c85cad8184a19b06675becc31a2ec6a1c4af13f97"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/train_async.py": {
+        "bytes": 3519,
+        "sha256": "768daed2e6b651be6f142ed5bcca3ed7c7b86743336b27bb5e763ac1da6e37b6"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/train.py": {
+        "bytes": 3822,
+        "sha256": "8b1e231caaa59ac5970fdbcd1a1cd5d10bae6a293f27072781ce800df2baa0b0"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/rollout/fully_async_rollout.py": {
+        "bytes": 12725,
+        "sha256": "b9ab67e7a3a1f8b2772560898128079d26c38c7b8c0e582f7a21c9c1a55fcea7"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/rollout/sglang_rollout.py": {
+        "bytes": 25687,
+        "sha256": "9b5b8b7d71af15baebc297d49e2d6be2d690ed1ff49278ced5e54eb3242c87d1"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/rollout/data_source.py": {
+        "bytes": 7940,
+        "sha256": "446595578aff88fac1637b8956a245853db1167e7964896bbab2fff61b1db616"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/utils/types.py": {
+        "bytes": 20359,
+        "sha256": "0e8aca6bc49dcba30975a5a325e210cd450fbb25b3c0c79c107a27986692816b"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/backends/megatron_utils/actor.py": {
+        "bytes": 27913,
+        "sha256": "22fa0bd1581f498454af0e353e9b9520a05fcd3a46b0e747a44f57ef3694f905"
+      },
+      "/public/home/caiyiwen/rewardtxn/third_party/slime/slime/backends/megatron_utils/loss.py": {
+        "bytes": 52984,
+        "sha256": "e7564cd6b2aaafafebd5344c3865ce6e609c4bda87552913a9da1c5607978ccc"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/train_async.py": {
+        "bytes": 3519,
+        "sha256": "768daed2e6b651be6f142ed5bcca3ed7c7b86743336b27bb5e763ac1da6e37b6"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/train.py": {
+        "bytes": 3822,
+        "sha256": "8b1e231caaa59ac5970fdbcd1a1cd5d10bae6a293f27072781ce800df2baa0b0"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/rollout/fully_async_rollout.py": {
+        "bytes": 12725,
+        "sha256": "b9ab67e7a3a1f8b2772560898128079d26c38c7b8c0e582f7a21c9c1a55fcea7"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/rollout/sglang_rollout.py": {
+        "bytes": 25687,
+        "sha256": "9b5b8b7d71af15baebc297d49e2d6be2d690ed1ff49278ced5e54eb3242c87d1"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/rollout/data_source.py": {
+        "bytes": 7940,
+        "sha256": "446595578aff88fac1637b8956a245853db1167e7964896bbab2fff61b1db616"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/utils/types.py": {
+        "bytes": 20359,
+        "sha256": "0e8aca6bc49dcba30975a5a325e210cd450fbb25b3c0c79c107a27986692816b"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/backends/megatron_utils/actor.py": {
+        "bytes": 27913,
+        "sha256": "22fa0bd1581f498454af0e353e9b9520a05fcd3a46b0e747a44f57ef3694f905"
+      },
+      "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/third_party/slime/slime/backends/megatron_utils/loss.py": {
+        "bytes": 52984,
+        "sha256": "e7564cd6b2aaafafebd5344c3865ce6e609c4bda87552913a9da1c5607978ccc"
+      }
+    },
+    "candidate_code_matches_inspected_root": {
+      "third_party/slime/train_async.py": true,
+      "third_party/slime/train.py": true,
+      "third_party/slime/slime/rollout/fully_async_rollout.py": true,
+      "third_party/slime/slime/rollout/sglang_rollout.py": true,
+      "third_party/slime/slime/rollout/data_source.py": true,
+      "third_party/slime/slime/utils/types.py": true,
+      "third_party/slime/slime/backends/megatron_utils/actor.py": true,
+      "third_party/slime/slime/backends/megatron_utils/loss.py": true
+    }
+  },
+  "handoff_before_update": {
+    "bytes": 41462,
+    "sha256": "ea172861023855ececc002cc89e0ed7cc931d42749e8fcfd4444a072d3767d03"
+  },
+  "implementation_gaps": [
+    "同一 driver 的批同步分支与后台 worker 停止预取",
+    "逐引擎权重确认和零在途证据",
+    "真实训练 forward 的选定步 logprob 保存",
+    "适用候选复审/性能/smoke、四格工程预检与最终运行冻结"
+  ]
+}

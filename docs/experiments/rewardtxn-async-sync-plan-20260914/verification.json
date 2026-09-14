@@ -1,0 +1,75 @@
+{
+  "status": "amended",
+  "original_status": "passed",
+  "checked_at_utc": "2026-09-14T08:34:39.889983+00:00",
+  "amended_at_utc": "2026-09-14T08:47:06.556710+00:00",
+  "scope": "方案文档、参数、来源和交接一致性自检；未验证尚未实现的控制流程、性能或 GPU 运行。修订：HANDOFF.md 已按用户决定改为精简版，历史正文不再随文件保留。",
+  "checks": {
+    "four_distinct_factorial_cells": true,
+    "one_new_seed_500_steps": true,
+    "seed_roles_distinct_and_explicit": true,
+    "shared_selected_arguments_match_observed_baseline_except_training_seed": true,
+    "single_draw_order_reproduced": true,
+    "full_budget_consistent": true,
+    "preflight_cost_explicit": true,
+    "preflight_models_discarded_and_500_step_scheduler_retained": true,
+    "interaction_coefficients_equal_delta_sync_minus_delta_async": true,
+    "selected_snapshots_fixed_and_in_range": true,
+    "proposal_status_does_not_imply_execution_or_release": true,
+    "no_statistical_or_equivalence_claim": true,
+    "candidate_core_files_match_inspected_root": true,
+    "all_28_read_only_source_files_unchanged": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-async-sync-plan-20260914/design.json": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/train_async.py:32": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/slime/rollout/fully_async_rollout.py:100": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/slime/rollout/sglang_rollout.py:295": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/slime/utils/types.py:408": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/slime/backends/megatron_utils/actor.py:524": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/third_party/slime/slime/backends/megatron_utils/loss.py:912": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-reproducibility-20260914/REPORT.md": true,
+    "link_exists:/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ablation-20260911/implementation/isolated_v2_driver_exit/CPU_RESULTS.md": true,
+    "plan_contains_design_and_budget": true,
+    "clean_whitespace:PLAN.md": true,
+    "clean_whitespace:design.json": true,
+    "previous_handoff_body_preserved": false,
+    "git_diff_check_passed": true,
+    "clean_whitespace:HANDOFF.md": true
+  },
+  "read_only_input_count": 28,
+  "changed_read_only_inputs": [],
+  "training_or_generation_executed": false,
+  "outputs": {
+    "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-async-sync-plan-20260914/PLAN.md": {
+      "bytes": 9833,
+      "sha256": "213ebe29566d688604915fac56623393652d89527bf0da48bc4323aaae35ae3a"
+    },
+    "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-async-sync-plan-20260914/design.json": {
+      "bytes": 17557,
+      "sha256": "515547b91f0830ae12f130c79a8e1f7d077a7f030332e41d65f4b3e7016dc6d0"
+    },
+    "/public/home/caiyiwen/rewardtxn/HANDOFF.md": {
+      "bytes": 1781,
+      "sha256": "deb6a00538e57edb541a6e5e40009484ad02403404e02925c72076c61389a6c2"
+    }
+  },
+  "handoff_previous_body_preserved_byte_for_byte": false,
+  "git_diff_check": {
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "amendment": {
+    "reason": "HANDOFF.md 在原验证（2026-09-14T08:34:39Z）之后被重写为精简版，删除了历史正文；用户已确认以当前精简版为准。原记录的字节数与哈希不再对应磁盘文件。",
+    "superseded_handoff_record": {
+      "bytes": 42869,
+      "sha256": "af61f779f8bbedad06263cfae46c2d6c3ff5edcb49c4f95b1d8e13e4aca5155f"
+    },
+    "handoff_history_available_at": {
+      "command": "git show ac7b74b:HANDOFF.md",
+      "bytes": 33642,
+      "sha256": "6575950ff136178156db56a53162f5316825e7f22f4482ed4101f5d3d37d82bf"
+    },
+    "plan_document_checks_unaffected": true,
+    "training_or_generation_executed": false
+  }
+}
