@@ -1,0 +1,20 @@
+{
+  "source": "trusted local RecoverInfo dataloader_info.pkl read-only parsed in same runtime",
+  "nofault-r4": {
+    "samples_yielded": 28,
+    "num_yielded_batches": 7,
+    "trained_prompt_groups": 12,
+    "sampler_state": null,
+    "fetcher_state": null,
+    "dataset_state": null
+  },
+  "resume-r1": {
+    "samples_yielded": 48,
+    "num_yielded_batches": 12,
+    "new_trained_prompt_groups": 4,
+    "sampler_state": null,
+    "fetcher_state": null,
+    "dataset_state": null
+  },
+  "conclusion": "dataloader advancement is ahead of actual training; no dispatcher pending state in RecoverInfo; full affected-work recovery not established"
+}

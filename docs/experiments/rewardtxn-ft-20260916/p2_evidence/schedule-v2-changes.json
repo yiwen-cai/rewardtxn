@@ -1,0 +1,100 @@
+{
+  "from_revision": 1,
+  "to_revision": 2,
+  "reason": "X1.b00 positive committed_target lacked explicit optimizer/checkpoint/commit suffix; expected unchanged",
+  "archive": "schedule-v1/hashes.json",
+  "changed_cases": [
+    {
+      "case_id": "X1.b00.i00",
+      "execution_status": "executable",
+      "before_semantic_sha256": "794ad421c6cd660fdcd8a9c1976c7d223cfa69245f050658d851dcb24b5ea763",
+      "after_semantic_sha256": "f0f30e8e852445fa65c92099aa7f1773d8c49730b6a19bfd6057284a5ca85ad1",
+      "before_operations": 36,
+      "after_operations": 64
+    },
+    {
+      "case_id": "X1.b00.i01",
+      "execution_status": "executable",
+      "before_semantic_sha256": "e13b3f7d5d631be13b9b42025d0ba93d49a1015ac3777c48ae0af7939f93a8be",
+      "after_semantic_sha256": "87aacb4a74caec43c2731b17ac5f63b17dc5dcdf1ce93596e9a19b4c8a1837ad",
+      "before_operations": 36,
+      "after_operations": 64
+    },
+    {
+      "case_id": "X1.b00.i02",
+      "execution_status": "executable",
+      "before_semantic_sha256": "2439d39c1420020602b80477e4a4f637f2d630ce748d9ce923bb8f1667c7002d",
+      "after_semantic_sha256": "68e75187278df1bc5d96526235f65e6f91dd9a7f00945825d33b8266f00788d2",
+      "before_operations": 37,
+      "after_operations": 65
+    },
+    {
+      "case_id": "X1.b00.i03",
+      "execution_status": "executable",
+      "before_semantic_sha256": "fd6319222ed4d0dc04ad2113b9a0835c9f57c575e5561efd43d44d71cdd91679",
+      "after_semantic_sha256": "15bb87e820c305c4b311bd7a0d29011af816e317456c9257000ecf2e23479a76",
+      "before_operations": 41,
+      "after_operations": 69
+    },
+    {
+      "case_id": "X1.b00.i04",
+      "execution_status": "executable",
+      "before_semantic_sha256": "1f3343d7415b0dbd2357e10971c3d5d134e87920668fb21910d6a7388382eea5",
+      "after_semantic_sha256": "51d4525d44f9aec37734a65905e34b57cac55e618c7cdab14391b53b92132059",
+      "before_operations": 41,
+      "after_operations": 69
+    },
+    {
+      "case_id": "X1.b00.i05",
+      "execution_status": "executable",
+      "before_semantic_sha256": "882a025f9cd33f5a1a502df9e089bf4cf0efd717f403e136a3c6c192811b567c",
+      "after_semantic_sha256": "592bad32cf0c4924867ec3040052d36514024c1a4d168e7f6634ba83369a48c8",
+      "before_operations": 36,
+      "after_operations": 64
+    },
+    {
+      "case_id": "X1.b00.i06",
+      "execution_status": "pending_interface",
+      "before_semantic_sha256": "e0876df1b65dc6b76d7fe8c9afb8e5eae86fca7a0cd2df4bad43c2210aa2381e",
+      "after_semantic_sha256": "7657c1daaba6f769a7d5d7b5d4af9e83894e886db19e1a48dcb08c0d12d7cc99",
+      "before_operations": 39,
+      "after_operations": 67
+    },
+    {
+      "case_id": "X1.b00.i07",
+      "execution_status": "pending_interface",
+      "before_semantic_sha256": "64ac93831824e71ff539eddf0d3b314a33be754ef8d27352f4419a8540c70ab7",
+      "after_semantic_sha256": "b52ea70fd851465e37a028425978f5648f3508a491c589878201cd7b60b19887",
+      "before_operations": 38,
+      "after_operations": 66
+    },
+    {
+      "case_id": "X1.b00.i08",
+      "execution_status": "executable",
+      "before_semantic_sha256": "27fcd61de34a50b6319da62697e1ccc5f2e9bd581d7340727cb9129eecf72618",
+      "after_semantic_sha256": "d490845face3c35df6c1ad51df741bfb9b0aa540664b51d6b3884b7873655773",
+      "before_operations": 39,
+      "after_operations": 67
+    },
+    {
+      "case_id": "X1.b00.i09",
+      "execution_status": "executable",
+      "before_semantic_sha256": "defa6c707eaef7de6dca35777c498a8200ee644d4d615d918497458e79df0665",
+      "after_semantic_sha256": "741ab1f0dce285e61e5f050db41a92196ecaa442733040e27090d701de216dab",
+      "before_operations": 41,
+      "after_operations": 69
+    }
+  ],
+  "unchanged_cases": 590,
+  "counts": {
+    "executable": 408,
+    "limitation_only": 8,
+    "pending_interface": 184
+  },
+  "source_sha256": {
+    "tests/ft/p2_schedule_cases.py": "4e158a6b6b1186e298a1b94a6de4defcfd6ec8a8e9abd52312e72a207ae0603e",
+    "tests/ft/test_p2_schedules.py": "87085303a94a0dfb6161551ce31109f05bfab14094dddcc50896df1623b65156",
+    "tests/ft/fixtures/p2_schedules.json": "aa5302ad9a59425c3bfe3b9b7cab1a1514ea112975e98ca937ca9b437a4e4c9c"
+  },
+  "executed_by_this_ledger": 0
+}

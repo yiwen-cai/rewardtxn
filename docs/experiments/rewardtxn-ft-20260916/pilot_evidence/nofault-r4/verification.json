@@ -1,0 +1,155 @@
+{
+  "scope": "nofault RLVR engineering validation only, no fault/recovery/full-state continuity claim",
+  "checks": {
+    "three_successful_optimizer_calls": true,
+    "training_returned": true,
+    "three_complete_training_batches": true,
+    "three_synchronous_optimizer_checkpoints": true,
+    "three_metadata_writes": true,
+    "final_files_fullhash_match": true,
+    "dataloader_metadata_present": true
+  },
+  "training_batches": [
+    {
+      "update_id": "ee824d12b703484e8fcfd7ae94d86dd8",
+      "batch_size": 32,
+      "groups": 4,
+      "unique_samples": 32,
+      "complete": true
+    },
+    {
+      "update_id": "ae955d18117b4955a7cd4148821ff969",
+      "batch_size": 32,
+      "groups": 4,
+      "unique_samples": 32,
+      "complete": true
+    },
+    {
+      "update_id": "e0388ab6aa634b3ab0059728405d08ae",
+      "batch_size": 32,
+      "groups": 4,
+      "unique_samples": 32,
+      "complete": true
+    }
+  ],
+  "optimizer_stats": [
+    {
+      "update_successful": 1.0,
+      "grad_norm": 2.3002519607543945,
+      "lr": 0.0,
+      "num_micro_batches": 2
+    },
+    {
+      "update_successful": 1.0,
+      "grad_norm": 2.856449842453003,
+      "lr": 1e-06,
+      "num_micro_batches": 2
+    },
+    {
+      "update_successful": 1.0,
+      "grad_norm": 2.5860495567321777,
+      "lr": 1e-06,
+      "num_micro_batches": 2
+    }
+  ],
+  "counts": {
+    "pilot_start": 1,
+    "recover_handler_load_start": 1,
+    "recover_handler_load_returned": 1,
+    "generation_done": 158,
+    "reward_start": 158,
+    "reward_done": 158,
+    "group_admitted": 19,
+    "batch_taken": 3,
+    "train_batch": 3,
+    "optimizer_start": 3,
+    "optimizer_end": 3,
+    "recover_handler_dump_start": 3,
+    "checkpoint_save_start": 3,
+    "checkpoint_save_returned": 3,
+    "metadata_written": 3,
+    "recover_handler_dump_returned": 3,
+    "pilot_training_returned": 1,
+    "pilot_error": 0
+  },
+  "verified_final_files": [
+    {
+      "kind": "checkpoint_save_returned",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/.metadata",
+      "size": 114498,
+      "matches": true
+    },
+    {
+      "kind": "checkpoint_save_returned",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/__0_0.distcp",
+      "size": 6917735465,
+      "matches": true
+    },
+    {
+      "kind": "checkpoint_save_returned",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/common.pt",
+      "size": 1575,
+      "matches": true
+    },
+    {
+      "kind": "checkpoint_save_returned",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/metadata.json",
+      "size": 119,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/checkpoint_info.json",
+      "size": 944,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/dataloader_info.pkl",
+      "size": 234,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/evaluator_info.json",
+      "size": 938,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/saver_info.json",
+      "size": 948,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/stats_logger_info.json",
+      "size": 29,
+      "matches": true
+    },
+    {
+      "kind": "metadata_written",
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/step_info.json",
+      "size": 90,
+      "matches": true
+    }
+  ],
+  "metadata_files": [
+    "checkpoint_info.json",
+    "dataloader_info.pkl",
+    "evaluator_info.json",
+    "saver_info.json",
+    "stats_logger_info.json",
+    "step_info.json"
+  ],
+  "launcher_exit_code": 1,
+  "launcher_exit_explanation": "native retries=0 raises JobException for trainer JobState.COMPLETED after training return",
+  "limitations": [
+    "no fault injected",
+    "no new-process recovery performed",
+    "only final overwritten checkpoint bytes available for independent rehash",
+    "native pending work not persisted by these hooks",
+    "first optimizer LR is zero under unchanged warmup schedule"
+  ],
+  "all_checks_pass": true
+}

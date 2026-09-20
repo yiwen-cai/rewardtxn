@@ -1,0 +1,15 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "tests/ft/p2_schedule_driver.py",
+    "--output",
+    "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p2_evidence/representative-r5",
+    "--case-timeout",
+    "30",
+    "--total-timeout",
+    "2460",
+    "--representative"
+  ],
+  "exitcode": 0,
+  "seconds": 5.335366128012538
+}

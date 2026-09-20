@@ -1,0 +1,6 @@
+{
+  "configured_whole_run_seconds": 900,
+  "signal_to_timeout_seconds": 610.408230671,
+  "formal_fault_900_second_window_tested": false,
+  "formal_samples": 0
+}

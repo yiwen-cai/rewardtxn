@@ -1,0 +1,37 @@
+{
+  "runs": [
+    {
+      "run": "nofault-r1",
+      "exit_code": 1,
+      "elapsed_seconds": 20.04598977707792,
+      "allocated_gpu_seconds": 80.18395910831168
+    },
+    {
+      "run": "nofault-r2",
+      "exit_code": 143,
+      "elapsed_seconds": 105.4699425729923,
+      "allocated_gpu_seconds": 421.8797702919692
+    },
+    {
+      "run": "nofault-r3",
+      "exit_code": 1,
+      "elapsed_seconds": 100.57244917505886,
+      "allocated_gpu_seconds": 402.28979670023546
+    },
+    {
+      "run": "nofault-r4",
+      "exit_code": 1,
+      "elapsed_seconds": 318.52071190299466,
+      "allocated_gpu_seconds": 1274.0828476119787
+    },
+    {
+      "run": "resume-r1",
+      "exit_code": 1,
+      "elapsed_seconds": 296.6545764140319,
+      "allocated_gpu_seconds": 1186.6183056561276
+    }
+  ],
+  "total_allocated_gpu_hours": 0.9347374109357285,
+  "formal_samples": 0,
+  "resource_cleanup": "all rtx-ft containers exited; GPUs0-6 idle4MiB; task internal network removed"
+}

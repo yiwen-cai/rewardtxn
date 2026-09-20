@@ -1,0 +1,8 @@
+{
+  "allocated_gpus": 4,
+  "seconds": 43.99461476004217,
+  "allocated_gpu_hours": 0.04888290528893574,
+  "classification": "CUDA preflight passed; native launcher rejected missing directory before training",
+  "formal_samples": 0,
+  "source_snapshot": "../native-gpu-r2-source"
+}

@@ -1,0 +1,22 @@
+{
+  "passed": 8,
+  "seconds": 26.199,
+  "resources": {
+    "gpus": 0,
+    "cpu_limit": 4,
+    "memory_gib": 8,
+    "deadline_seconds": 180
+  },
+  "scope": "positive-score CPU artifact contract only; legitimate zero rejected, not suitable for RL training",
+  "synthetic_generation": true,
+  "real_official_scoring": true,
+  "real_wrapper_timeout_tested": true,
+  "real_RLVR_builder_and_Grouped": true,
+  "cross_epoch_adoption": false,
+  "optimizer_commit_GPU_tested": false,
+  "sha256": {
+    "scripts/ft/rlvr_replay.py": "ff7fbc9ef3d7184988bcc78ab40824037a15c371eef4f30f817a1fa5c3e926cc",
+    "tests/ft/rlvr_replay_fixture.py": "9708ae1b080baa4650d63b8f57c5e059565e39a5960688319891749e09c42977",
+    "tests/ft/test_rlvr_replay.py": "e6386c9db02b7291b8e611fbbe33f53fb59f9872b958f18d08dae8d3df2ee8e7"
+  }
+}

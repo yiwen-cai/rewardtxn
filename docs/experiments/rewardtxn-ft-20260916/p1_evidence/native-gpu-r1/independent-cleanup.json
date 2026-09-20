@@ -1,0 +1,10 @@
+{
+  "container": {
+    "absent": true,
+    "stderr": "Error: No such object: 02830088c219fd84f8261231dc2532c81c595062db6c9c785ca24c0672d6ed86"
+  },
+  "network": {
+    "absent": true,
+    "stderr": "Error response from daemon: network be5357ca86d09761de11e61e1962fd58fa2e0ef30060b362227af25a16cde376 not found"
+  }
+}

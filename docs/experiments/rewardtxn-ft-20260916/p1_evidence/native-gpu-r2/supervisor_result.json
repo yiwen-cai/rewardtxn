@@ -1,0 +1,1 @@
+{"cleanup_confirmed":false,"cleanup_errors":[],"container_id":null,"duration_seconds":4.385223994962871,"failure":"selected GPUs are not idle (100 MiB/0% threshold)","network_id":null,"nonce":"760e4cc4e8c64294a18d90f8067696b7","scope":"native-trainer-4gpu; no oracle classification"}

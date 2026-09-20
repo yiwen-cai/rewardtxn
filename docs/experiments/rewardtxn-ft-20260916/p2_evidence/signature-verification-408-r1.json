@@ -1,0 +1,78 @@
+{
+  "tests": {
+    "passed": 12,
+    "seconds": 3.12,
+    "command": ".venv-tq/bin/python3.11 tests/ft/test_p2_schedule_audit.py -v"
+  },
+  "counts": {
+    "distinct_labels_observed": 408,
+    "distinct_labels_parsed": 408,
+    "observations": 408,
+    "unverifiable_observations": 0
+  },
+  "distinct_signatures": {
+    "O": 110,
+    "P": 116,
+    "S": 322,
+    "core_joint": 384,
+    "markers": 209,
+    "with_markers": 408
+  },
+  "status": "investigation_required",
+  "investigation_groups": [
+    [
+      "F2.b01.i00",
+      "F2.b02.i00",
+      "F2.b03.i00",
+      "F2.b04.i00"
+    ],
+    [
+      "F2.b01.i01",
+      "F2.b02.i01",
+      "F2.b03.i01",
+      "F2.b04.i01"
+    ],
+    [
+      "F2.b01.i02",
+      "F2.b02.i02",
+      "F2.b03.i02",
+      "F2.b04.i02"
+    ],
+    [
+      "F2.b01.i03",
+      "F2.b02.i03",
+      "F2.b03.i03",
+      "F2.b04.i03"
+    ],
+    [
+      "F2.b01.i04",
+      "F2.b02.i04",
+      "F2.b03.i04",
+      "F2.b04.i04"
+    ],
+    [
+      "F2.b01.i05",
+      "F2.b02.i05",
+      "F2.b03.i05",
+      "F2.b04.i05"
+    ],
+    [
+      "F2.b01.i08",
+      "F2.b02.i08",
+      "F2.b03.i08",
+      "F2.b04.i08"
+    ],
+    [
+      "F2.b01.i09",
+      "F2.b02.i09",
+      "F2.b03.i09",
+      "F2.b04.i09"
+    ]
+  ],
+  "interpretation": "8 F2.b01-b04 equivalence groups; CPU optimizer markers do not create real backend states. Not GPU recovery proof.",
+  "hashes": {
+    "tests/ft/p2_schedule_audit.py": "dd7e2cb4671fa5fd5d4272530b887514a751433ae6b7a622b1dcfa00abfe2b0b",
+    "tests/ft/test_p2_schedule_audit.py": "ab632b658d1dbfe7c4859b09df744a596869c645480e948bd7cd6c603ebe93f0",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-audit-408-r1/audit.json": "6dd7d224af96b1c9cd77b2e207ecdf0175c3b6a9dd458548138fad6e445c6aee"
+  }
+}

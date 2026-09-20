@@ -1,0 +1,9 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "tests/ft/test_p2_schedule_audit.py",
+    "-v"
+  ],
+  "exitcode": 0,
+  "seconds": 1.5364471540087834
+}

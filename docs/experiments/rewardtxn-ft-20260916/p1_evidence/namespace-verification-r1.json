@@ -1,0 +1,26 @@
+{
+  "scope": "CPU transport and real Docker containment only; no native AReaL recovery or GPU certification",
+  "tests": {
+    "descendants": {
+      "count": 8,
+      "seconds": 0.182,
+      "exit_code": 0,
+      "log": "descendant-tests-r2.log"
+    },
+    "namespace_container": {
+      "count": 4,
+      "seconds": 16.869,
+      "exit_code": 0,
+      "log": "namespace-tests-r1.log",
+      "artifacts": "namespace-r1"
+    }
+  },
+  "source_sha256": {
+    "scripts/ft/descendants.py": "ff61ab13f1d8d2369e108ee6f05b5f201b9aca32007cd5c396eb903c1cf8d757",
+    "scripts/ft/namespace_run.py": "da09e7048ffc568edf7171e4f95de7904ad935f9131dcbb50db3807040953da3",
+    "scripts/ft/container_run.py": "80d442f3dd7cacf99833afbe37ae8fe0f923fea3f3afa1a973a6e223af4b62d9",
+    "tests/ft/test_descendants.py": "f3764ef69cef3d5524aeb9031357f9a389caffa14c17198edd223ac5c0873b25",
+    "tests/ft/test_namespace_container.py": "254c0dc99f459ca269104b276abe3f93bfe0ae640288bc2a45f14c677896fe24",
+    "tests/ft/namespace_fixture.py": "1caabdde3f6ca7ae9e60f975055753bfc1a7cd0f168d9e10ae692b61657341aa"
+  }
+}

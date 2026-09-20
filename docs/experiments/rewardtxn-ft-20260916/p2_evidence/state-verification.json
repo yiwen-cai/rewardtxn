@@ -1,0 +1,33 @@
+{
+  "scope": "CPU contract only; GPU/backend scopes rejected",
+  "argv": [
+    ".venv-tq/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ft",
+    "-p",
+    "test_state.py",
+    "-v"
+  ],
+  "tests": 21,
+  "seconds": 1.129,
+  "exit_code": 0,
+  "source_sha256": {
+    "scripts/ft/state.py": "935ff8e0eecac1320d6afdcae6ebfaf87aa4bbc7193356bdfe8bd966d1bac618",
+    "tests/ft/test_state.py": "f0d900b6d690197fd82ac44852dd511ffd4b8acfd32d2fae1a873137d95e7d7e"
+  },
+  "filesystems": {
+    "/tmp": "ext4   /dev/nvme0n1p2[/tmp]",
+    "/public/home/caiyiwen/rewardtxn": "ext4   /dev/nvme1n1p1[/home/caiyiwen/rewardtxn]"
+  },
+  "not_covered": [
+    "real backend finalization",
+    "GPU process ownership completeness",
+    "real verifier semantics",
+    "selective replay delivery",
+    "independent oracle",
+    "600 scheduled fixtures"
+  ]
+}

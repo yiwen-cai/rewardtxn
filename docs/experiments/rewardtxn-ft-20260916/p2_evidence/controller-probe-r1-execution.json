@@ -1,0 +1,19 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "-m",
+    "scripts.ft.container_run",
+    "--config",
+    "/tmp/rtx-controller-probe-config-r1.json",
+    "--source",
+    "/public/home/caiyiwen/rewardtxn",
+    "--run-dir",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/controller-probe-r1",
+    "--image",
+    "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+    "--python",
+    "/opt/.venv/bin/python"
+  ],
+  "exitcode": 0,
+  "seconds": 7.0945574779761955
+}

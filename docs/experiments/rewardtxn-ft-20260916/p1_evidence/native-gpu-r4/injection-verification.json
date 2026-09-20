@@ -1,0 +1,12 @@
+{
+  "exact_signal_identity_binding": true,
+  "one_signal": true,
+  "step0_save_before_second_success": true,
+  "injection_evidence": {
+    "successful_ordinal": 2,
+    "saved_global_step": 0,
+    "phase": "post_optimizer_pre_save"
+  },
+  "native_recovery_success": false,
+  "scope": "injection boundary only"
+}

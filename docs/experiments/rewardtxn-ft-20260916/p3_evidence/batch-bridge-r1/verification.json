@@ -1,0 +1,45 @@
+{
+  "test_passed": 1,
+  "test_seconds": 30.849,
+  "scope": "real CPU async executor/Grouped/PPO/actual splitter; synthetic generation and forward; no optimizer/consumed",
+  "result": {
+    "synthetic_generation_and_forward": true,
+    "real_async_executor_grouped_ppo_and_split": true,
+    "optimizer_executed": false,
+    "consumed_authority": false,
+    "groups_delivered": 8,
+    "rejected_pending_samples": [
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:0",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:1",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:2",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:3",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:4",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:5",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:6",
+      "633273317059ebd6c150e9f31e3a1836963de1db065ecf192e67ecbb231a34b4:7"
+    ],
+    "microbatch_sizes": [
+      16,
+      16
+    ],
+    "logical_update_id": "f8512cd2e5759351230e6371f4de3fe2d7df8986a18798aa29589fe613a63b2f",
+    "sources": {
+      "/workspace/scripts/ft/batch_identity.py": "07fe80a3d5a5bd48cf48d49148162dfcd7c685d3b74b84d358cee3f6eac4460b",
+      "/workspace/third_party/areal/areal/infra/workflow_executor.py": "1c669bf9589110bea7521d4dd781a712026995018c12c107a04bff021400ce5e",
+      "/workspace/third_party/areal/areal/trainer/ppo/actor.py": "eb16cd0cefdf1a03fef6be50ae6aebcbf01bc4d84b335753d2f14c914f161712",
+      "/workspace/scripts/ft/rlvr_replay.py": "c0d27bd2d2f2358ca4957e04935a03e99733fcfa4be08c221b1f8da0c8fffc64"
+    }
+  },
+  "source_hashes": {
+    "scripts/ft/batch_identity.py": "07fe80a3d5a5bd48cf48d49148162dfcd7c685d3b74b84d358cee3f6eac4460b",
+    "tests/ft/test_batch_identity.py": "c5b2aa67777fc0f6b0715ed8f325c87d8696b5655aa4f5c1d11f6a12a1fcce83",
+    "scripts/ft/rlvr_replay.py": "c0d27bd2d2f2358ca4957e04935a03e99733fcfa4be08c221b1f8da0c8fffc64",
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c"
+  },
+  "cleanup": {
+    "container_id": "c03be78cfc128a048a5925ac0a51290ce6df3a21b22cd9d8fc5cc38bc6d213f3",
+    "returncode": 1,
+    "stderr": "Error: No such object: c03be78cfc128a048a5925ac0a51290ce6df3a21b22cd9d8fc5cc38bc6d213f3\n",
+    "confirmed_absent": true
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "tests/ft/p2_schedule_audit.py",
+    "--run",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/representative-r4",
+    "--run",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-one-r3",
+    "--run",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-two-r2",
+    "--run",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-three-r1",
+    "--output",
+    "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-audit-r1"
+  ],
+  "exitcode": 0,
+  "seconds": 34.88982130901422
+}

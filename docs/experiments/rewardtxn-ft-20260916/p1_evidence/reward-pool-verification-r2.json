@@ -1,0 +1,59 @@
+{
+  "scope": "real official CPU ProcessPool recovery at callable entry before scoring; not F4/GPU/training recovery",
+  "tests": 5,
+  "seconds": 24.016,
+  "exit_code": 0,
+  "log": "reward-pool-tests-r2.log",
+  "descendant_regression": {
+    "tests": 8,
+    "seconds": 0.179,
+    "log": "descendant-tests-r3.log"
+  },
+  "two_event_regression": {
+    "tests": 1,
+    "seconds": 2.369,
+    "log": "namespace-tests-r2.log"
+  },
+  "source_sha256": {
+    "scripts/ft/descendants.py": "f93ba3923edb7253a78dc087e7a719c3b0f3a8d3078438b7215b9d68b8e563de",
+    "scripts/ft/namespace_run.py": "f937c308fa95b2294fa3e9f64e4ff1be17534d0fa33b04a92276e80615c8e7ee",
+    "scripts/ft/container_run.py": "80d442f3dd7cacf99833afbe37ae8fe0f923fea3f3afa1a973a6e223af4b62d9",
+    "scripts/ft/reward_pool_probe.py": "f9abf032ac265a02be7d0119d96dbb4d5b5a4bfd18487a620df66ab9e912e11f",
+    "tests/ft/test_reward_pool_probe.py": "535b1f6c5dd3f3ad9aa334902438ace8efd949fc32ff42c0f549ad95dff91a07",
+    "tests/ft/test_descendants.py": "f3764ef69cef3d5524aeb9031357f9a389caffa14c17198edd223ac5c0873b25"
+  },
+  "runs": [
+    {
+      "path": "reward-pool-r2/reward-pool-khpy5fw3/run",
+      "fault": false,
+      "status": "returned",
+      "score": 1.0,
+      "memory": {
+        "cgroup_peak_bytes": null,
+        "cgroup_scope": null,
+        "cgroup_version": null,
+        "process_peak_rss_kib": 923468,
+        "reaped_children_peak_rss_kib": 818948,
+        "reason": "private cgroup namespace not established by host inspect"
+      },
+      "seconds": 13.305249557946809,
+      "cleanup_confirmed": true
+    },
+    {
+      "path": "reward-pool-r2/reward-pool-zjmhci9w/run",
+      "fault": true,
+      "status": "returned",
+      "score": 1.0,
+      "memory": {
+        "cgroup_peak_bytes": null,
+        "cgroup_scope": null,
+        "cgroup_version": null,
+        "process_peak_rss_kib": 922884,
+        "reaped_children_peak_rss_kib": 818980,
+        "reason": "private cgroup namespace not established by host inspect"
+      },
+      "seconds": 10.6798191559501,
+      "cleanup_confirmed": true
+    }
+  ]
+}

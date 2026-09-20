@@ -1,0 +1,6 @@
+{
+  "container_id": "7fa4e8bb1039db51fe6f085d6171ff6a58cc41f32fbb4bb1415c2ded82d5fec3",
+  "returncode": 1,
+  "stderr": "Error: No such object: 7fa4e8bb1039db51fe6f085d6171ff6a58cc41f32fbb4bb1415c2ded82d5fec3\n",
+  "confirmed_absent": true
+}

@@ -1,0 +1,27 @@
+{
+  "scope": "CPU real official scorer and RLVR builder; synthetic generation; no GPU/trainer consumption",
+  "r2": {
+    "passed": 11,
+    "errors": 1,
+    "seconds": 28.685
+  },
+  "r3": {
+    "targeted_passed": 1,
+    "seconds": 11.655,
+    "test": "test_cached_nonce_and_old_schema_cannot_self_authorize"
+  },
+  "change": "Only test changed: explicit upstream hash rejection, then hash-consistent wrong-nonce chain and validation spy. Production unchanged. No full 12-test green rerun claimed.",
+  "semantic_limit": "official_call_returned does not distinguish internal fallback zero from legitimate zero",
+  "source_hashes": {
+    "scripts/ft/reward_return.py": "6ec2696f63519f2aff3156166bc491831980a8324936def507bf538631aa7e51",
+    "scripts/ft/rlvr_replay.py": "c0d27bd2d2f2358ca4957e04935a03e99733fcfa4be08c221b1f8da0c8fffc64",
+    "tests/ft/rlvr_replay_fixture.py": "9016921a40e62cd249ccc93a376e6890bd887f15f4ac58e498b61fc1541f8dd8",
+    "tests/ft/test_rlvr_replay.py": "1459ac2022a811ae34f50f208fcbc0128194b7cb8326b47a07dca27ca6ff9ec2"
+  },
+  "cleanup": {
+    "container_id": "2dd11b3f0ebbbb3f27a88008b1c10933694251d84ea35b86c1ec62d79bdc49ac",
+    "returncode": 1,
+    "stderr": "Error: No such object: 2dd11b3f0ebbbb3f27a88008b1c10933694251d84ea35b86c1ec62d79bdc49ac\n",
+    "confirmed_absent": true
+  }
+}

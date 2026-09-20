@@ -1,0 +1,598 @@
+{
+  "date": "2026-09-20",
+  "scope": "Raw artifacts remain local; selected small summaries are versioned, not a substitute for raw evidence",
+  "directories": [
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence",
+      "local_absolute_path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence",
+      "files": 1391,
+      "bytes": 1323447,
+      "raw_artifacts_in_git": false
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence",
+      "local_absolute_path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p0_evidence",
+      "files": 43,
+      "bytes": 13837610289,
+      "raw_artifacts_in_git": false
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence",
+      "local_absolute_path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p2_evidence",
+      "files": 278770,
+      "bytes": 1308272015,
+      "raw_artifacts_in_git": false
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence",
+      "local_absolute_path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p1_evidence",
+      "files": 924,
+      "bytes": 6957578982,
+      "raw_artifacts_in_git": false
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence",
+      "local_absolute_path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/pilot_evidence",
+      "files": 143,
+      "bytes": 13843879157,
+      "raw_artifacts_in_git": false
+    }
+  ],
+  "tracked_summaries": [
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/cleanup_verification.json",
+      "bytes": 541,
+      "sha256": "43293e6114f13acf2eefd639654cff8bafe9af441fb8f8b5ea5b044dd7b9b52a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/execution_summary.json",
+      "bytes": 1447,
+      "sha256": "b8f9b7ce53437408e7259a5a145e3d4e7542fa3f4b1466656063ed6c3b46ef01"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/model_manifest.json",
+      "bytes": 13215,
+      "sha256": "fc68fbb1390c655fd994d3746b20bd5c627d7d61f55932a7fa3cf4741b43513e"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/robustrl_search.json",
+      "bytes": 825,
+      "sha256": "e20f51b499f2efd3dd2047a00630d9e4c42e3e69d5435427a711a0a1ab850d3d"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/runtime_snapshot.json",
+      "bytes": 1952,
+      "sha256": "a35ba411442235567cde1d3c2a81a8ffd2cfdf20c9913470dbe05a01a21d72e6"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/slime_untracked_manifest.json",
+      "bytes": 110,
+      "sha256": "51023dbece4494b7aa4ce1c42bf26bd0181bc11351aa043e38198212e15ef5a9"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/source_provenance.json",
+      "bytes": 2250,
+      "sha256": "14929b66b0a697ab92f8dac6bd93692b5cde0af7f13ebb0647c4751ca09bef35"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence/verification.json",
+      "bytes": 958,
+      "sha256": "3d75f50fb2a100394feeb3e075e1f37bed5ec80e17e61c7709084c735844f951"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/descendant-verification-r1.json",
+      "bytes": 1022,
+      "sha256": "b4e5ad8e6d2201fa6f135bb49233b1589bcf0b7e5433d9ed3e98fa10136b63ab"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/namespace-verification-r1.json",
+      "bytes": 1086,
+      "sha256": "704e7f8b939f40c5f65e81efaa9b1984e5493c724103701b2ba0b05a37ed0315"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-contracts-r2.json",
+      "bytes": 987,
+      "sha256": "b3badf938440650afd23294ab112f0d66294ac4d24f510e66e62693b61c245fd"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-cpu-verification-r1.json",
+      "bytes": 1734,
+      "sha256": "d6ed027db092b941f324444eb43a9c767e9e5686b67c075ecb715be144ebe91d"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-descendants-r1.json",
+      "bytes": 736,
+      "sha256": "2c1dd1208e9034a115b5fe368429bd7b66bd326168766d1369b3dc7d09938ecc"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r1/cost.json",
+      "bytes": 268,
+      "sha256": "0f984da181c0017a7d0b5cdacc09aea0e73e10bc076d0bca1586b404ce3ecb7a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r1/independent-cleanup.json",
+      "bytes": 315,
+      "sha256": "3e2ce9f6c461e97f4c2aea99c92520a01845d2defd0acdaf171b3ba99e99133b"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r1/source-sha256.json",
+      "bytes": 1548,
+      "sha256": "f55d4187a345d3dc0a71e8d0551f515569bb1e10009421fab7ce53832621100c"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r1/supervisor_result.json",
+      "bytes": 376,
+      "sha256": "fb83d2402b13d9b2ac870243f8865598af898a1c1d84211bea0645467c7deeb6"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r2/cost.json",
+      "bytes": 209,
+      "sha256": "d8a676aee0b8ff70d0d245933cc9137ef1caecc358a83c992171315692d3ded0"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r2/source-sha256.json",
+      "bytes": 1548,
+      "sha256": "7a0beabf5cac3807edb9006c2525b74b5a7c28c0944a2868f690fea95126e8a3"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r2/supervisor_result.json",
+      "bytes": 283,
+      "sha256": "8db789ed136f02872f2de7b729c5e281e6ce4c00a1c45ef188058245955621ea"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r3/cost.json",
+      "bytes": 279,
+      "sha256": "dd74493e2dbc16678331c7141f4c1580f823dc62bd7d2450e1b76258b3f66d51"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r3/independent-cleanup.json",
+      "bytes": 315,
+      "sha256": "ea63384da55e5e6327573116ff697c615739b38dbde0a104f98abc0482758392"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r3/source-sha256.json",
+      "bytes": 1548,
+      "sha256": "7a0beabf5cac3807edb9006c2525b74b5a7c28c0944a2868f690fea95126e8a3"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r3/supervisor_result.json",
+      "bytes": 376,
+      "sha256": "09eec6eb530963444ff6cdbeaf15595c509372cc39537322ccae890df4281920"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/cost.json",
+      "bytes": 298,
+      "sha256": "2d07992333508fab2203a6674a2ee83a96ef1505e39ec1b7c9b0870b4a6e898f"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/independent-cleanup.json",
+      "bytes": 315,
+      "sha256": "387e38d40e0f9ad03e95750a89b63ddbf1b4378bb2d67a68c846f87fc0751caa"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/independent-verification.json",
+      "bytes": 789,
+      "sha256": "cb9161980ea67e8cdbce3b580b06b655aa63da7f30446dc446050bb94c4a0423"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/injection-verification.json",
+      "bytes": 310,
+      "sha256": "41a1a08773b83465423b6600eaad69c9c6e7d8abeb5261bc6d9a52266f695a24"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/source-sha256.json",
+      "bytes": 1548,
+      "sha256": "615046ba6fcf22433864acbb84d147383a4f3e6750cec2d58bc2a5b5b84df7ac"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/supervisor_result.json",
+      "bytes": 359,
+      "sha256": "50bbd6f5cd893a4ede1ae6b264240a350343044ecdd614cf334455e294a297a4"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-gpu-r4/timing-scope.json",
+      "bytes": 160,
+      "sha256": "9f7f86939edfa6256d5ab16e48470bb2c86d31c85516eeb45db8659479a9d04d"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-cleanup-r1.json",
+      "bytes": 2335,
+      "sha256": "2e77f1ba8962bf8fe63bcea23210360cafc7da4224c8432ec02e9e34348cbc13"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1.json",
+      "bytes": 221,
+      "sha256": "62f8ee176900782c743ed2a56a540ce517f2f38e7fc6f3259aa7fe65359bdd42"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/reward-pool-cleanup-verification.json",
+      "bytes": 699,
+      "sha256": "688e1b4c59d963d12e565ba9151e3ad4f18f51accb8e545639005386e8cf95e2"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/reward-pool-verification-r2.json",
+      "bytes": 2087,
+      "sha256": "c923e65d71b1647184ea5be3e7ad85e39fe5fa1a8fe602c4c4d554329614caa9"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/test_invocation_history.json",
+      "bytes": 689,
+      "sha256": "c54c9ea27a56a3444b16b30b525a03deae5045eb3034cb550b1cd351141cfb38"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/tests-r1.json",
+      "bytes": 1376,
+      "sha256": "2041c5d008ceea3a4922ee6a24cd17910a82a1be273c54a1ea99a4dfe3dc3074"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/torchrun-cleanup-r2.json",
+      "bytes": 454,
+      "sha256": "e7d8d225f28eb176623cbc95c39b7cc52e0efd0d1829abcc36bdb2e6221cf504"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/torchrun-cpu-r1.json",
+      "bytes": 215,
+      "sha256": "7ecb120bf0e9bb094d10f55af2d83827fcd815310e524a9028c295a32b3a899f"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/torchrun-cpu-r2.json",
+      "bytes": 215,
+      "sha256": "887c414152dca976dc4cae9331eb07faef96137a2abbf065f04855b185e2bfc8"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/controller-probe-r1/independent-cleanup.json",
+      "bytes": 241,
+      "sha256": "71471697c9a6b7f52d03861ca7b5843419c3a22776c73c8ef1a37bf55208f0f3"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/controller-probe-r1/supervisor_result.json",
+      "bytes": 281,
+      "sha256": "0bbc89cf8858a3b1b18ac9c224afe5a878075171555c1966b7b02c8685398884"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/controller-probe-r1/verification.json",
+      "bytes": 1087,
+      "sha256": "6c7bb0968b53439aecb37fa603739e0642298e5f17aa4549b1737c6fbcd87e23"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/controller-probe-r1-execution.json",
+      "bytes": 495,
+      "sha256": "e32f87dc449b0937285dc6b41f4243ed37cc11dbd1abf4ecf9877080adaa953b"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-tests-r2.json",
+      "bytes": 52,
+      "sha256": "9bab5ba2289127deefd95aba3649f95413d42c5b6cc02389753c4a443a5727cb"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-tests-r3.json",
+      "bytes": 51,
+      "sha256": "fdc26b543033c261b8317c5a3487cca0621da6e13ad839d36607cd12a2cd5db6"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-tests-r4.json",
+      "bytes": 51,
+      "sha256": "906af9e81266048c25a8d3fa8d92d23b998ed6188489497d7d6cf88055bc4ba7"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-tests-r5.json",
+      "bytes": 51,
+      "sha256": "32e9421f95a4dbc5c7f098d81f4412e159c83525f9771bdb075abd48289cfa0f"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-tests-r6.json",
+      "bytes": 51,
+      "sha256": "ada712cbb74b37bf047903ee09b4fa08975e6ef134268d9c5043cb33dae226e4"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/driver-verification-r1.json",
+      "bytes": 2448,
+      "sha256": "f60986e30b9292e57552e18f9c8492cabf4fb6f29c41d066c30406887110c10b"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/f4-tests-r1.json",
+      "bytes": 52,
+      "sha256": "f0d139bbabc354e4a8b3c27a409310f5a08554eaeb4e249acf8ea6ed367e8ace"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-F1.json",
+      "bytes": 2883,
+      "sha256": "8be4774a47b3689219872360c84b069057e6cda0a375dbbc3068521a9283f09e"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-F2.json",
+      "bytes": 2884,
+      "sha256": "6f5ae89335b5a9a1ae483cc6cddb91d8d4c2ad3e786c3241fe230b20a603fc6e"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-F3.json",
+      "bytes": 834,
+      "sha256": "02da8d55a17645991055bb5e2146a8b54d294aba1cfc453f578679f1f1a95463"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-F4.json",
+      "bytes": 2885,
+      "sha256": "cef8c9fc6eb884e4dde1ba0a495b4ec5b98535d0c25b80ff921950c667f205f6"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-X1.json",
+      "bytes": 2629,
+      "sha256": "95609fdba96325beb015aac5f79dedeb0cc5a41ec604e2c3462a9c00a5644e46"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-X2.json",
+      "bytes": 2885,
+      "sha256": "4ba347c8310d1d55bdf8efec57b35857715d4c47038298057958b0a17afcfd27"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-r1-source.json",
+      "bytes": 505,
+      "sha256": "f8fc890228226fb76384529ee3ad200cec87d0322852b83c2076a042aa116673"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/full-408-verification-r1.json",
+      "bytes": 3572,
+      "sha256": "d033ef339c21e00457152e6e77b538f36fc583e8267b9e7b99238048dc508ec8"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/oracle-verification-r1.json",
+      "bytes": 643,
+      "sha256": "574297415987d164793adecdbd243d69803959298ff8d6f47d76d46e1c053102"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/oracle-verification-r2.json",
+      "bytes": 748,
+      "sha256": "8986a093bf9a36cba206a0a6ee463f89191a8d4b5bcdca424688ccd8a16cd489"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/representative-r3.json",
+      "bytes": 351,
+      "sha256": "f54093b5d5209941bdd7d882ec4ecfe46d6e0978c3feaefa7c42e9a0532dd8d2"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/representative-r4.json",
+      "bytes": 351,
+      "sha256": "d9e7a94f6bd9c220e5e9e7bb343ed76b742cdf7f8cb0da198f3189a5d9788ea9"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/representative-r5.json",
+      "bytes": 351,
+      "sha256": "86b998e048aaa3f1875477ab8ff8cf458ee61c092b1ffcd57d9602cd674b5000"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/schedule-static-tests-r2.json",
+      "bytes": 52,
+      "sha256": "133f5ad5d3dab00971fd09c452b1d5fc3d9a71673efd89ac3ed8c9584e806bd2"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/schedule-static-verification-r1.json",
+      "bytes": 649,
+      "sha256": "28b64740343cec0b150a5e26199c7b105d543353e4c7b16ab6802c5671cf7984"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/schedule-v2-changes.json",
+      "bytes": 4174,
+      "sha256": "44e8efde8920d9fb5e4cdcb87a1192353b5f75dae789eca1e3fe1749af75ef59"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/scope-tests-r1.json",
+      "bytes": 52,
+      "sha256": "609094566f1d3755be3d0d4d30d39deea30a80d0f631b55e762555a4da6bcbee"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/scope-tests-r2.json",
+      "bytes": 52,
+      "sha256": "820dbd4ef3b671e588d845230fc0bb228f93cc252894a2d54f3f5655b2101157"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-audit-r1.json",
+      "bytes": 571,
+      "sha256": "1b9280c651b6e0bd820c2970b3bd79efb54841d828089b8bea8e3b09a5cf5e13"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-audit-tests-r1.json",
+      "bytes": 151,
+      "sha256": "4e9ff4e86533c6b3647de6dda5be50f82fd3b33516678169116265e818cab33d"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-verification-408-r1.json",
+      "bytes": 1767,
+      "sha256": "7fe028a42665bccda6d03b32a1ca84e8df7ca04204cf30ae57014df66ac82500"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/signature-verification-r1.json",
+      "bytes": 711,
+      "sha256": "1a00fc4c2a4b208730d64e05ac91160a77bfaa1434a86b22b0cb3d79123cec6c"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-four-r1.json",
+      "bytes": 2884,
+      "sha256": "bcad314c953b49d49f6e75d46744400d23c74b37026271ac4653dda115149f7f"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-four-verification-r1.json",
+      "bytes": 7140,
+      "sha256": "a105f8e1127a0e03dc375a9a99c078fb64d7b8c18caeb0ac36643ad31c38292d"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-one-r1.json",
+      "bytes": 3139,
+      "sha256": "669cdc1f0e99c7fb134958673f328870032aa252b64bd783a29f3831642a3959"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-one-r2.json",
+      "bytes": 3139,
+      "sha256": "b11bd1f78f4c5ba2265a297e8e302e3ab0cb1ac5f55b598cddf72d64a5c39c91"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-one-r3.json",
+      "bytes": 3138,
+      "sha256": "c4c31712e504b9b73a00c5cd3a220d0791385c8cb53fc6509eac94d08987b1f6"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-one-verification-r1.json",
+      "bytes": 3418,
+      "sha256": "9ba8bfad00119bd2b2b4d24d559499a530763aa5202cfa6be7cd28a80d6ddf34"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-three-r1.json",
+      "bytes": 2629,
+      "sha256": "373c82f4593e40887e6273b3146f2e261e7d5e8750eac2507a6db06829232367"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-three-verification-r1.json",
+      "bytes": 6848,
+      "sha256": "c4c8f1c5baf17d3cbc51673d5fbee1eb3211e785b24f6c89c0087cf82ab5104c"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-two-r1.json",
+      "bytes": 3394,
+      "sha256": "f5a75b8c04c5fe307df22b95f7a55203e7dacc8957d85cec8d21571fdc19beba"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-two-r2.json",
+      "bytes": 3394,
+      "sha256": "f669d278cda1aab31f9564143994ffa6ce9b68145dcd8e055b2b5a5ffb66c9e2"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/stage-two-verification-r1.json",
+      "bytes": 5259,
+      "sha256": "2dee97ed5f42eba319b1a986cd27f675b37dffa6a7c892306efbf669b5c0e0b9"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/state-verification-r3.json",
+      "bytes": 639,
+      "sha256": "957fd8a325dc42321b96883470af4c8646ddd6347bec5c16841af4c208aa96b8"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/state-verification.json",
+      "bytes": 861,
+      "sha256": "07a3524fcf81759e830287e68bc28f50b3191a0e6d8ff2755c0db69050a7fc39"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence/verifier-real-library-verification.json",
+      "bytes": 973,
+      "sha256": "b7147fe2232b255e10bddc832edd98bfcdbb6b5c7c1ab4156da8ab7b98d2242e"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/batch-bridge-r1/execution.json",
+      "bytes": 52,
+      "sha256": "f01f237fa652e081620c74407431bd02ff4e6840316a5947974516dac5f2b812"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/batch-bridge-r1/independent-cleanup.json",
+      "bytes": 241,
+      "sha256": "957de747052d1ed2c1b71bd44aa0d2e0beb815e869ba5c35fa8424a01978fe73"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/batch-bridge-r1/source-sha256.json",
+      "bytes": 403,
+      "sha256": "05f39e2dc2045277b59854b20aad70c2f305c7fc3b970c220d736ac9ffe9ab2b"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/batch-bridge-r1/verification.json",
+      "bytes": 2401,
+      "sha256": "e3cf2f84ff88978984830600807a73e96fec0ccc943c8d8754ba4995451ba7d7"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/draw-verification-r1.json",
+      "bytes": 853,
+      "sha256": "08933f979964adfed1bef0df580f00d9fc48c696fb0a962f23e9d0f070edceae"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/loader-real-r1.json",
+      "bytes": 1156,
+      "sha256": "1d31ce181700e36f00aca9b64d57d0d9dfc2a5a076b8e7e8621f3ceb47cfaa8a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/replay-tests-r1.json",
+      "bytes": 209,
+      "sha256": "d3b43aebbb46f67990f493758a346ee31c42917ede5b178698c3b26343000322"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r1/execution.json",
+      "bytes": 52,
+      "sha256": "33cc823771d2b14b66a9edbc70a2b50b43c8be04a1c5a7d91c7de919f26156bf"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r1/independent-cleanup.json",
+      "bytes": 209,
+      "sha256": "ed6c2e6857933be4e1e1a72e59735fa949801dc7305b6a8be263f88f9704ae07"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r1/verification.json",
+      "bytes": 804,
+      "sha256": "4146b85b4e9385b2315df91d69211858404990b2a712db7b7b1c3b7489750adb"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r2/execution.json",
+      "bytes": 52,
+      "sha256": "ff889f9667cf61b4bedd8fe8a0681c56d5c3b7b2ab471d9ffdc46d6e55cf8ce8"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r2/independent-cleanup.json",
+      "bytes": 241,
+      "sha256": "4f58587bc1a8495f69462562f9b3dfb7ce64c08a20ae31b724e64a727d8b087a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r3/execution.json",
+      "bytes": 53,
+      "sha256": "0c707a74dcd5c94211c667083e76c77d8f6aaca2ab70342f8b43ee062355670e"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r3/independent-cleanup.json",
+      "bytes": 241,
+      "sha256": "734c1ab303ff14f3e1066f7f85eb6504399dcf54a8d99f9b09c96f1798e1f7ea"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/rlvr-cpu-r3/verification.json",
+      "bytes": 1316,
+      "sha256": "90384b032c8a70d30e3da04cd4a849e69b85116296aefc14b669d648fa953e76"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/completed_engineering_runs.json",
+      "bytes": 977,
+      "sha256": "1f352b3ca5f59fb7b5f51edd5e6624d8aa9f3d90cf5906997275b8913f8b8942"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/dataloader_audit.json",
+      "bytes": 645,
+      "sha256": "4bd3251f840529801cab385faf15aa98753b706bb38b794d9e0ae746a1c84f66"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/nofault-r1/execution.json",
+      "bytes": 2825,
+      "sha256": "cf7ce820c813c1555daa3a60a7e18fe80d8a5bdb5c7676dfaf9f758de9bdab2a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/nofault-r2/execution.json",
+      "bytes": 2927,
+      "sha256": "8fffce4739c5a1644511794e3125eb9db15b9902ff7826e5f1adefdec507f13a"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/nofault-r3/execution.json",
+      "bytes": 2956,
+      "sha256": "4c50a1efae1005cb1e648b7c3e933c7708b0155ab905750282ebcb33be86a204"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/nofault-r4/execution.json",
+      "bytes": 3101,
+      "sha256": "7ec621b68ba54562ef15d04f4fda04eaf12f9209c78b656a47e7ae51f1016e25"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/nofault-r4/verification.json",
+      "bytes": 4562,
+      "sha256": "61594818cc44367b4fd44b2b91a8a057ff708eedc3ccea65f7c220b14b899482"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/resume-r1/execution.json",
+      "bytes": 3406,
+      "sha256": "b73d430714a89a856966be9ed15bb24a61ca5fcc5e2e99f4d6fda71dc7c066f3"
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence/resume-r1/verification.json",
+      "bytes": 3240,
+      "sha256": "8da45cc5036fcac9d73f16ae3c68bcedbbd9b3fddd30ffda08cba0fb0e2d09e8"
+    }
+  ]
+}

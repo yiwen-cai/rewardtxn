@@ -1,0 +1,43 @@
+{
+  "scope": "CPU contracts only; no GPU/native recovery acceptance",
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "native_contracts": {
+    "passed": 7,
+    "seconds": 25.413,
+    "real_import": true,
+    "evidence": "tool session 57365; raw stdout not separately saved"
+  },
+  "gpu_profile_mock": {
+    "passed": 2,
+    "seconds": 0.008,
+    "evidence": "tool command output; no CUDA"
+  },
+  "descendants": {
+    "passed": 8,
+    "seconds": 0.189,
+    "log": "native-descendants-r1.log"
+  },
+  "namespace": {
+    "passed": 4,
+    "seconds": 16.622,
+    "log": "native-namespace-r1.log",
+    "independent_cleanup": "native-namespace-cleanup-r1.json"
+  },
+  "setup_failures": [
+    "Two manually mistyped image IDs failed before container creation; second attempted unauthorized registry name sha256 and returned denied. Subsequent command uses inspected full ID and --pull never."
+  ],
+  "host_skip_not_counted": 6,
+  "source_sha256": {
+    "scripts/ft/areal_native_trainer_probe.py": "462ffa452e72735d291037868d429ca9518f92b1253a6c9439d94ea484fb9d60",
+    "scripts/ft/native_gpu.py": "bd961d6cf71d680e608a2ac1c82acf01094761cb14a4335ba0c841224379316d",
+    "scripts/ft/container_run.py": "240f3498f8bd166a1f97331082ecf9502b689d23a26c445f764f2fe27acf3daf",
+    "scripts/ft/namespace_run.py": "8ef9628f3b7094f47ef9dfc6d8a535d0c1a5e77db9e092fcbaaccec98fc4a123",
+    "tests/ft/test_native_trainer_probe.py": "74ab484b5525141515ac888f69a22a263c62b1230a4318a18fc315c0f51e9b20",
+    "tests/ft/test_native_gpu_profile.py": "3e52ed5a7a4aa4653448c9c957e76f7d5aaa3d0b2df6c684dda4dcf017550a41"
+  },
+  "injection_assignment": {
+    "passed": 4,
+    "seconds": 0.023,
+    "evidence": "tool stdout"
+  }
+}

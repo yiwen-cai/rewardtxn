@@ -1,0 +1,64 @@
+{
+  "observed_at": "2026-09-20T07:06:34.379195+00:00",
+  "repositories": {
+    "areal": {
+      "head": {
+        "exit_code": 0,
+        "stdout": "b83d1f40196e5bd7d9f83092563443561870d550",
+        "stderr": ""
+      },
+      "status": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "origin": {
+        "exit_code": 0,
+        "stdout": "git@github.com:areal-project/AReaL",
+        "stderr": ""
+      }
+    },
+    "ByteCheckpoint": {
+      "head": {
+        "exit_code": 0,
+        "stdout": "6f00167c153f3e65a67240aaa5ef4850a1c740fd",
+        "stderr": ""
+      },
+      "status": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "origin": {
+        "exit_code": 0,
+        "stdout": "git@github.com:ByteDance-Seed/ByteCheckpoint.git",
+        "stderr": ""
+      }
+    },
+    "slime": {
+      "head": {
+        "exit_code": 0,
+        "stdout": "a6272da0d4f3d0a08520c99a2f3b4f6c887960dc",
+        "stderr": ""
+      },
+      "status": {
+        "exit_code": 0,
+        "stdout": "M .github/workflows/pr-test.yml\n M .github/workflows/pr-test.yml.j2\n M scripts/models/qwen2.5-1.5B.sh\n M scripts/models/qwen2.5-7B.sh\n M scripts/models/qwen3-4B.sh\n M slime/backends/sglang_utils/sglang_engine.py\n M slime/rollout/fully_async_rollout.py\n M slime/rollout/sglang_rollout.py\n?? tests/test_fully_async_rollout.py",
+        "stderr": ""
+      },
+      "origin": {
+        "exit_code": 0,
+        "stdout": "git@github.com:THUDM/slime",
+        "stderr": ""
+      }
+    }
+  },
+  "files": {
+    "areal/areal/utils/recover.py": "19380a7339260236b9e3b8009b6517c4ac4f0fd9491ddbb8fff6a005b9f27b6c",
+    "areal/areal/engine/megatron_engine.py": "1bdb183b9400138547f20a4761ce498abad640505a6c69de36701cdf93f0f93f",
+    "areal/areal/engine/megatron_utils/checkpointer.py": "7ff877a756c10b773ee1ea1f46987dd23c3156fd20a4318f09bed68287792ade",
+    "areal/areal/api/reward_api.py": "1e80895a79c5d4b1becd9cfa9fabc2996ef9a923a68a59054d6377b03fb0cf6b",
+    "areal/areal/workflow/rlvr.py": "cedc5b26fc2ba82e48eb0594d4dee5b1a32bbe226b5c732af16c695b73421635",
+    "ByteCheckpoint/bytecheckpoint/checkpointer/meta_type.py": "c7aec0bbd809d85efe458478f31f7b7145d2ec8a79df21d4fe608d2cc5c8e50a"
+  }
+}

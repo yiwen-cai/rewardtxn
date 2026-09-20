@@ -1,0 +1,41 @@
+{
+  "argv": [
+    "/opt/.venv/bin/python",
+    "-m",
+    "scripts.ft.native_gpu"
+  ],
+  "env": {
+    "PATH": "/opt/.venv/bin:/usr/local/cuda/bin:/usr/local/cuda/nvvm/bin:/usr/local/nvidia/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "PYTHONPATH": "/workspace:/workspace/third_party/areal",
+    "USER": "caiyiwen",
+    "LOGNAME": "caiyiwen",
+    "HOME": "/tmp",
+    "LD_LIBRARY_PATH": "/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+    "CUDA_HOME": "/usr/local/cuda",
+    "CUDA_VISIBLE_DEVICES": "0,1,2,3",
+    "HF_HUB_OFFLINE": "1",
+    "WANDB_MODE": "disabled",
+    "OMP_NUM_THREADS": "4",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "AREAL_CACHE_DIR": "/tmp/areal-native-probe"
+  },
+  "schedule": [
+    {
+      "event_id": "trainer-post-update-0",
+      "target": "trainer",
+      "waiters": [
+        "trainer"
+      ],
+      "evidence": {
+        "successful_ordinal": 2,
+        "saved_global_step": 0,
+        "phase": "post_optimizer_pre_save"
+      }
+    }
+  ],
+  "timeouts": {
+    "run": 900,
+    "handshake": 10,
+    "lease": 20
+  }
+}

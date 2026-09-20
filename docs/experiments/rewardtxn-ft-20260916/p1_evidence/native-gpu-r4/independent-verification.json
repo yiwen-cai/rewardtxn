@@ -1,0 +1,30 @@
+{
+  "passed": false,
+  "checks": {
+    "two_authenticated_incarnations": false,
+    "one_assignment_each": false,
+    "all_witnesses_bound_to_authenticated_identity": true,
+    "final_checkpoint_rehashed": false,
+    "final_metadata_rehashed": false,
+    "native_run0_then_run1": false,
+    "native_exit1_retained": false,
+    "native_completed_exception_retained": false,
+    "containment_cleanup": true,
+    "network_removed": true,
+    "preflight_subprocess_exited": true
+  },
+  "method_observation": [
+    {
+      "controller_monotonic_ns": 549925021360442,
+      "kind": "method_observation",
+      "outcome": "timeout"
+    }
+  ],
+  "native_runs": [
+    [
+      "0",
+      "False"
+    ]
+  ],
+  "scope": "one trainer process kill/native retry; not R, replay, F4 or pending recovery"
+}

@@ -1,0 +1,15 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ft",
+    "-p",
+    "test_namespace_container.py",
+    "-v"
+  ],
+  "exitcode": 0,
+  "seconds": 16.78446766990237
+}

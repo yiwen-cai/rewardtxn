@@ -1,0 +1,53 @@
+{
+  "observed_at": "2026-09-20T07:13:35.367778+00:00",
+  "image_reference": "areal-project/areal-runtime:v2.0.0-sglang",
+  "image_id": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "registry_digest": null,
+  "cpu_container": {
+    "network": "none",
+    "source_mount": "read_only",
+    "cpus": 4,
+    "memory": "16g",
+    "shm": "1g",
+    "uid": 1028,
+    "environment": {
+      "USER": "caiyiwen",
+      "LOGNAME": "caiyiwen",
+      "HOME": "/tmp",
+      "PYTHONPATH": "/workspace/third_party/areal",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    }
+  },
+  "official_test_argv": [
+    "timeout",
+    "240",
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "tests/test_recover.py",
+    "tests/test_grouped_rollout_workflow.py",
+    "tests/test_async_reward_wrapper.py"
+  ],
+  "official_tests": {
+    "passed": 62,
+    "seconds": 40.27,
+    "exit_code": 0,
+    "log": "official_tests_r2.log",
+    "first_attempt": "official_tests.log",
+    "first_attempt_failure": "getpass.getuser: uid 1028 missing passwd entry; USER env fixed"
+  },
+  "cpu_contracts": {
+    "exit_code": 0,
+    "log": "cpu_contracts.log",
+    "checks": [
+      "RecoverInfo roundtrip",
+      "corrupt JSON rejected",
+      "missing cursor file rejected",
+      "ByteCheckpoint rejects megatron framework"
+    ]
+  },
+  "slime_tracked_diff_sha256": "ebf4e3999f0139f336820aa1883665f2ee86c205efb113021b18728cbcf14cdb"
+}

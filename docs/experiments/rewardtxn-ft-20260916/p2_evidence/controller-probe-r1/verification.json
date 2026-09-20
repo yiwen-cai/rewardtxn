@@ -1,0 +1,25 @@
+{
+  "scope": "CPU control protocol; no training recovery/oracle",
+  "container_seconds": 6.994673751993105,
+  "tests": {
+    "passed": 7,
+    "seconds": 0.006
+  },
+  "real_controller_sigkills": 2,
+  "target_sigkills": 3,
+  "new_attempts_after_uncertain_resume": 0,
+  "pending_interface": 184,
+  "source_hashes": {
+    "tests/ft/p2_controller_probe.py": "5e9e9e4d94f1909f9ad5d0379274d057146a5a3b5eb0dfbd62745d94efeaa668",
+    "tests/ft/test_p2_controller_probe.py": "139e39a87ab502c0e7d6f2a2882e0a8dad05bb2073a4297d5568f6b6e7c96826",
+    "scripts/ft/run.py": "9e123ff789dd4ac4e660b2fcd72d77926c471286b62b2c632c7cc7e429254018",
+    "scripts/ft/faults.py": "dfe2d62f99085d82f072eb45be0efd784a6e0ad92df9caf7e2d503bfd698852b",
+    "scripts/ft/state.py": "29594fab13730a75a0f1c275e35402967058106fad8b08b4e5c65cdcddeb04c6"
+  },
+  "cleanup": {
+    "container_id": "25387f96b1c5228a21b10622dc73c01e303ecc53f5855a36076eb45be449e324",
+    "returncode": 1,
+    "stderr": "Error: No such object: 25387f96b1c5228a21b10622dc73c01e303ecc53f5855a36076eb45be449e324\n",
+    "confirmed_absent": true
+  }
+}

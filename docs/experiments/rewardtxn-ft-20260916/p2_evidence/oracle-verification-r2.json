@@ -1,0 +1,28 @@
+{
+  "scope": "CPU contract fixtures only; no GPU correctness certification",
+  "argv": [
+    ".venv-tq/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ft",
+    "-p",
+    "test_oracle.py",
+    "-v"
+  ],
+  "tests": 25,
+  "seconds": 0.13,
+  "exit_code": 0,
+  "log": "oracle-tests-r2.log",
+  "source_sha256": {
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "tests/ft/test_oracle.py": "de5bff11c40fb23d6f64f1eabbe3d3c6c05ab891fd824ca6f42f60d9c91087b4"
+  },
+  "not_covered": [
+    "real backend adapter",
+    "600 scheduled fixtures",
+    "GPU fault recovery"
+  ],
+  "repair": "actual load-event execution continuity; old ancestor reload cannot retain discarded parent"
+}

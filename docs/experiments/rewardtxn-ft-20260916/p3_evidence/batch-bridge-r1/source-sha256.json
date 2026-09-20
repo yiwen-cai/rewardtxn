@@ -1,0 +1,6 @@
+{
+  "scripts/ft/batch_identity.py": "07fe80a3d5a5bd48cf48d49148162dfcd7c685d3b74b84d358cee3f6eac4460b",
+  "tests/ft/test_batch_identity.py": "c5b2aa67777fc0f6b0715ed8f325c87d8696b5655aa4f5c1d11f6a12a1fcce83",
+  "scripts/ft/rlvr_replay.py": "c0d27bd2d2f2358ca4957e04935a03e99733fcfa4be08c221b1f8da0c8fffc64",
+  "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c"
+}

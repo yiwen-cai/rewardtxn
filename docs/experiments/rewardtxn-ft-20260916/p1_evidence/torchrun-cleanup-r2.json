@@ -1,0 +1,12 @@
+[
+  {
+    "cid": "48e934d29fe398efc6acf20225ad6e4ac86c0111d709123896a74cfde52b1d30",
+    "source": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/torchrun-cpu-r1/torchrun-fs9jsftj/run/container.id",
+    "absent": true
+  },
+  {
+    "cid": "fd372a837486aff5bac09470e7ba7edbfdc42fbd0cddfcaf9abc0e625df8e65d",
+    "source": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/torchrun-cpu-r2/torchrun-9s_p58py/run/container.id",
+    "absent": true
+  }
+]

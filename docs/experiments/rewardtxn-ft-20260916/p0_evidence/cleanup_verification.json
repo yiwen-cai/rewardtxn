@@ -1,0 +1,27 @@
+{
+  "observed_at": "2026-09-20T07:24:00.708059+00:00",
+  "containers": {
+    "argv": [
+      "docker",
+      "ps",
+      "--filter",
+      "name=rtx-p0",
+      "--format",
+      "{{.Names}} {{.Status}}"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "gpu0": {
+    "argv": [
+      "nvidia-smi",
+      "--id=GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+      "--query-gpu=index,name,memory.used",
+      "--format=csv,noheader"
+    ],
+    "exit_code": 0,
+    "stdout": "0, NVIDIA H100 PCIe, 4 MiB\n",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "scope": "CPU contract fixtures only; no GPU correctness certification",
+  "argv": [
+    ".venv-tq/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ft",
+    "-p",
+    "test_oracle.py",
+    "-v"
+  ],
+  "tests": 21,
+  "seconds": 0.102,
+  "exit_code": 0,
+  "log": "oracle-tests-r1.log",
+  "source_sha256": {
+    "scripts/ft/oracle.py": "f3b81c66ff4a121d60f2e9427e294e9c2df9bf17984b3b4d1332e1575da10b86",
+    "tests/ft/test_oracle.py": "d306fb74cf236c57c86d2057f8377fc98cffa6c79ceb4350bddd4470af1c252d"
+  },
+  "not_covered": [
+    "real backend adapter",
+    "600 scheduled fixtures",
+    "GPU fault recovery"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "verified_at": "2026-09-20T07:21:52.513833+00:00",
+  "scope": "single_rank_sync_MegatronEngine_DCP_new_process_continuity",
+  "verdict": "PASS",
+  "component_comparisons": {
+    "saved_state": {
+      "lr_scheduler": true,
+      "model": true,
+      "optimizer": true,
+      "rng_state": true,
+      "lr": true
+    },
+    "next_state": {
+      "lr_scheduler": true,
+      "model": true,
+      "optimizer": true,
+      "rng_state": true,
+      "lr": true
+    }
+  },
+  "next_rng_equal": true,
+  "successful_optimizer_updates": {
+    "baseline": 3,
+    "resume": 1
+  },
+  "process_exit_codes": {
+    "baseline": 0,
+    "resume": 0
+  },
+  "effective_engine_seed": 42,
+  "gpu_uuid": "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+  "checkpoint_bytes": 6917851650,
+  "not_covered": [
+    "RecoverHandler end-to-end",
+    "dataloader/pending state",
+    "multi-rank",
+    "async checkpoint crash consistency",
+    "F1-F4/X1-X2 end-to-end",
+    "A+R adapter"
+  ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-edx38uee/run/container.id",
+    "cid": "237f06bafc1ed6cac3ae8dc5b8186c8d1e2995d83d7ce3291bc94473f87063a7",
+    "absent": true,
+    "stderr": "Error: No such object: 237f06bafc1ed6cac3ae8dc5b8186c8d1e2995d83d7ce3291bc94473f87063a7"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-xve3lris/run/container.id",
+    "cid": "10b0f39c5102cf4f17fb2f1143d580e65195c68f94ed35f2b2a6c008d17e82d2",
+    "absent": true,
+    "stderr": "Error: No such object: 10b0f39c5102cf4f17fb2f1143d580e65195c68f94ed35f2b2a6c008d17e82d2"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-6bp4o5mm/run/container.id",
+    "cid": "14e7d3082a75401928fcce974f5c06c5d5aaf946b0b892483db062815792b7b0",
+    "absent": true,
+    "stderr": "Error: No such object: 14e7d3082a75401928fcce974f5c06c5d5aaf946b0b892483db062815792b7b0"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-eo11n1at/run/container.id",
+    "cid": "9d99c0560f0eb28b81ad74d5152b255ec9afd399d43fd8c6d89a60d537452cc4",
+    "absent": true,
+    "stderr": "Error: No such object: 9d99c0560f0eb28b81ad74d5152b255ec9afd399d43fd8c6d89a60d537452cc4"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/sentinel-e9g64fs9/container.id",
+    "cid": "68ba9e1f068b6662ae98ce7ec5a7d6de95bc621937f1af8b88f0f16ec3f3c1c4",
+    "absent": true,
+    "stderr": "Error: No such object: 68ba9e1f068b6662ae98ce7ec5a7d6de95bc621937f1af8b88f0f16ec3f3c1c4"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-40cdb0wf/run/container.id",
+    "cid": "27f3636e1695f2527aeed97d0724061cb0c05bc2599ccf97dabd16ec4e6b652d",
+    "absent": true,
+    "stderr": "Error: No such object: 27f3636e1695f2527aeed97d0724061cb0c05bc2599ccf97dabd16ec4e6b652d"
+  },
+  {
+    "file": "docs/experiments/rewardtxn-ft-20260916/p1_evidence/native-namespace-r1/namespace-mvgrpslw/run/container.id",
+    "cid": "8ec47b9b51400ec45e8e316eb508216346fec8991af1e4c27b40f1376ddcee95",
+    "absent": true,
+    "stderr": "Error: No such object: 8ec47b9b51400ec45e8e316eb508216346fec8991af1e4c27b40f1376ddcee95"
+  }
+]

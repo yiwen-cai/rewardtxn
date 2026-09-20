@@ -1,0 +1,47 @@
+{
+  "observed_at": "2026-09-17T13:53:56.235810+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "shanghai_overlay_smoke_audit",
+  "job_id": "dlc5yvbiisbeyv8e",
+  "supersedes_pass_of": "dlcpnaebu58x4wml",
+  "status": "Succeeded",
+  "verdict": "PASS",
+  "checks": {
+    "base_digest": {
+      "value": "sha256:2feaad36b157ee1f790f139aeb6d2669a466b914f28426f468df70b2324807a7",
+      "pass": true
+    },
+    "tar_and_sidecar_sha256": {
+      "value": "bee5d1a6ca2dcf0f742daf837ff242387ccb88bbbdeea5c85159ab2e9cb53706",
+      "source": "sidecar",
+      "match": true,
+      "pass": true
+    },
+    "rewardtxn_commit": {
+      "value": "7e6c1dd7755e2a9354ecc9f0f5f83b86996c186b",
+      "pass": true
+    },
+    "slime_commit": {
+      "value": "a6272da0d4f3d0a08520c99a2f3b4f6c887960dc",
+      "pass": true
+    },
+    "pip_install": {
+      "path": "/root/slime",
+      "result": "Successfully installed slime-0.3.1 / PIP_INSTALL_OK",
+      "pass": true
+    },
+    "gpu_name": {
+      "value": "NVIDIA L20Z",
+      "capability": "(9, 0)",
+      "pass": true
+    },
+    "job_id": {
+      "value": "dlc5yvbiisbeyv8e",
+      "pass": true
+    }
+  },
+  "five_item_gate_overall_pass": true,
+  "hardware_labeling": "NVIDIA L20Z / quota587xfuxezvn; not lab H100",
+  "overlay_path_authorized_for_ft0": true,
+  "note": "PASS now bound to package bee5d1a6...; prior 70c4392d smoke retained as historical only"
+}

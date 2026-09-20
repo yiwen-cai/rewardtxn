@@ -1,0 +1,25 @@
+{
+  "scope": "durable CPU draw/loader only; all draws pending, no consumed authority or GPU selective replay",
+  "mechanism_tests": {
+    "passed": 9,
+    "seconds": 0.773,
+    "sigkill_windows": 10
+  },
+  "real_loader": {
+    "passed": 1,
+    "seconds": 9.939,
+    "versions": {
+      "torch": "2.9.1+cu129",
+      "torchdata": "0.11.0",
+      "datasets": "4.8.5"
+    },
+    "replayed_groups": 12,
+    "fresh_groups": 20
+  },
+  "sha256": {
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c",
+    "tests/ft/test_replay.py": "86a40df2ed7580ad86cdaf2da6a6ed4f6aa43275e0bc5b8db8d0eb5cf87781c6",
+    "tests/ft/replay_fixture.py": "9c20fa1e6412ccc6f4377a52ae4beef8b6acc83ea19662bce89abd9ec2c3d105",
+    "tests/ft/test_replay_real_loader.py": "a7ae2a079cc2c177a2b37a28dd5da41c6fdd65328d1183db3b10e84e6d593bc2"
+  }
+}

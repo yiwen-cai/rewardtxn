@@ -1,0 +1,6 @@
+{
+  "container_id": "25387f96b1c5228a21b10622dc73c01e303ecc53f5855a36076eb45be449e324",
+  "returncode": 1,
+  "stderr": "Error: No such object: 25387f96b1c5228a21b10622dc73c01e303ecc53f5855a36076eb45be449e324\n",
+  "confirmed_absent": true
+}

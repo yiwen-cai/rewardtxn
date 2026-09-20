@@ -1,0 +1,93 @@
+{
+  "scope": "12 CPU representatives only, not 600-case completion or GPU proof",
+  "unit_tests": {
+    "count": 8,
+    "seconds": 1.161,
+    "exit_code": 0,
+    "log": "driver-tests-r1.log"
+  },
+  "representatives": {
+    "case_results": [
+      {
+        "case_id": "F1.b00.i01",
+        "status": "passed"
+      },
+      {
+        "case_id": "F1.b09.i04",
+        "status": "passed"
+      },
+      {
+        "case_id": "F2.b04.i00",
+        "status": "passed"
+      },
+      {
+        "case_id": "F2.b09.i05",
+        "status": "passed"
+      },
+      {
+        "case_id": "F3.b00.i00",
+        "status": "passed"
+      },
+      {
+        "case_id": "F3.b01.i09",
+        "status": "passed"
+      },
+      {
+        "case_id": "F4.b00.i00",
+        "status": "passed"
+      },
+      {
+        "case_id": "F4.b06.i03",
+        "status": "passed"
+      },
+      {
+        "case_id": "X1.b01.i00",
+        "status": "passed"
+      },
+      {
+        "case_id": "X1.b09.i08",
+        "status": "passed"
+      },
+      {
+        "case_id": "X2.b02.i04",
+        "status": "passed"
+      },
+      {
+        "case_id": "X2.b09.i05",
+        "status": "passed"
+      }
+    ],
+    "declared": 600,
+    "executed": 12,
+    "failed": 0,
+    "harness_failure": 0,
+    "lanes": {
+      "confirmed_sigkill": 4,
+      "oracle_model_audited": 12,
+      "owner_race_observed": 2,
+      "state_started": 12
+    },
+    "limitation_only": 8,
+    "not_executed": 0,
+    "passed": 12,
+    "pending_interface": 184,
+    "requested": 12
+  },
+  "global_inventory": {
+    "declared": 600,
+    "executed": 12,
+    "passed": 12,
+    "executable_not_yet_run": 396,
+    "limitation_only": 8,
+    "pending_interface": 184
+  },
+  "source_sha256": {
+    "tests/ft/p2_schedule_driver.py": "22ccbd6f3fb4a5e2a5f83f3bed6de5cc15a05680d87e25b503434a9d7fc38b0a",
+    "tests/ft/test_p2_schedule_driver.py": "489d46b0dbc75617b47336e63a3a8950ab9fba005e867248084e3c5ba68e7600",
+    "tests/ft/p2_schedule_cases.py": "4ef4f1994fa044ce3b6a9a4e12389251a795b6523615783ebdae739e982d0106",
+    "tests/ft/fixtures/p2_schedules.json": "d568543ade5704d3b4f89a9bfde2071d374ec3df58761ec5dcdb151ca7db2ac3",
+    "scripts/ft/state.py": "29594fab13730a75a0f1c275e35402967058106fad8b08b4e5c65cdcddeb04c6",
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "tests/ft/test_oracle.py": "de5bff11c40fb23d6f64f1eabbe3d3c6c05ab891fd824ca6f42f60d9c91087b4"
+  }
+}

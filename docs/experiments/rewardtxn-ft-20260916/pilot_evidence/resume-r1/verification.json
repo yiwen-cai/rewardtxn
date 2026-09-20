@@ -1,0 +1,110 @@
+{
+  "scope": "new process native RecoverHandler load and next update engineering probe; no fault injected",
+  "checks": {
+    "new_process_incarnation": true,
+    "loaded_exact_prior_checkpoint_manifest": true,
+    "one_successful_next_update": true,
+    "next_batch_complete_and_version3": true,
+    "next_metadata_step3": true,
+    "training_returned": true,
+    "final_files_fullhash_match": true
+  },
+  "all_checks_pass": true,
+  "batches": [
+    {
+      "batch_size": 32,
+      "groups": 4,
+      "policy_version": 3,
+      "complete": true
+    }
+  ],
+  "optimizer_stats": [
+    {
+      "update_successful": 1.0,
+      "grad_norm": 2.6783628463745117,
+      "lr": 1e-06,
+      "num_micro_batches": 2
+    }
+  ],
+  "verified_files": [
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/.metadata",
+      "matches": true,
+      "size": 114498
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/__0_0.distcp",
+      "matches": true,
+      "size": 6917735465
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/common.pt",
+      "matches": true,
+      "size": 1575
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/default/recover_checkpoint/metadata.json",
+      "matches": true,
+      "size": 119
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/checkpoint_info.json",
+      "matches": true,
+      "size": 945
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/dataloader_info.pkl",
+      "matches": true,
+      "size": 234
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/evaluator_info.json",
+      "matches": true,
+      "size": 938
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/saver_info.json",
+      "matches": true,
+      "size": 946
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/stats_logger_info.json",
+      "matches": true,
+      "size": 29
+    },
+    {
+      "path": "areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/nofault0/recover_info/step_info.json",
+      "matches": true,
+      "size": 90
+    }
+  ],
+  "event_counts": {
+    "pilot_start": 1,
+    "recover_handler_load_start": 1,
+    "checkpoint_load_start": 1,
+    "checkpoint_load_returned": 1,
+    "recover_handler_load_returned": 1,
+    "generation_done": 96,
+    "reward_start": 96,
+    "reward_done": 96,
+    "group_admitted": 12,
+    "batch_taken": 1,
+    "train_batch": 1,
+    "optimizer_start": 1,
+    "optimizer_end": 1,
+    "recover_handler_dump_start": 1,
+    "checkpoint_save_start": 1,
+    "checkpoint_save_returned": 1,
+    "metadata_written": 1,
+    "recover_handler_dump_returned": 1,
+    "pilot_training_returned": 1,
+    "pilot_error": 0
+  },
+  "launcher_exit_code": 1,
+  "limitations": [
+    "no independent in-memory component equality snapshot in this RL probe",
+    "no proof of native pending work recovery",
+    "no fault/semantic barrier/controller retry tested",
+    "no oracle-valid formal result"
+  ]
+}

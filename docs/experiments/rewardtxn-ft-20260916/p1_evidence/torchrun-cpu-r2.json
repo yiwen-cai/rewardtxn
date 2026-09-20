@@ -1,0 +1,15 @@
+{
+  "argv": [
+    ".venv-tq/bin/python3.11",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests/ft",
+    "-p",
+    "test_torchrun_cpu.py",
+    "-v"
+  ],
+  "exitcode": 0,
+  "seconds": 13.328157023061067
+}

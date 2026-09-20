@@ -1,0 +1,22 @@
+{
+  "scope": "CPU process transport only; lifecycle and native library integration separate",
+  "tests": 7,
+  "seconds": 0.176,
+  "exit_code": 0,
+  "log": "descendant-tests-r1.log",
+  "source_sha256": {
+    "scripts/ft/descendants.py": "ff61ab13f1d8d2369e108ee6f05b5f201b9aca32007cd5c396eb903c1cf8d757",
+    "scripts/ft/namespace_run.py": "da09e7048ffc568edf7171e4f95de7904ad935f9131dcbb50db3807040953da3",
+    "scripts/ft/container_run.py": "80d442f3dd7cacf99833afbe37ae8fe0f923fea3f3afa1a973a6e223af4b62d9",
+    "tests/ft/test_descendants.py": "f326d00d0ea0b28d58506d3a4c3d0f2d0b78df0879e9cdc4d1710af285dd431d"
+  },
+  "prior_direct_child_sources_unchanged": {
+    "scripts/ft/run.py": true,
+    "scripts/ft/__init__.py": true,
+    "scripts/ft/faults.py": true,
+    "tests/ft/__init__.py": true,
+    "tests/ft/test_runner.py": true,
+    "tests/ft/test_faults.py": true
+  },
+  "caveat": "test_namespace_requires_real_pid_one does not exercise rejection when unittest itself is PID 1; container lifecycle suite required"
+}

@@ -1,0 +1,8 @@
+{
+  "allocated_gpus": 4,
+  "host_supervisor_seconds": 37.84080319607165,
+  "allocated_gpu_seconds": 151.3632127842866,
+  "allocated_gpu_hours": 0.042045336884524054,
+  "classification": "engineering preflight failed; native method not started",
+  "formal_samples": 0
+}

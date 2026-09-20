@@ -1,0 +1,48 @@
+{
+  "observed_at": "2026-09-20T07:08:47.554707+00:00",
+  "queries": {
+    "gpu": {
+      "argv": [
+        "nvidia-smi",
+        "--query-gpu=index,name,uuid,memory.used,memory.total",
+        "--format=csv,noheader"
+      ],
+      "exit_code": 0,
+      "stdout": "0, NVIDIA H100 PCIe, GPU-e3a46342-07b6-3c91-ce7f-833f0201a336, 4 MiB, 81559 MiB\n1, NVIDIA H100 PCIe, GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794, 4 MiB, 81559 MiB\n2, NVIDIA H100 PCIe, GPU-03d6dfd0-fe60-5231-596d-72069e4d413c, 4 MiB, 81559 MiB\n3, NVIDIA H100 PCIe, GPU-57adc905-df4c-7006-349f-bfccb8f6f358, 4 MiB, 81559 MiB\n4, NVIDIA H100 PCIe, GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605, 4 MiB, 81559 MiB\n5, NVIDIA H100 PCIe, GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9, 4 MiB, 81559 MiB\n6, NVIDIA H100 PCIe, GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3, 4 MiB, 81559 MiB\n7, NVIDIA H100 PCIe, GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d, 73357 MiB, 81559 MiB\n",
+      "stderr": ""
+    },
+    "gpu_processes": {
+      "argv": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid,used_memory",
+        "--format=csv,noheader"
+      ],
+      "exit_code": 0,
+      "stdout": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d, 3630763, 73344 MiB\n",
+      "stderr": ""
+    },
+    "image": {
+      "argv": [
+        "docker",
+        "inspect",
+        "--format",
+        "{{.Id}} {{json .RepoDigests}}",
+        "areal-project/areal-runtime:v2.0.0-sglang"
+      ],
+      "exit_code": 0,
+      "stdout": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469 []\n",
+      "stderr": ""
+    },
+    "space": {
+      "argv": [
+        "df",
+        "-B1",
+        "/public",
+        "/tmp"
+      ],
+      "exit_code": 0,
+      "stdout": "Filesystem         1B-blocks          Used    Available Use% Mounted on\n/dev/nvme1n1p1 7619772022784 6601375735808 634304524288  92% /public\n/dev/nvme0n1p2 7619238330368 6638150045696 597023420416  92% /\n",
+      "stderr": ""
+    }
+  }
+}

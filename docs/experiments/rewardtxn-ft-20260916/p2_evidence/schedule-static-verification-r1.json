@@ -1,0 +1,19 @@
+{
+  "scope": "static schedule inventory only, no case execution",
+  "tests": 12,
+  "seconds": 10.963,
+  "exit_code": 0,
+  "declared": 600,
+  "classification": {
+    "executable": 408,
+    "limitation_only": 8,
+    "pending_interface": 184
+  },
+  "executed": 0,
+  "log": "schedule-static-tests-r1.log",
+  "source_sha256": {
+    "tests/ft/p2_schedule_cases.py": "4ef4f1994fa044ce3b6a9a4e12389251a795b6523615783ebdae739e982d0106",
+    "tests/ft/test_p2_schedules.py": "a2dfb40b11f9dafab31deddd683acb825850caf06207845b37d0472e3bcdd5fb",
+    "tests/ft/fixtures/p2_schedules.json": "d568543ade5704d3b4f89a9bfde2071d374ec3df58761ec5dcdb151ca7db2ac3"
+  }
+}

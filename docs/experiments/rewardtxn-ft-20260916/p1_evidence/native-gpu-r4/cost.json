@@ -1,0 +1,8 @@
+{
+  "allocated_gpus": 4,
+  "host_supervisor_seconds": 911.4975174730644,
+  "allocated_gpu_hours": 1.012775019414516,
+  "classification": "valid trainer injection; native method timeout; engineering recovery acceptance failed",
+  "formal_samples": 0,
+  "source_snapshot": "../native-gpu-r4-source"
+}

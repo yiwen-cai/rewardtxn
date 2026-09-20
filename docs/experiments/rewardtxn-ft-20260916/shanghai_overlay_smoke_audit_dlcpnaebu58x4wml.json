@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-09-16T21:54:45.190344+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "shanghai_overlay_smoke_audit",
+  "job_id": "dlcpnaebu58x4wml",
+  "prior_failed_job": "dlczvz2fehezm3ap",
+  "status": "Succeeded",
+  "verdict": "PASS_WITH_PIN_CAVEAT",
+  "checks": {
+    "base_digest": {
+      "expected": "sha256:2feaad36b157ee1f790f139aeb6d2669a466b914f28426f468df70b2324807a7",
+      "observed_in_job_spec_and_log": true,
+      "pass": true
+    },
+    "code_tar_download_sha256": {
+      "expected": "70c4392da82995dc7cb980ea5b1281fb8317588a63c36bfe0da390cb49b85723",
+      "observed_log_line": true,
+      "local_mac_rehash_match": true,
+      "pass": true
+    },
+    "overlay_pin_json_tar_sha256": {
+      "observed": "b3b7d57c892a0086d104ec4ac8013da67bd2c277460cc195f4cabaecb8afc7ee",
+      "matches_download": false,
+      "pass": false,
+      "note": "stale PIN; do not use as authority; fix before formal FT"
+    },
+    "rewardtxn_commit": {
+      "expected": "7e6c1dd7755e2a9354ecc9f0f5f83b86996c186b",
+      "pass": true
+    },
+    "slime_commit": {
+      "expected": "a6272da0d4f3d0a08520c99a2f3b4f6c887960dc",
+      "pass": true
+    },
+    "pip_install": {
+      "path": "/root/slime",
+      "command": "pip install -e . --no-deps",
+      "result": "Successfully installed slime-0.3.1 / PIP_INSTALL_OK",
+      "pass": true
+    },
+    "gpu_name": {
+      "observed": "NVIDIA L20Z",
+      "capability": "(9, 0)",
+      "quota_resource_name": "h100",
+      "must_record_as": "L20Z",
+      "pass": true
+    },
+    "job_id": {
+      "observed": "dlcpnaebu58x4wml",
+      "pass": true
+    }
+  },
+  "five_item_gate": {
+    "base_digest": true,
+    "commit_and_tar_sha256_download_verified": true,
+    "pip_install_receipt": true,
+    "gpu_name": true,
+    "job_id": true,
+    "overall_pass": true
+  },
+  "hardware_labeling": "Record NVIDIA L20Z / quota587xfuxezvn; do not label as lab H100 despite ResourceName=h100",
+  "next": "Fix OVERLAY_PIN.json tar_sha256 to 70c4392d... before formal FT jobs; then proceed FT0 on this overlay path"
+}

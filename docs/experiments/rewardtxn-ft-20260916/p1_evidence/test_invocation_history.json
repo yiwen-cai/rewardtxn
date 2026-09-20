@@ -1,0 +1,25 @@
+{
+  "scope": "CPU engineering verification only; not experiment runs",
+  "initial_module_invocation": {
+    "test_argv": [
+      "python",
+      "-m",
+      "unittest",
+      "tests.ft.test_runner",
+      "tests.ft.test_faults",
+      "-v"
+    ],
+    "exit_code": 1,
+    "error": "ModuleNotFoundError: No module named tests.ft",
+    "tests_executed": 0,
+    "raw_output_location": "current conversation tool output"
+  },
+  "development_discover_run": {
+    "tests": 8,
+    "seconds": 1.271,
+    "exit_code": 0,
+    "source_status": "worker still editing; not final verification",
+    "raw_output_location": "current conversation tool output"
+  },
+  "final_verification": "tests-r1.json"
+}

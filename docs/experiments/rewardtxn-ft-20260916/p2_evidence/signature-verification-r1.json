@@ -1,0 +1,27 @@
+{
+  "tests": {
+    "passed": 7,
+    "seconds": 1.409
+  },
+  "counts": {
+    "distinct_labels_observed": 252,
+    "distinct_labels_parsed": 252,
+    "observations": 268,
+    "unverifiable_observations": 0
+  },
+  "unique_signatures": {
+    "S": 200,
+    "P": 99,
+    "O": 67,
+    "core_joint": 228,
+    "with_markers": 252
+  },
+  "status": "investigation_required",
+  "core_equivalence_groups": 8,
+  "functional_case_contracts_passed": 252,
+  "actual_backend_optimizer_cases": 0,
+  "sha256": {
+    "tests/ft/p2_schedule_audit.py": "3d049a70f3ad08eeeb79f7d06e8f88d4909a38d8c556730120ccdce92b7ff513",
+    "tests/ft/test_p2_schedule_audit.py": "efb9446b94ce6c4b6e15a2a173199c72d069c17e80d4fc69b3eaddc7c3bcb075"
+  }
+}

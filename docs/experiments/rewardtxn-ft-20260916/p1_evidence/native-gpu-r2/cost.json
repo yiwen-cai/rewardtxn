@@ -1,0 +1,7 @@
+{
+  "allocated_gpus": 0,
+  "allocated_gpu_hours": 0,
+  "classification": "resource preflight rejected before container/network creation",
+  "formal_samples": 0,
+  "source_snapshot": "../native-gpu-r2-source"
+}

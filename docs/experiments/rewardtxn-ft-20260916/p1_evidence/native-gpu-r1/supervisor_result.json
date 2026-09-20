@@ -1,0 +1,1 @@
+{"cleanup_confirmed":true,"cleanup_errors":[],"container_id":"02830088c219fd84f8261231dc2532c81c595062db6c9c785ca24c0672d6ed86","duration_seconds":37.84080319607165,"failure":"controller exited 2","network_id":"be5357ca86d09761de11e61e1962fd58fa2e0ef30060b362227af25a16cde376","nonce":"00008f0a4fda44028f5c075626a4375d","scope":"native-trainer-4gpu; no oracle classification"}

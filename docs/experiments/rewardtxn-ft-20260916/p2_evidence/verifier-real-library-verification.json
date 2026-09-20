@@ -1,0 +1,31 @@
+{
+  "scope": "CPU actual AReaL verifier; not GPU oracle acceptance",
+  "image": "areal-project/areal-runtime:v2.0.0-sglang",
+  "image_id": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "network": "none",
+  "gpu": false,
+  "script_sha256": "69322446e43225ad396a7c570b2dad2368d28fa49bd17ac35dbf80dbe15107cd",
+  "oracle_sha256": "f3b81c66ff4a121d60f2e9427e294e9c2df9bf17984b3b4d1332e1575da10b86",
+  "attempts": [
+    {
+      "log": "verifier-real-library-r1.log",
+      "exit_code": 1,
+      "reason": "USER/LOGNAME unset; UID not in container passwd, import failed before scoring"
+    },
+    {
+      "log": "verifier-real-library-r2.log",
+      "exit_code": 0,
+      "env_fix": {
+        "USER": "caiyiwen",
+        "LOGNAME": "caiyiwen"
+      }
+    }
+  ],
+  "checks": [
+    "correct answer scored 1",
+    "incorrect answer scored 0",
+    "source mismatch rejected",
+    "dependency mismatch rejected",
+    "parameters mismatch rejected"
+  ]
+}
