@@ -23,8 +23,10 @@ def write(path, value):
     temporary.replace(path)
 
 
-def main(rid, scenario='post-optimizer'):
-    if scenario == 'midwrite':
+def main(rid, scenario='post-optimizer', *, ft1=None):
+    if ft1 is not None:
+        entry = '/workspace/scripts/ft/areal_ft1.py'
+    elif scenario == 'midwrite':
         from scripts.ft.areal_midwrite_fault import EVENT, EVIDENCE
         entry = '/workspace/scripts/ft/areal_midwrite_fault.py'
     elif scenario == 'post-optimizer':
@@ -39,12 +41,20 @@ def main(rid, scenario='post-optimizer'):
     query = subprocess.check_output(['nvidia-smi', '--query-gpu=uuid,memory.used,utilization.gpu',
                                     '--format=csv,noheader,nounits'], text=True)
     devices = [r[0].strip() for r in csv.reader(query.splitlines()) if float(r[1]) <= 100 and float(r[2]) == 0][:4]
+    if ft1 is not None:
+        devices = ft1['devices']
+        if len(set(devices)) != 4:
+            raise ValueError('FT1 requires four fixed, distinct GPU UUIDs')
     if len(devices) != 4:
         raise RuntimeError('four idle GPUs unavailable')
     idle_snapshot(devices, output / 'gpu-idle.json')
     write(output / 'gpu-uuids.json', devices)
     config = (REPO / 'docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml').read_text()
     config = config.replace('trial_name: native-trainer0', 'trial_name: r-fault-integration').replace('async_save: false', 'async_save: true')
+    if ft1 is not None:
+        from run_ft1 import smoke_config
+        config=smoke_config(config,ft1['seed'])
+        write(output/'ft1-case.json',ft1)
     (output / 'training.yaml').write_text(config)
     for name in ('areal', 'name_resolve', 'tmp'):
         (output / name).mkdir()
@@ -54,10 +64,11 @@ def main(rid, scenario='post-optimizer'):
         'PYTHONDONTWRITEBYTECODE':'1','HF_HUB_OFFLINE':'1','WANDB_MODE':'disabled',
         'AREAL_CACHE_DIR':'/tmp/areal-r','CUDA_HOME':'/usr/local/cuda','CUDA_VISIBLE_DEVICES':'0,1,2,3',
         'OMP_NUM_THREADS':'4','LD_LIBRARY_PATH':'/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64'}
+    if ft1 is not None:env['FT1_ARM']=ft1['arm']
     contract = {'argv':['/opt/.venv/bin/python','-m','areal.infra.launcher.local',
                          entry,'--config','/output/training.yaml'],
-        'env':env, 'schedule':[{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
-        'timeouts':{'run':1200,'handshake':10,'lease':20}}
+        'env':env, 'schedule':[] if ft1 is not None else [{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
+        'timeouts':{'run':2400 if ft1 is not None else 1200,'handshake':10,'lease':20}}
     write(output / 'controller-config.json', contract)
     write(output / 'identity.json', {'nonce':nonce,'host_pidns':os.stat('/proc/self/ns/pid').st_ino})
     guardian = '''import hashlib,json,os,subprocess
@@ -88,6 +99,11 @@ finally:
         REPO/'third_party/areal/areal/trainer/rl_trainer.py',
         REPO/'third_party/areal/areal/utils/recover.py',
         REPO/'third_party/areal/areal/engine/megatron_utils/checkpointer.py']
+    if ft1 is not None:
+        files.extend(REPO/p for p in ('tests/ft/check_ft1_smoke.py','tests/ft/run_ft1.py',
+            'third_party/areal/areal/api/reward_api.py','third_party/areal/areal/utils/strict_reward.py',
+            'third_party/areal/areal/infra/remote_inf_engine.py','third_party/areal/areal/infra/workflow_executor.py',
+            'third_party/areal/areal/reward/gsm8k.py','third_party/areal/areal/reward/__init__.py'))
     write(output / 'source-sha256.json', {str(p.relative_to(REPO)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
     image = 'sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469'
     network = subprocess.check_output(['docker','network','create','--internal','--label','rewardtxn.fault='+rid,'rtx-'+rid],text=True).strip()
@@ -117,7 +133,7 @@ finally:
         write(output/'host_lease.json',{'nonce':nonce,'counter':0})
         thread.start()
         subprocess.run(['docker','start',cid],check=True,capture_output=True)
-        (output/'exitcode').write_text(subprocess.check_output(['docker','wait',cid],text=True,timeout=1400).strip())
+        (output/'exitcode').write_text(subprocess.check_output(['docker','wait',cid],text=True,timeout=2600 if ft1 is not None else 1400).strip())
     finally:
         stopped.set()
         if thread.ident: thread.join()

@@ -1,0 +1,12 @@
+{
+  "tests": 4,
+  "failures": 0,
+  "errors": 0,
+  "seconds": 15.101,
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-preflight-cpu-r1",
+  "container_id": "0892a761bc754164126c3bd2cfa2ad083e2ce004d8c43c22ae2d067dea6453af",
+  "independent_inspect_returncode": 1,
+  "independent_inspect_stderr": "Error: No such object: 0892a761bc754164126c3bd2cfa2ad083e2ce004d8c43c22ae2d067dea6453af\n",
+  "gpu_runs": 0,
+  "full_ft1_passed": false
+}

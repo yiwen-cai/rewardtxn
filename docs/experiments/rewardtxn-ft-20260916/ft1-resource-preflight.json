@@ -1,0 +1,8 @@
+{
+  "collected_at": "2026-09-21T08:05:02.093977+00:00",
+  "gpu_csv": "0, GPU-e3a46342-07b6-3c91-ce7f-833f0201a336, NVIDIA H100 PCIe, 21609, 96\n1, GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794, NVIDIA H100 PCIe, 22191, 54\n2, GPU-03d6dfd0-fe60-5231-596d-72069e4d413c, NVIDIA H100 PCIe, 4895, 0\n3, GPU-57adc905-df4c-7006-349f-bfccb8f6f358, NVIDIA H100 PCIe, 4895, 0\n4, GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605, NVIDIA H100 PCIe, 4895, 0\n5, GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9, NVIDIA H100 PCIe, 4895, 0\n6, GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3, NVIDIA H100 PCIe, 65347, 0\n7, GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d, NVIDIA H100 PCIe, 77205, 0\n",
+  "disk_free_bytes": 520484560896,
+  "criterion": "four fixed distinct GPU UUIDs, each memory.used <= 100 MiB and utilization.gpu == 0",
+  "gpu_runs_started": 0,
+  "status": "blocked_no_four_idle_gpus"
+}
