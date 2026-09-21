@@ -1,0 +1,4 @@
+{
+  "name": "RewardTxn CPU verification harness",
+  "install": "bash .cursor/install.sh"
+}
