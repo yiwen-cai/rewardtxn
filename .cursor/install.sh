@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # Idempotent Cloud Agent bootstrap for the RewardTxn CPU verification harness.
 #
+# Source-of-truth note: the Cloud Agent environment for this repo is
+# dashboard-managed (DB-backed). The authoritative install lives in the
+# environment settings; this file mirrors it under version control so the
+# harness is reviewable and runnable locally. It is intentionally self-contained
+# (locates the repo via BASH_SOURCE) so `bash .cursor/install.sh` works from any
+# checkout without a committed .cursor/environment.json (whose presence would
+# flip the environment to repo-file-managed and override the dashboard).
+#
 # Scope note: GPU training, proprietary AReaL/slime Docker images, large model
 # weights, and the ~33 GB local-only evidence directories are intentionally out
 # of scope here (see HANDOFF.md). This prepares the CPU-only fault-tolerance and
