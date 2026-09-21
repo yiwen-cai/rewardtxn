@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-09-21T11:43:30.001669+00:00",
+  "gpus": [
+    {
+      "index": 0,
+      "uuid": "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+      "utilization_percent": 63,
+      "memory_mib": 16965
+    },
+    {
+      "index": 1,
+      "uuid": "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+      "utilization_percent": 38,
+      "memory_mib": 16599
+    },
+    {
+      "index": 2,
+      "uuid": "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+      "utilization_percent": 64,
+      "memory_mib": 17023
+    },
+    {
+      "index": 3,
+      "uuid": "GPU-57adc905-df4c-7006-349f-bfccb8f6f358",
+      "utilization_percent": 0,
+      "memory_mib": 4
+    },
+    {
+      "index": 4,
+      "uuid": "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605",
+      "utilization_percent": 66,
+      "memory_mib": 63457
+    },
+    {
+      "index": 5,
+      "uuid": "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+      "utilization_percent": 61,
+      "memory_mib": 56741
+    },
+    {
+      "index": 6,
+      "uuid": "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+      "utilization_percent": 98,
+      "memory_mib": 74685
+    },
+    {
+      "index": 7,
+      "uuid": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d",
+      "utilization_percent": 0,
+      "memory_mib": 73357
+    }
+  ],
+  "compute_raw": "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336, 2583714\nGPU-40b9b481-bf7d-cd0e-d659-065cfc44e794, 2583715\nGPU-03d6dfd0-fe60-5231-596d-72069e4d413c, 2589255\nGPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605, 2133032\nGPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605, 2557328\nGPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9, 2142279\nGPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9, 2408775\nGPU-8c3a30a0-a187-3387-9e90-089a3c851bd3, 2164303\nGPU-8c3a30a0-a187-3387-9e90-089a3c851bd3, 2563165\nGPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d, 3630763\n",
+  "idle_indices": [
+    3
+  ],
+  "own_containers_absent": [
+    {
+      "run": "ft1-f4-s417-a-r1",
+      "container": "2fac74f4abf78148faee7d88bad39b5d85896a885ca9d3cc546ab2cdb5856e07",
+      "absent": true
+    },
+    {
+      "run": "ft1-f4-s417-r-r1",
+      "container": "7b5575daddc7f53d4ec1168916b806bd7127b97bab21a8f8bfa63233807fef00",
+      "absent": true
+    },
+    {
+      "run": "ft1-f2-s419-r-r1",
+      "container": "012c72ac94adc395fa595fb497f4ebfc630a5b2e9fe6bfac4a31a4a08b21970b",
+      "absent": true
+    },
+    {
+      "run": "ft1-input-f2-s419-r-r1",
+      "container": "21eaa732fdada03b863f18d1bd76036cfeeb845e75f9f1e6d2cca66ea14dc02a",
+      "absent": true
+    }
+  ]
+}

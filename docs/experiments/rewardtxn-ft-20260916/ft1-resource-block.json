@@ -1,0 +1,15 @@
+{
+  "status": "blocked_before_container_create",
+  "classification": "resource_unavailable",
+  "scenario": "F2",
+  "arm": "A",
+  "seed": 419,
+  "observed_at": "2026-09-21T11:40:12.228352+00:00",
+  "gpu_run_started": false,
+  "fault_injected": false,
+  "formal_sample": false,
+  "reason": "selected GPU 2/3 occupied by external processes immediately after R cleanup; subsequent probe also found 0/1 occupied",
+  "container_created": false,
+  "retained_evidence": "gpu-idle.json",
+  "retry_policy": "preserve this preflight directory; resume same seed/config/source/device UUIDs in a fresh evidence directory when all four are idle; do not rerun completed R arm solely for this preflight block"
+}

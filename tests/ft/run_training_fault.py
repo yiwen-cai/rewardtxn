@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -53,7 +54,12 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
     config = config.replace('trial_name: native-trainer0', 'trial_name: r-fault-integration').replace('async_save: false', 'async_save: true')
     if ft1 is not None:
         from run_ft1 import smoke_config
-        config=smoke_config(config,ft1['seed'])
+        if ft1['scenario']=='no_fault':config=smoke_config(config,ft1['seed'])
+        else:
+            from run_ft1_faults import fault_config
+            config=fault_config(config,ft1['scenario'],ft1['seed'])
+        if ft1['scenario']=='F1':
+            shutil.copy2(REPO/'docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',output/'f1-target.json')
         write(output/'ft1-case.json',ft1)
     (output / 'training.yaml').write_text(config)
     for name in ('areal', 'name_resolve', 'tmp'):
@@ -64,12 +70,21 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
         'PYTHONDONTWRITEBYTECODE':'1','HF_HUB_OFFLINE':'1','WANDB_MODE':'disabled',
         'AREAL_CACHE_DIR':'/tmp/areal-r','CUDA_HOME':'/usr/local/cuda','CUDA_VISIBLE_DEVICES':'0,1,2,3',
         'OMP_NUM_THREADS':'4','LD_LIBRARY_PATH':'/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64'}
-    if ft1 is not None:env['FT1_ARM']=ft1['arm']
+    schedule=[]
+    if ft1 is not None:
+        env['FT1_ARM']=ft1['arm']
+        env['FT1_SCENARIO']=ft1['scenario']
+        if ft1['scenario']!='no_fault':
+            from scripts.ft.ft1_fault_hooks import contract as fault_contract
+            schedule=[fault_contract(ft1['scenario'])]
     contract = {'argv':['/opt/.venv/bin/python','-m','areal.infra.launcher.local',
                          entry,'--config','/output/training.yaml'],
-        'env':env, 'schedule':[] if ft1 is not None else [{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
+        'env':env, 'schedule':schedule if ft1 is not None else [{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
         'timeouts':{'run':2400 if ft1 is not None else 1200,'handshake':10,'lease':20}}
     write(output / 'controller-config.json', contract)
+    inputs = ['training.yaml', 'controller-config.json']
+    if ft1 is not None and ft1['scenario'] == 'F1': inputs.append('f1-target.json')
+    write(output / 'input-sha256.json', {name:hashlib.sha256((output/name).read_bytes()).hexdigest() for name in inputs})
     write(output / 'identity.json', {'nonce':nonce,'host_pidns':os.stat('/proc/self/ns/pid').st_ino})
     guardian = '''import hashlib,json,os,subprocess
 from pathlib import Path
@@ -79,6 +94,7 @@ code=2
 try:
  frozen=json.loads((root/'source-sha256.json').read_text())
  assert all(hashlib.sha256((Path('/workspace')/name).read_bytes()).hexdigest()==sha for name,sha in frozen.items())
+ assert all(hashlib.sha256((root/name).read_bytes()).hexdigest()==sha for name,sha in json.loads((root/'input-sha256.json').read_text()).items())
  with (root/'preflight.log').open('w') as log:
   subprocess.run(['/opt/.venv/bin/python','-m','scripts.ft.native_gpu','--preflight'],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=120)
  cfg=json.loads((root/'controller-config.json').read_text())
@@ -100,11 +116,19 @@ finally:
         REPO/'third_party/areal/areal/utils/recover.py',
         REPO/'third_party/areal/areal/engine/megatron_utils/checkpointer.py']
     if ft1 is not None:
-        files.extend(REPO/p for p in ('tests/ft/check_ft1_smoke.py','tests/ft/run_ft1.py',
+        files.extend(REPO/p for p in ('tests/ft/check_ft1_smoke.py','tests/ft/run_ft1.py','tests/ft/run_ft1_faults.py',
+            'tests/ft/check_ft1_input_audit.py','tests/ft/check_ft1_load.py','tests/ft/check_ft1_chain.py',
+            'tests/ft/check_ft1_fault.py','tests/ft/finalize_ft1_fault.py','docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',
+            'third_party/areal/areal/v2/inference_service/sglang/scheduler.py',
             'third_party/areal/areal/api/reward_api.py','third_party/areal/areal/utils/strict_reward.py',
             'third_party/areal/areal/infra/remote_inf_engine.py','third_party/areal/areal/infra/workflow_executor.py',
             'third_party/areal/areal/reward/gsm8k.py','third_party/areal/areal/reward/__init__.py'))
+    if ft1 is not None: files.extend((REPO/'third_party/areal/areal').rglob('*.py'))
+    files = sorted(set(files))
     write(output / 'source-sha256.json', {str(p.relative_to(REPO)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
+    for source in files:
+        archived=output/'source-archive'/source.relative_to(REPO)
+        archived.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,archived)
     image = 'sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469'
     network = subprocess.check_output(['docker','network','create','--internal','--label','rewardtxn.fault='+rid,'rtx-'+rid],text=True).strip()
     (output/'network.id').write_text(network)

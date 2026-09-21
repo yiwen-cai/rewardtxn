@@ -1,0 +1,14 @@
+--- a/areal/v2/inference_service/sglang/scheduler.py
++++ b/areal/v2/inference_service/sglang/scheduler.py
+@@ -234,6 +234,11 @@
+         # ---- BEGIN AREAL ----
+         AwexSchedulerBridge(scheduler).bind()
+         PPSchedulerBridge(scheduler, server_args).bind()
++        # Shared FT1 observation/injection only; normal scheduling is unchanged.
++        if os.environ.get("FT1_SCENARIO") == "F1":
++            from scripts.ft.ft1_scheduler_observer import attach
++
++            attach(scheduler)
+         # ---- END AREAL ----
+ 
+         pipe_writer.send(scheduler.get_init_info())

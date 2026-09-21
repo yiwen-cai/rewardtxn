@@ -1,5 +1,7 @@
 # FT 实验执行状态
 
+> 2026-09-21 FT1 等待GPU：4个无故障run完整通过，F4两臂完整验收为正确恢复；F2 A+R真实原生恢复、32输入重放、352输入重评分、320唯一样本保留链及最终step9独立GPU加载均通过。F2 A在创建容器前被外部占卡拦住，F1两臂未运行；公共F1 hook已批准并安装/冻结。完整FT1未通过、FT2未放行，正式样本0。详见 [FT1_RUN_REPORT.md](FT1_RUN_REPORT.md) 和 [ft1-progress.json](ft1-progress.json)。以下保留历史状态。
+
 > 2026-09-21 最新补充：实现已提交（24b7285、6719426）；FT1 无故障配对入口及 4 项 CPU 预检通过，GPU 预检尚未运行，现场无四张空闲卡。完整 FT1 仍有恢复链 oracle、各 cell 映射及冻结验收未完成，不能放行正式实验。详见 [FT1_PREFLIGHT_REPORT.md](FT1_PREFLIGHT_REPORT.md)。下文较早阶段状态保留历史上下文。
 
 2026-09-21最新补充：公共严格评分补丁已经用户授权并应用；116项CPU测试和6373条标准答案检查通过，详见 [报告](SCORING_STATUS_PATCH_REPORT.md) 与 [验收摘要](scoring-status-verification-r3.json)。有效0/1与异常/超时/gold错误分离；两臂同一有界评分进程与最多2次尝试；R仅缓存schema2/scored有效结果；终态错误停止实际Grouped/dispatcher批次并回收兄弟任务，不补样本。7个CPU容器已清理，本轮无GPU。用户已选择单训练rank＋3推理实例；这及重试参数仍需正式freeze。历史异常fallback零分和评分池证据不能当新版本正式结论；下一步FT1成对故障预检、独立分类与正式冻结，F4需按新实际执行进程重新映射，正式矩阵0/184待补不变。

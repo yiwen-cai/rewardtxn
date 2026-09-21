@@ -1,0 +1,27 @@
+{
+  "verified": true,
+  "scenario": "F4",
+  "seed": 417,
+  "order": [
+    "A",
+    "R"
+  ],
+  "source_files_per_arm": 506,
+  "source_archives_verified": true,
+  "training_config_sha256": "43ce8d04ce7823cf9f32b4dd5f31028fa0bd4d8da1bf7e90ed91547cceaa08c3",
+  "controller_config_equal_except_FT1_ARM": true,
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "same_gpu_uuids": [
+    "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+    "GPU-57adc905-df4c-7006-349f-bfccb8f6f358"
+  ],
+  "same_limits": {
+    "Memory": 137438953472,
+    "NanoCpus": 32000000000,
+    "ShmSize": 17179869184
+  },
+  "scope": "FT1 pilot pairing and frozen provenance; method result independently reported",
+  "script_sha256": "019d634aae01f7c0f2bc33eadce2591d52b82b2900050f09af7d1d385387fdba"
+}

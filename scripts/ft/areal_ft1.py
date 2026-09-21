@@ -1,4 +1,4 @@
-"""FT1 ten-step smoke and natural F4 timing observation, shared across arms."""
+"""FT1 ten-step pilot with shared observation and one-shot fault cuts."""
 import dataclasses
 import functools
 import json
@@ -8,9 +8,11 @@ import sys
 import time
 
 
+TRAINER_IDENTITY = None
+
 def observe(event, **fields):
     root=Path(os.environ['FT1_OBSERVE']);root.mkdir(exist_ok=True)
-    record={'event':event,'pid':os.getpid(),'monotonic_ns':time.monotonic_ns(),**fields}
+    record={'event':event,'pid':os.getpid(),'trainer_identity':TRAINER_IDENTITY,'monotonic_ns':time.monotonic_ns(),**fields}
     with (root/f'{os.getpid()}.jsonl').open('a') as stream:
         stream.write(json.dumps(record)+'\n');stream.flush()
 
@@ -38,6 +40,31 @@ def install_observer():
     strict_reward._worker=scoring
 
 
+
+def install_load_observer():
+    from areal.engine.megatron_engine import MegatronPPOActor
+    from areal.utils.recover import RecoverInfo
+    from scripts.ft.training_adapter import native_snapshot
+    save=MegatronPPOActor.save
+    def engine_save(self,meta):
+        observe('checkpoint_save_state',path=meta.path,update_id=getattr(self,'_pilot_update',None),state=native_snapshot(self))
+        return save(self,meta)
+    MegatronPPOActor.save=engine_save
+    load=MegatronPPOActor.load
+    def engine_load(self,meta):
+        result=load(self,meta)
+        observe('checkpoint_loaded_state',path=meta.path,state=native_snapshot(self))
+        return result
+    MegatronPPOActor.load=engine_load
+    recover_load=RecoverInfo.load.__func__
+    @classmethod
+    def metadata_load(cls,path):
+        result=recover_load(cls,path)
+        observe('recover_info_loaded',path=str(path),last_step_info=dataclasses.asdict(result.last_step_info))
+        return result
+    RecoverInfo.load=metadata_load
+
+
 def main(args):
     from areal import PPOTrainer
     from areal.api.cli_args import GRPOConfig,load_expr_config
@@ -47,8 +74,13 @@ def main(args):
     from scripts.ft.training_adapter import Runtime,install,native_snapshot
     from scripts.ft.reward_return import verifier_fingerprint
     config,_=load_expr_config(args,GRPOConfig)
+    global TRAINER_IDENTITY
+    from scripts.ft.descendants import snapshot
+    TRAINER_IDENTITY=snapshot(os.getpid())
     arm=os.environ['FT1_ARM'];root=Path(config.cluster.fileroot).parent
-    if arm not in ('A','R') or config.total_train_steps!=10 or config.recover.retries!=0:
+    scenario=os.environ.get('FT1_SCENARIO','no_fault')
+    if scenario not in ('no_fault','F1','F2','F4'):raise RuntimeError('unmapped FT1 scenario')
+    if arm not in ('A','R') or config.total_train_steps!=10 or config.recover.retries!=(0 if scenario=='no_fault' else 1):
         raise RuntimeError('unsupported FT1 smoke configuration')
     if not config.actor.megatron.async_save or config.gconfig.n_samples!=8 or config.train_dataset.batch_size!=4:
         raise RuntimeError('FT1 requires common async DCP K8/U4')
@@ -60,7 +92,12 @@ def main(args):
         runtime=Runtime(config,root/'rewardtxn');install(runtime)
     install_hooks()
     install_observer()
-    observe('configured',arm=arm,config=dataclasses.asdict(config),effective_seed=get_seed(),
+    client=None
+    if scenario!='no_fault':
+        from scripts.ft.ft1_fault_hooks import install as install_fault
+        client=install_fault(scenario,sys.modules[__name__])
+        install_load_observer()
+    observe('configured',arm=arm,scenario=scenario,config=dataclasses.asdict(config),effective_seed=get_seed(),
             verifier_sha256=verifier_fingerprint())
     try:
         dataset=load_pilot_dataset(config.train_dataset.path)
@@ -90,6 +127,7 @@ def main(args):
     finally:
         if runtime is not None:runtime.close()
         close_events()
+        if client is not None:client.close()
 
 
 if __name__=='__main__':main(sys.argv[1:])

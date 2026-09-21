@@ -1,0 +1,508 @@
+{
+  "status": "blocked_on_gpu_availability",
+  "formal_samples": 0,
+  "completed_no_fault": [
+    {
+      "run": "ft1-smoke-s401-a-r1",
+      "arm": "A",
+      "seed": 401,
+      "cost": {
+        "wall_seconds": 433.5144837789703,
+        "allocated_gpu_hours": 0.48168275975441144,
+        "scope": "engineering run; no comparative performance claim"
+      },
+      "input": {
+        "scope": "independent no-fault observer input multiset, original-label re-scoring, physical optimizer linkage; not persistent-chain/reload proof",
+        "verified": true,
+        "arm": "A",
+        "updates": 10,
+        "rows": 320,
+        "positive_rewards": 158.0,
+        "distinct_source_rows": 40,
+        "all_groups_have_eight_distinct_slots": true,
+        "identical_response_identity_ambiguities": 0,
+        "data_sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+        "verifier_sha256": "2b4587682685af79b69c2b9fe71e8d5adb9dab1c2f16c80737dd32624b9f91d7"
+      },
+      "load": {
+        "arm": "A",
+        "checkpoint": "/input/areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/r-fault-integration/default/recover_checkpoint",
+        "pid": 1,
+        "scope": "fresh process native engine load and RecoverInfo; no training or source ledger mutation",
+        "terminal_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "last_step_info": {
+          "epoch": 0,
+          "epoch_step": 9,
+          "global_step": 9,
+          "steps_per_epoch": 1593
+        },
+        "next_step_info": {
+          "epoch": 0,
+          "epoch_step": 10,
+          "global_step": 10,
+          "steps_per_epoch": 1593
+        },
+        "native_cursor_roundtrip_equal": true,
+        "engine_exact_match": true
+      },
+      "chain": {
+        "verified": true,
+        "arm": "A",
+        "scope": "no-fault observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately",
+        "checkpoint_bytes_hashed": 6917854855,
+        "files_hashed": 10,
+        "wall_seconds": 8.573673976003192,
+        "final_checkpoint_retains_step": 9,
+        "retained_updates": 10
+      },
+      "natural_f4_candidates": 51
+    },
+    {
+      "run": "ft1-smoke-s401-r-r1",
+      "arm": "R",
+      "seed": 401,
+      "cost": {
+        "wall_seconds": 1915.8960188450292,
+        "allocated_gpu_hours": 2.1287733542722544,
+        "scope": "engineering run; no comparative performance claim"
+      },
+      "input": {
+        "scope": "independent no-fault observer input multiset, original-label re-scoring, physical optimizer linkage; not persistent-chain/reload proof",
+        "verified": true,
+        "arm": "R",
+        "updates": 10,
+        "rows": 320,
+        "positive_rewards": 159.0,
+        "distinct_source_rows": 40,
+        "all_groups_have_eight_distinct_slots": true,
+        "identical_response_identity_ambiguities": 0,
+        "data_sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+        "verifier_sha256": "2b4587682685af79b69c2b9fe71e8d5adb9dab1c2f16c80737dd32624b9f91d7"
+      },
+      "load": {
+        "arm": "R",
+        "checkpoint": "/input/rewardtxn/state/generations/g-9343312d150c419087322720fd44dbf1/checkpoint/native",
+        "pid": 1,
+        "scope": "fresh process native engine load and RecoverInfo; no training or source ledger mutation",
+        "terminal_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "saved_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "last_step_info": {
+          "epoch": 0,
+          "epoch_step": 9,
+          "global_step": 9,
+          "steps_per_epoch": 1593
+        },
+        "next_step_info": {
+          "epoch": 0,
+          "epoch_step": 10,
+          "global_step": 10,
+          "steps_per_epoch": 1593
+        },
+        "draw_saved_prefix_loaded": true,
+        "saved_wal_sequence": 14,
+        "restored_wal_sequence": 14,
+        "retained_cursor_status": "real DrawLoader restore on copy; consumption independently checked against token chain",
+        "engine_exact_match": true
+      },
+      "chain": {
+        "verified": true,
+        "arm": "R",
+        "scope": "no-fault observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately",
+        "checkpoint_bytes_hashed": 69180862022,
+        "files_hashed": 120,
+        "wall_seconds": 69.75385345704854,
+        "retained_generations": 10,
+        "unique_consumed_samples": 320,
+        "unique_source_rows": 40
+      },
+      "natural_f4_candidates": 45
+    },
+    {
+      "run": "ft1-smoke-s409-a-r1",
+      "arm": "A",
+      "seed": 409,
+      "cost": {
+        "wall_seconds": 391.09954438800924,
+        "allocated_gpu_hours": 0.43455504932001027,
+        "scope": "engineering run; no comparative performance claim"
+      },
+      "input": {
+        "scope": "independent physical optimizer input multiset (rollback may repeat across trainer incarnations), original-label re-scoring, physical optimizer linkage; not persistent-chain/reload proof",
+        "verified": true,
+        "arm": "A",
+        "updates": 10,
+        "rows": 320,
+        "positive_rewards": 160.0,
+        "distinct_source_rows": 40,
+        "all_groups_have_eight_distinct_slots": true,
+        "identical_response_identity_ambiguities": 0,
+        "data_sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+        "verifier_sha256": "2b4587682685af79b69c2b9fe71e8d5adb9dab1c2f16c80737dd32624b9f91d7"
+      },
+      "load": {
+        "arm": "A",
+        "checkpoint": "/input/areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/r-fault-integration/default/recover_checkpoint",
+        "pid": 1,
+        "scope": "fresh process native engine load and RecoverInfo; no training or source ledger mutation",
+        "terminal_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "last_step_info": {
+          "epoch": 0,
+          "epoch_step": 9,
+          "global_step": 9,
+          "steps_per_epoch": 1593
+        },
+        "next_step_info": {
+          "epoch": 0,
+          "epoch_step": 10,
+          "global_step": 10,
+          "steps_per_epoch": 1593
+        },
+        "native_cursor_roundtrip_equal": true,
+        "engine_exact_match": true
+      },
+      "chain": {
+        "verified": true,
+        "arm": "A",
+        "scope": "observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately",
+        "checkpoint_bytes_hashed": 6917854920,
+        "files_hashed": 10,
+        "wall_seconds": 8.590880926931277,
+        "final_checkpoint_retains_step": 9,
+        "retained_updates": 10,
+        "retained_physical_update_ids": [
+          "4aba14c99c2643c1967c0c2f3ca71975",
+          "d73383604ebc4a0bb01e93776f66470f",
+          "7577bd5e13e34156baa2612f9ac3452c",
+          "93e184c0e5cb453bb64d1750ac51ca65",
+          "10120bc096bd4c02a831e2176cd24696",
+          "bf102e08d0fb4336a5a330f6adfe156e",
+          "c5e68bda4e3f4d229c35dae429098e0e",
+          "5a70461b464f4f5a87ec625e19932c34",
+          "c09affeb030a4e3da37a324b61e3d491",
+          "d638fc1ae8b44d308b50a429de0f58c2"
+        ],
+        "discarded_physical_updates": 0,
+        "retained_source_rows": [
+          913,
+          995,
+          1332,
+          1377,
+          1708,
+          1860,
+          1927,
+          1948,
+          2089,
+          2337,
+          2474,
+          2602,
+          2618,
+          2653,
+          2685,
+          2898,
+          3113,
+          3227,
+          3323,
+          3412,
+          3583,
+          3741,
+          4170,
+          4247,
+          4275,
+          4480,
+          4597,
+          4688,
+          5047,
+          5184,
+          5190,
+          5407,
+          5411,
+          5518,
+          5580,
+          5674,
+          5692,
+          5883,
+          6001,
+          6049
+        ]
+      },
+      "natural_f4_candidates": 52
+    },
+    {
+      "run": "ft1-smoke-s409-r-r1",
+      "arm": "R",
+      "seed": 409,
+      "cost": {
+        "wall_seconds": 1818.5155811230652,
+        "allocated_gpu_hours": 2.0205728679145167,
+        "scope": "engineering run; no comparative performance claim"
+      },
+      "input": {
+        "scope": "independent physical optimizer input multiset (rollback may repeat across trainer incarnations), original-label re-scoring, physical optimizer linkage; not persistent-chain/reload proof",
+        "verified": true,
+        "arm": "R",
+        "updates": 10,
+        "rows": 320,
+        "positive_rewards": 168.0,
+        "distinct_source_rows": 40,
+        "all_groups_have_eight_distinct_slots": true,
+        "identical_response_identity_ambiguities": 0,
+        "data_sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+        "verifier_sha256": "2b4587682685af79b69c2b9fe71e8d5adb9dab1c2f16c80737dd32624b9f91d7"
+      },
+      "load": {
+        "arm": "R",
+        "checkpoint": "/input/rewardtxn/state/generations/g-9ac673635ef242199997a83c44e796d1/checkpoint/native",
+        "pid": 1,
+        "scope": "fresh process native engine load and RecoverInfo; no training or source ledger mutation",
+        "terminal_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "saved_components_equal": {
+          "lr_scheduler": true,
+          "model": true,
+          "optimizer": true,
+          "rng_state": true
+        },
+        "last_step_info": {
+          "epoch": 0,
+          "epoch_step": 9,
+          "global_step": 9,
+          "steps_per_epoch": 1593
+        },
+        "next_step_info": {
+          "epoch": 0,
+          "epoch_step": 10,
+          "global_step": 10,
+          "steps_per_epoch": 1593
+        },
+        "draw_saved_prefix_loaded": true,
+        "saved_wal_sequence": 14,
+        "restored_wal_sequence": 14,
+        "retained_cursor_status": "real DrawLoader restore on copy; consumption independently checked against token chain",
+        "engine_exact_match": true
+      },
+      "chain": {
+        "verified": true,
+        "arm": "R",
+        "scope": "observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately",
+        "checkpoint_bytes_hashed": 69180862859,
+        "files_hashed": 120,
+        "wall_seconds": 78.18604033405427,
+        "retained_generations": 10,
+        "unique_consumed_samples": 320,
+        "unique_source_rows": 40,
+        "retained_source_rows": [
+          913,
+          995,
+          1332,
+          1377,
+          1708,
+          1860,
+          1927,
+          1948,
+          2089,
+          2337,
+          2474,
+          2602,
+          2618,
+          2653,
+          2685,
+          2898,
+          3113,
+          3227,
+          3323,
+          3412,
+          3583,
+          3741,
+          4170,
+          4247,
+          4275,
+          4480,
+          4597,
+          4688,
+          5047,
+          5184,
+          5190,
+          5407,
+          5411,
+          5518,
+          5580,
+          5674,
+          5692,
+          5883,
+          6001,
+          6049
+        ]
+      },
+      "natural_f4_candidates": 42
+    }
+  ],
+  "active_fault_pair": null,
+  "fault_gpu_completed": 3,
+  "ft2_released": false,
+  "fault_results": [
+    {
+      "run": "ft1-f2-s419-r-r1",
+      "scenario": "F2",
+      "arm": "R",
+      "formal_sample": false,
+      "scope": "FT1 single-rank pilot; A first durable completion is not independently timestamped, no formal RTO comparison",
+      "killed_uncheckpointed_update_id": "ff7bad91c8b746708c1ea094019a9d41",
+      "valid_hit": true,
+      "classification": "correct_recovered",
+      "signals": 1,
+      "physical_optimizer_successes": 11,
+      "successful_updates_after_fault": 9,
+      "native_run_ids": [
+        "0",
+        "1"
+      ],
+      "job_receipts": 4,
+      "all_jobs_cleaned": true,
+      "training_returned": true,
+      "affected_work_recovery": "verified",
+      "safety_verified_for_retained_chain": true,
+      "training_continuation_verified": true,
+      "affected_work_recovered": true,
+      "target_source_rows": [
+        995,
+        3113,
+        4688,
+        5518
+      ],
+      "retained_target_source_rows": [
+        995,
+        3113,
+        4688,
+        5518
+      ],
+      "full_native_reload_verified": true,
+      "fault_to_verified_persistence_seconds": 271.460266447,
+      "persistence_time_kind": "commit observation",
+      "recovery_within_900_seconds": true,
+      "formal_rto_eligible": false,
+      "cost": {
+        "wall_seconds": 2173.7671977159334,
+        "allocated_gpu_hours": 2.415296886351037,
+        "scope": "engineering run; no comparative performance claim"
+      }
+    },
+    {
+      "run": "ft1-f4-s417-a-r1",
+      "scenario": "F4",
+      "arm": "A",
+      "formal_sample": false,
+      "scope": "FT1 single-rank pilot; A first durable completion is not independently timestamped, no formal RTO comparison",
+      "same_input_native_score_retry_succeeded": true,
+      "valid_hit": true,
+      "classification": "correct_recovered",
+      "signals": 1,
+      "physical_optimizer_successes": 10,
+      "successful_updates_after_fault": 10,
+      "native_run_ids": [
+        "0",
+        "1"
+      ],
+      "job_receipts": 4,
+      "all_jobs_cleaned": true,
+      "training_returned": true,
+      "affected_work_recovery": "verified",
+      "safety_verified_for_retained_chain": true,
+      "training_continuation_verified": true,
+      "affected_work_recovered": true,
+      "target_source_rows": [
+        5518
+      ],
+      "retained_target_source_rows": [
+        5518
+      ],
+      "full_native_reload_verified": true,
+      "fault_to_verified_persistence_seconds": 237.58311522,
+      "persistence_time_kind": "final-checkpoint upper bound",
+      "recovery_within_900_seconds": true,
+      "formal_rto_eligible": false,
+      "cost": {
+        "wall_seconds": 670.6815476819174,
+        "allocated_gpu_hours": 0.7452017196465749,
+        "scope": "engineering run; no comparative performance claim"
+      }
+    },
+    {
+      "run": "ft1-f4-s417-r-r1",
+      "scenario": "F4",
+      "arm": "R",
+      "formal_sample": false,
+      "scope": "FT1 single-rank pilot; A first durable completion is not independently timestamped, no formal RTO comparison",
+      "same_input_native_score_retry_succeeded": true,
+      "valid_hit": true,
+      "classification": "correct_recovered",
+      "signals": 1,
+      "physical_optimizer_successes": 10,
+      "successful_updates_after_fault": 10,
+      "native_run_ids": [
+        "0",
+        "1"
+      ],
+      "job_receipts": 4,
+      "all_jobs_cleaned": true,
+      "training_returned": true,
+      "affected_work_recovery": "verified",
+      "safety_verified_for_retained_chain": true,
+      "training_continuation_verified": true,
+      "affected_work_recovered": true,
+      "target_source_rows": [
+        5518
+      ],
+      "retained_target_source_rows": [
+        5518
+      ],
+      "full_native_reload_verified": true,
+      "fault_to_verified_persistence_seconds": 179.845066246,
+      "persistence_time_kind": "commit observation",
+      "recovery_within_900_seconds": true,
+      "formal_rto_eligible": false,
+      "cost": {
+        "wall_seconds": 2322.35288771498,
+        "allocated_gpu_hours": 2.580392097461089,
+        "scope": "engineering run; no comparative performance claim"
+      }
+    }
+  ],
+  "updated_at": "2026-09-21T11:45:58.950812+00:00",
+  "gpu_runs_finished": 7,
+  "fault_gpu_runs_finished": 3,
+  "pending": [
+    "F2 A seed419 same four GPUs; r1 blocked before container creation",
+    "F1 seed421 A->R; approved hook installed but no GPU run yet"
+  ],
+  "resource_block": "ft1-resource-block.json",
+  "historical_interim_reports": [
+    "p3_evidence/ft1-f2-s419-r-r1/interim-verification.json"
+  ],
+  "current_free_gpu_indices": [
+    3
+  ]
+}
