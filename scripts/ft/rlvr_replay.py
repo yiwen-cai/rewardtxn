@@ -1,8 +1,7 @@
-"""CPU official-call-return artifacts, with synthetic generation in tests.
+"""Bound response/reward artifacts. Strict GSM8K uses scored-only envelopes.
 
-Legitimate 0/1 are preserved. An envelope proves only that the official scorer
-returned, INCLUDING its internal timeout/error fallback zeros, not verification
-success. No formal/GPU verifier semantics, consumed authority or adoption.
+Legacy custom callables retain call-return semantics; they are not certified
+strict verifiers. Consumption authority is supplied by the training adapter.
 """
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -50,9 +49,10 @@ class CallReturnRLVR(RLVRWorkflow):
         if re.fullmatch(r'[0-9a-f]{64}', tokenizer_sha256) is None:
             raise ArtifactError('explicit tokenizer asset hash required')
         super().__init__(reward_fn=reward_fn, gconfig=gconfig, tokenizer=tokenizer, **kwargs)
-        # Public constructor only; the super-created default executor is lazy,
-        # and receives no jobs. Official retry implementation remains unchanged.
-        self.async_reward_fn = AsyncRewardWrapper(ReturningReward(reward_fn), max_workers=1, max_retries=0,
+        # Strict scorers use the same default retries and process isolation as A.
+        self.strict_scoring = bool(getattr(reward_fn, 'strict_scoring', False))
+        self.async_reward_fn = AsyncRewardWrapper(ReturningReward(reward_fn), max_workers=1,
+                                                  max_retries=None if self.strict_scoring else 0,
                                                   timeout_seconds=timeout_seconds)
         self.owner = owner
         self.attempts = copy.deepcopy(attempts)
@@ -114,14 +114,17 @@ class CallReturnRLVR(RLVRWorkflow):
         if set(payload) != required or payload['input_tokens'] != context['input_ids']:
             raise ArtifactError('response input/schema mismatch')
         n = len(payload['output_tokens'])
-        version = context['binding']['attempt']['versions']['policy_version']
         if (n < 1 or len(payload['output_logprobs']) != n or len(payload['output_versions']) != n
                 or any(type(t) is not int or not 0 <= t <= 2147483647 for t in payload['input_tokens'] + payload['output_tokens'])
-                or any(type(v) is not int or v != version for v in payload['output_versions'])
+                or not self.valid_versions(context, payload['output_versions'])
                 or any(type(v) not in (int, float) or not math.isfinite(v) for v in payload['output_logprobs'])
                 or payload['stop_reason'] not in ('stop', 'length') or not payload['origin_rid']):
             raise ArtifactError('invalid response or unsupported mixed policy versions')
         return ModelResponse(**{k: copy.deepcopy(v) for k, v in payload.items() if k != 'origin_rid'}, tokenizer=self.tokenizer)
+
+    def valid_versions(self, context, versions):
+        version = context['binding']['attempt']['versions']['policy_version']
+        return all(type(v) is int and v == version for v in versions)
 
     def _scoring_input(self, context, response):
         resp = response[0]
@@ -135,8 +138,9 @@ class CallReturnRLVR(RLVRWorkflow):
                        'input_sha256': self._scoring_input(context, response)})
 
     def _validate_return(self, context, response, envelope):
-        if (type(envelope) is not RewardReturn or type(envelope.schema) is not int or envelope.schema != 1
-                or envelope.status != 'official_call_returned'
+        if (type(envelope) is not RewardReturn or type(envelope.schema) is not int
+                or envelope.schema != (2 if self.strict_scoring else 1)
+                or envelope.status != ('scored' if self.strict_scoring else 'official_call_returned')
                 or not isinstance(envelope.invocation_nonce, str)
                 or re.fullmatch('[0-9a-f]{64}', envelope.invocation_nonce) is None
                 or envelope.invocation_nonce != self._invocation_nonce(context, response)
@@ -201,6 +205,12 @@ class CallReturnRLVR(RLVRWorkflow):
         self._validate_tensors(context, result, response, reward)
         return result
 
+    def bind_context(self, context):
+        return context
+
+    async def restore_artifacts(self, context):
+        """Training adapters may validate and adopt a prior execution's artifacts."""
+
     async def arun_episode(self, engine, data):
         data = copy.deepcopy(data)
         if '_r_reward_request' in data:
@@ -224,10 +234,12 @@ class CallReturnRLVR(RLVRWorkflow):
                    'input_ids_sha256': digest(input_ids)}
         context = {'binding': binding, 'input_ids': input_ids, 'data': data,
                    'directory': self.root / 'samples' / digest([sample, attempt['epoch'], attempt['owner_nonce'], attempt['attempt']])}
+        context = self.bind_context(context)
         self._check(context)
         self._active.add(sample)
         token = self._context.set(context)
         try:
+            await self.restore_artifacts(context)
             response, reward, tensor = await self._io(context, lambda: tuple(self._stage(context, s) for s in ('response', 'reward', 'tensor')))
             if (reward is not None or tensor is not None) and response is None or tensor is not None and reward is None:
                 raise ArtifactError('upstream artifact missing')

@@ -1,0 +1,324 @@
+diff --git a/areal/api/reward_api.py b/areal/api/reward_api.py
+index 44bef1f..1ed2c86 100644
+--- a/areal/api/reward_api.py
++++ b/areal/api/reward_api.py
+@@ -78,10 +78,15 @@ class AsyncRewardWrapper:
+         reward_fn: Callable,
+         timeout_seconds: float = 15,
+         max_workers: int | None = None,
+-        max_retries: int = 3,
++        max_retries: int | None = None,
+     ):
+         self.reward_fn = reward_fn
+         self.timeout_seconds = timeout_seconds
++        self.strict_scoring = bool(getattr(reward_fn, "strict_scoring", False))
++        if max_retries is None:
++            max_retries = 1 if self.strict_scoring else 3
++        if self.strict_scoring and max_workers is None:
++            max_workers = 1
+         if max_workers is None:
+             cpu_count = os.cpu_count() or 1
+             device_count = _get_device_count_safely()
+@@ -89,6 +94,11 @@ class AsyncRewardWrapper:
+         self.max_workers = max_workers
+         self.max_retries = max_retries
+         self._executor_key = max_workers
++        if self.strict_scoring:
++            if timeout_seconds <= 0 or max_retries < 0 or max_workers < 1:
++                raise ValueError("invalid strict scoring timeout/retry/worker count")
++            self._strict_slots = asyncio.Semaphore(max_workers)
++            return
+ 
+         with self._lock:
+             if self._executor_key not in self._executors:
+@@ -139,6 +149,23 @@ class AsyncRewardWrapper:
+             return new_executor
+ 
+     async def __call__(self, *args, **kwargs) -> float:
++        if self.strict_scoring:
++            from areal.utils.strict_reward import evaluate
++            from areal.utils.reward_status import RewardEvaluationError
++
++            try:
++                async with self._strict_slots:
++                    return await evaluate(
++                        self.reward_fn, args, kwargs, self.timeout_seconds, self.max_retries
++                    )
++            except RewardEvaluationError:
++                raise
++            except Exception as exc:
++                # Setup, serialization, transport and cleanup failures must not
++                # enter the legacy rejected-rollout/replacement path either.
++                record = {"status": "infrastructure_error", "detail": type(exc).__name__}
++                logger.exception("Terminal strict scoring infrastructure failure")
++                raise RewardEvaluationError([record]) from exc
+         for attempt in range(self.max_retries + 1):
+             executor = self._executors.get(self._executor_key)
+             if executor is None:
+diff --git a/areal/infra/remote_inf_engine.py b/areal/infra/remote_inf_engine.py
+index 390b13f..cdb1fbf 100644
+--- a/areal/infra/remote_inf_engine.py
++++ b/areal/infra/remote_inf_engine.py
+@@ -104,9 +104,17 @@ class GroupedRolloutWorkflow(RolloutWorkflow):
+             result = await self.workflow.arun_episode(engine, data)
+             return sample_idx, result
+ 
+-        indexed_results = await asyncio.gather(
+-            *[run_sample(sample_idx) for sample_idx in range(self.group_size)]
+-        )
++        from areal.utils.reward_status import RewardEvaluationError
++
++        tasks = [asyncio.create_task(run_sample(i)) for i in range(self.group_size)]
++        try:
++            indexed_results = await asyncio.gather(*tasks)
++        except (RewardEvaluationError, asyncio.CancelledError):
++            # Finish sibling scoring cleanup before the executor stops its loop.
++            for task in tasks:
++                task.cancel()
++            await asyncio.gather(*tasks, return_exceptions=True)
++            raise
+         indexed_results.sort(key=lambda item: item[0])
+         sample_indices = [sample_idx for sample_idx, _ in indexed_results]
+         if sample_indices != list(range(self.group_size)):
+diff --git a/areal/infra/workflow_executor.py b/areal/infra/workflow_executor.py
+index 514b15d..6ebda86 100644
+--- a/areal/infra/workflow_executor.py
++++ b/areal/infra/workflow_executor.py
+@@ -36,6 +36,7 @@ from areal.experimental.openai.types import (
+     concat_string_interactions,
+ )
+ from areal.utils import logging, perf_tracer, stats_tracker
++from areal.utils.reward_status import RewardEvaluationError
+ from areal.infra.utils.concurrent import get_executor
+ from areal.utils.data import concat_padded_tensors, cycle_dataloader
+ from areal.utils.perf_tracer import trace_perf, trace_session_event
+@@ -1257,6 +1258,15 @@ class WorkflowExecutor:
+                     )
+                 return None
+ 
++            except RewardEvaluationError as exc:
++                # A terminal score failure is not a rejected sample to replace.
++                # Wake the main batch waiter through the existing failure slot.
++                self.dispatcher._set_thread_exception(exc)
++                with self.dispatcher._result_cv:
++                    self.dispatcher._result_cv.notify_all()
++                with self.dispatcher._input_cv:
++                    self.dispatcher._input_cv.notify_all()
++                raise
+             except Exception as exc:  # pragma: no cover - workflow execution errors
+                 manager.on_rollout_rejected()
+                 stats_tracker.get("rollout").scalar(rejected=1)
+diff --git a/areal/reward/__init__.py b/areal/reward/__init__.py
+index d6b8e42..1557f2f 100644
+--- a/areal/reward/__init__.py
++++ b/areal/reward/__init__.py
+@@ -6,6 +6,7 @@ from math_verify.grader import verify as math_verify_verify
+ from math_verify.parser import ExprExtractionConfig, LatexExtractionConfig, parse
+ 
+ from areal.utils import logging
++from areal.utils.reward_status import ScoringFailure
+ 
+ logger = logging.getLogger("RewardUtils")
+ 
+@@ -48,17 +49,21 @@ class MathVerifyWorker:
+         self.precision = precision
+         self.timeout = timeout
+ 
+-    def _verify_impl(self, response: str, ground_truth: str) -> float:
++    def _verify_impl(self, response: str, ground_truth: str, *, strict=False) -> float:
+         """Core verification logic without timeout wrapper."""
+         gold_parsed = parse(
+             ground_truth,
+             extraction_config=self.gold_extraction_target,
+             parsing_timeout=None,
++            raise_on_error=strict,
+         )
++        if strict and not any(not isinstance(value, str) for value in gold_parsed):
++            raise ScoringFailure("invalid_gold", "reference answer has no extracted expression")
+         pred_parsed = parse(
+             response,
+             extraction_config=self.pred_extraction_target,
+             parsing_timeout=None,
++            raise_on_error=strict,
+         )
+         if not gold_parsed or not pred_parsed:
+             return 0.0
+@@ -67,9 +72,24 @@ class MathVerifyWorker:
+             pred_parsed,
+             float_rounding=self.precision,
+             timeout_seconds=None,
++            raise_on_error=strict,
+         )
+         return 1.0 if result else 0.0
+ 
++    def verify_strict(self, response: str, ground_truth: str) -> float:
++        """Run inside AsyncRewardWrapper's killable strict worker.
++
++        Extraction/comparison rules stay unchanged. The math-verify public
++        raise_on_error option exposes errors otherwise converted to []/False.
++        There is no inner thread timeout: the outer process owns the deadline.
++        """
++        try:
++            return self._verify_impl(response, ground_truth, strict=True)
++        except ScoringFailure:
++            raise
++        except Exception as exc:
++            raise ScoringFailure("error", type(exc).__name__) from exc
++
+     def verify(self, response: str, ground_truth: str) -> float:
+         try:
+             if self.timeout is None:
+diff --git a/areal/reward/gsm8k.py b/areal/reward/gsm8k.py
+index 2c3b681..f1135cf 100644
+--- a/areal/reward/gsm8k.py
++++ b/areal/reward/gsm8k.py
+@@ -1,18 +1,13 @@
+ # SPDX-License-Identifier: Apache-2.0
+ 
+-from areal.utils import logging
+-
+ from . import get_math_verify_worker
+ 
+-logger = logging.getLogger("GSM8KReward")
+-
+ 
+ def gsm8k_reward_fn(
+     prompt, completions, prompt_ids, completion_ids, answer, **kwargs
+ ) -> float:
+-    try:
+-        worker = get_math_verify_worker()
+-        return worker.verify(str(completions), str(answer))
+-    except Exception:
+-        logger.warning("Exception in gsm8k_reward_fn", exc_info=True)
+-        return 0.0
++    return get_math_verify_worker().verify_strict(str(completions), str(answer))
++
++
++# Consumed by the common AsyncRewardWrapper and the R return envelope.
++gsm8k_reward_fn.strict_scoring = True
+diff --git a/areal/utils/strict_reward.py b/areal/utils/strict_reward.py
+new file mode 100644
+index 0000000..c390b21
+--- /dev/null
++++ b/areal/utils/strict_reward.py
+@@ -0,0 +1,97 @@
++"""Bounded per-call processes for strict scoring; shared by A and A+R.
++
++Only the score worker for this invocation is terminated on timeout. This does
++not kill shared legacy ProcessPoolExecutor workers or other in-flight samples.
++"""
++import asyncio
++import hashlib
++import json
++import math
++import multiprocessing
++import os
++import time
++
++from areal.utils import logging
++from areal.utils.reward_status import RewardEvaluationError, ScoringFailure
++
++logger = logging.getLogger("StrictReward")
++
++
++def _worker(channel, scorer, args, kwargs):
++    try:
++        try:
++            value = scorer(*args, **kwargs)
++            score = getattr(value, "score", value)
++            if type(score) not in (int, float) or not math.isfinite(score) or score not in (0, 1):
++                raise ScoringFailure("error", "strict scorer returned an invalid score")
++            packet = {"status": "scored", "value": value}
++        except ScoringFailure as exc:
++            packet = {"status": exc.status, "detail": exc.detail}
++        except Exception as exc:
++            packet = {"status": "error", "detail": type(exc).__name__}
++        channel.send(packet)
++    finally:
++        channel.close()
++        # No inherited executor/atexit cleanup in this forked score worker.
++        os._exit(0)
++
++
++async def evaluate(scorer, args, kwargs, timeout, retries):
++    # JSON inputs match the RLVR reward API; omit R's additional envelope.
++    binding = [args, {k: v for k, v in sorted(kwargs.items()) if k != "_r_reward_request"}]
++    input_hash = hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest()
++    attempts = []
++    for number in range(retries + 1):
++        ctx = multiprocessing.get_context("fork")
++        reader, writer = ctx.Pipe(duplex=False)
++        process = ctx.Process(target=_worker, args=(writer, scorer, args, kwargs))
++        started = time.monotonic()
++        packet = {"status": "error", "detail": "worker exited without a result"}
++        try:
++            process.start()
++            writer.close()
++            while not reader.poll():
++                if time.monotonic() - started >= timeout:
++                    packet = {"status": "timeout", "detail": "scoring deadline exceeded"}
++                    break
++                if not process.is_alive():
++                    break
++                await asyncio.sleep(0.01)
++            else:
++                try:
++                    packet = reader.recv()
++                except EOFError:
++                    pass
++        finally:
++            writer.close()
++            reader.close()
++            # Also clean up when the caller is cancelled. Never leave a score
++            # process alive after retry, return, or terminal failure.
++            # A short bounded synchronous cleanup cannot be interrupted by a
++            # second Task.cancel(). It also releases the Process sentinel fd.
++            pid = process.pid
++            if pid is not None:
++                process.join(timeout=0.02 if packet["status"] == "scored" else 0)
++                if process.is_alive():
++                    process.terminate()
++                    process.join(timeout=0.2)
++                    if process.is_alive():
++                        process.kill()
++                        process.join(timeout=1)
++                if process.is_alive():
++                    raise RuntimeError("score worker could not be reaped")
++            exit_code = process.exitcode
++            process.close()
++        if packet['status'] == 'scored' and exit_code != 0:
++            packet = {'status': 'error', 'detail': 'worker did not exit cleanly'}
++        record = {"attempt": number + 1, "input_sha256": input_hash,
++                  "pid": pid, "status": packet["status"],
++                  "detail": packet.get("detail"), "exit_code": exit_code,
++                  "elapsed_seconds": time.monotonic() - started}
++        attempts.append(record)
++        logger.info("scoring_attempt %s", json.dumps(record, sort_keys=True))
++        if packet["status"] == "scored":
++            return packet["value"]
++        if packet["status"] == "invalid_gold":
++            break
++    raise RewardEvaluationError(attempts)
+diff --git a/areal/utils/reward_status.py b/areal/utils/reward_status.py
+new file mode 100644
+index 0000000..2baa72f
+--- /dev/null
++++ b/areal/utils/reward_status.py
+@@ -0,0 +1,17 @@
++"""Explicit failures for the common strict scoring path."""
++
++
++class ScoringFailure(Exception):
++    def __init__(self, status: str, detail: str):
++        super().__init__(status, detail)
++        self.status = status
++        self.detail = detail
++
++
++class RewardEvaluationError(Exception):
++    """Terminal scoring failure: the rollout must not be silently replaced."""
++
++    def __init__(self, attempts: list[dict]):
++        super().__init__(attempts)
++        self.attempts = attempts
++

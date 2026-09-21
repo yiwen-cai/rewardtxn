@@ -1,5 +1,15 @@
 # RewardTxn 当前交接
 
+2026-09-21最新补充：用户接受首批单训练rank＋3推理实例，并批准公共评分状态补丁。现已应用并通过116项CPU测试（28严格评分/缓存/重放＋88原有相关测试），当前6373条标准答案解析/自比较检查全通过。A/A+R共用严格评分：正常0/1可复用，回答无表达式仍有效0；gold无解析结果为数据错误，异常/超时不转有效0；默认每wrapper单并发、15秒执行等待、最多2次尝试，超时独立进程回收。终态失败收齐同组任务并停止批次，不静默换样本；R envelope schema2/status=scored，verifier指纹已更新。见 [评分补丁报告](docs/experiments/rewardtxn-ft-20260916/SCORING_STATUS_PATCH_REPORT.md)。7个CPU容器清理完成，未占GPU。下文official_call_returned/异常零分不可辨识是旧版本状态；当前依赖公共评分执行修改，下一步仍需FT1配对预检及F4故障进程重新映射、正式冻结，不能沿用旧GPU结果作新版本正式验收。预检两次尝试尚非正式参数冻结，正式GPU样本仍0。
+
+2026-09-21最新补充：checkpoint写入中故障自动恢复已通过CPU/GPU独立验收。真实DCP文件已写272,437,394字节、剩703个tensor时SIGKILL trainer；公共job层清理writer，原生自动重试，适配器依据绑定旧job的完整清理凭据解除pending阻塞，弃用半成品并精确加载step0。最终96唯一样本/3提交，未提交32样本全部重放；故障到下一optimizer178.49秒、下一commit244.40秒。容器4项CPU与宿主state21项通过；GPU仅一次尝试。详见 [写入中恢复报告](docs/experiments/rewardtxn-ft-20260916/P3_MIDWRITE_RECOVERY_REPORT.md)。容器/网络及4卡已释放。下文“pending总是拒绝接管/写入中未覆盖”是历史快照；当前只允许同boot/PID namespace、受信任专属subreaper的完整清理凭据接管，缺证据仍拒绝。多rank、连续GPU故障及正式配对矩阵仍待完成，正式样本0与184待补不变。
+
+2026-09-21最新补充：用户批准公共launcher生命周期修订后，真实GPU自动恢复闭环已验证。单rank、第二optimizer成功/保存前唯一SIGKILL；原生local_main自动run0→run1，精确加载保留状态；4次物理更新、3次有效提交、96唯一样本，未提交32样本均重放消费。故障到下一optimizer173.20秒、下一commit233.61秒；6项CPU及独立GPU验收通过，容器/网络和4卡已释放。见 [自动恢复报告](docs/experiments/rewardtxn-ft-20260916/P3_AUTOMATIC_RECOVERY_REPORT.md)。旧未经修订部署r4超时保留；此结果不覆盖写入中故障或多rank，正式GPU样本0、184待补不变。
+
+2026-09-21最新补充：真实训练接入工程验收已完成。3次真实optimizer/scheduler、3代异步完整checkpoint、96个唯一consumed；64个跨进程复用样本实际训练并提交，新进程完整状态精确加载通过。最终同版本CPU21项及宿主state/fork/exit23项通过（部分重叠）。见 [P3接入报告](docs/experiments/rewardtxn-ft-20260916/P3_TRAINING_INTEGRATION_REPORT.md)。修复评分fork继承mutation锁导致的阻塞，所有本轮容器/网络已清理。以下历史快照的“仅train_batch入口/尚无optimizer接入”已过时；单rank、同PID namespace正常保存/新进程加载的验收不能替代GPU故障自动恢复，P2的184项待补与正式GPU样本0不变。
+
+2026-09-21补充：双故障CPU隔离探针已执行，独立6项验收全通过，无跳过；容器删除已独立确认。见 [验收报告](docs/experiments/rewardtxn-ft-20260916/P2_SECOND_FAULT_REPORT.md)。以下9月20日快照中“双故障尚未运行”及接续第1项已完成；184项待补、训练/oracle未验证与正式GPU样本0均不变。
+
 更新：2026-09-20。本次按用户要求停止派发新实验，整理交接并推送；完整 FT-v1 实现/实验目标尚未完成，正式 GPU 样本数 **0**。
 
 ## 接手入口与当前状态

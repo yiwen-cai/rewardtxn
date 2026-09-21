@@ -1,0 +1,13 @@
+{
+  "tests_passed": 6,
+  "skipped": 0,
+  "seconds": 32.954,
+  "exitcode": 0,
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/job-lifecycle-cpu-r4",
+  "cleanup": {
+    "id": "fa8e61d7c1b9efc75160f005a9eeea5fc306a49b137981f3f96387d19e847521",
+    "returncode": 1,
+    "stderr": "Error: No such object: fa8e61d7c1b9efc75160f005a9eeea5fc306a49b137981f3f96387d19e847521\n"
+  },
+  "scope": "CPU hardware allocation stub; real torchrun/native local_main retry"
+}

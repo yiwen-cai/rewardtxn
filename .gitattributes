@@ -1,2 +1,2 @@
-# 归档训练日志保留原始 ANSI/空白；按二进制证据处理，避免 diff 规范化。
-runs/**/*.log -diff -text
+# Unified diff context represents an empty source line with a single space.
+docs/experiments/rewardtxn-ft-20260916/*.patch whitespace=-blank-at-eol

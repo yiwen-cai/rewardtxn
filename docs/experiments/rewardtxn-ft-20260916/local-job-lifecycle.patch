@@ -1,0 +1,17 @@
+--- a/areal/infra/launcher/local.py
++++ b/areal/infra/launcher/local.py
+@@ -145,10 +145,11 @@
+                     str(self._gpu_devices[j]) for j in visible_devices
+                 )
+             c = build_target_cmd(cmd[i], env_vars=env_vars, use_stdbuf=True)
+-            c = f"{c} 2>&1 | tee -a {self.log_path_of(job_name)}"
+-            logger.info("Starting local process with command: %s", c)
++            logger.info("Starting supervised local process with command: %s", c)
+             process = subprocess.Popen(
+-                c, shell=isinstance(c, str), stdout=sys.stdout, stderr=sys.stdout
++                [sys.executable, "-m", "scripts.ft.job_lifecycle",
++                 "--log", self.log_path_of(job_name), "--command", c],
++                stdout=sys.stdout, stderr=sys.stdout,
+             )
+             self._jobs[f"{job_name}/{offset + i}"] = process
+             self._job_counter[job_name] += 1

@@ -216,6 +216,11 @@ class IdentityBridge:
         return copy.deepcopy(self.intent)
 
     def at_train_batch(self, data):
+        path, _ = self.prepare_train_batch(data)
+        raise PreparedBoundary(str(path))
+
+    def prepare_train_batch(self, data):
+        """Persist the checked intent; the caller must bind actual backend events."""
         if self.intent is None:
             raise ArtifactError('update boundary not prepared')
         rows = self.validate_rows(data)
@@ -235,4 +240,4 @@ class IdentityBridge:
             if any(control['attempts'].get(row['sample']) != row['attempt'] for row in self.intent['rows']):
                 raise ArtifactError('update authorization changed before intent publication')
             _publish(path, _encode(record), 'update_intent')
-        raise PreparedBoundary(str(path))
+        return path, clean

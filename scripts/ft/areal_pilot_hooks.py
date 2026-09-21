@@ -108,7 +108,7 @@ atexit.register(close_events)
 
 def observed_gsm8k_reward(prompt, completions, prompt_ids, completion_ids, answer,
                           pilot_observation, **kwargs):
-    """Pickleable callable executed by the unmodified AsyncRewardWrapper pool."""
+    """Observed scorer using the same strict AsyncRewardWrapper path as A+R."""
     from areal.reward.gsm8k import gsm8k_reward_fn
 
     invocation = uuid.uuid4().hex
@@ -127,6 +127,9 @@ def observed_gsm8k_reward(prompt, completions, prompt_ids, completion_ids, answe
         # Pool workers do not necessarily run Python atexit handlers. Bound the
         # drain in this CPU subprocess, never on the rollout event loop.
         writer().flush()
+
+
+observed_gsm8k_reward.strict_scoring = True
 
 
 class ObservedRLVRWorkflow(RLVRWorkflow):

@@ -1,0 +1,104 @@
+{
+  "verified_at_utc": "2026-09-21T04:04:25.829481+00:00",
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/training-gpu-r6",
+  "verification": {
+    "verified": true,
+    "updates": 3,
+    "samples": 96,
+    "generations": 3,
+    "checkpoint_bytes_hashed": 20754258568,
+    "adopted_samples_committed": 64,
+    "native_full_state_load_exact": true,
+    "async_saves_finalized": 3,
+    "scope": "single actor engineering save/new-process-load; not injected-fault recovery or formal matrix"
+  },
+  "source_sha256": {
+    "scripts/ft/run.py": "9e123ff789dd4ac4e660b2fcd72d77926c471286b62b2c632c7cc7e429254018",
+    "scripts/ft/areal_native_trainer_probe.py": "925d72cedf93b89b0fa371acd6930a49147b0d0aff577cdaa14045690072f64b",
+    "scripts/ft/native_gpu.py": "cb5142c9fe2e7f778fe77514dc28b925c1eecb3bcbf5178d564131323a7e491e",
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "scripts/ft/training_replay.py": "2e5a7269d1c1b06509c19074965f161b3cc1a7fd0fb0353fdc7cee34d8c08332",
+    "scripts/ft/reward_pool_probe.py": "f9abf032ac265a02be7d0119d96dbb4d5b5a4bfd18487a620df66ab9e912e11f",
+    "scripts/ft/areal_rewardtxn.py": "5e5b01b195dafd8e1ef9c475a391a561854d9faa937aa1d119455058e8f5246f",
+    "scripts/ft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scripts/ft/areal_pilot_hooks.py": "1009c9682bf7b2c3f952cea18ce44f9822c921224c804f70d1f7fc9f5c1d59b4",
+    "scripts/ft/rlvr_replay.py": "a6d2d4a85973f675944dc93137fe3dee5150eb5a71de935734d96a9e4514e77d",
+    "scripts/ft/batch_identity.py": "c2071cde000cc2352524ba0ece8b98e7d8be075d828ce40c56eff1d9e1457d8b",
+    "scripts/ft/descendants.py": "f93ba3923edb7253a78dc087e7a719c3b0f3a8d3078438b7215b9d68b8e563de",
+    "scripts/ft/namespace_run.py": "8ef9628f3b7094f47ef9dfc6d8a535d0c1a5e77db9e092fcbaaccec98fc4a123",
+    "scripts/ft/state.py": "cfc44c2763102c3aa2d869c14b41acb61faf347e69e7d2286bfee50e0da0f3c0",
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c",
+    "scripts/ft/training_adapter.py": "8b5401c562034b96325a47218dbc35dcafd4a5de76c90802c6a4f0fe6100a28e",
+    "scripts/ft/container_run.py": "1eb8e35c0cc8de28a3462571f6215adba22025ccd52e3e8d71155174787640e8",
+    "scripts/ft/faults.py": "dfe2d62f99085d82f072eb45be0efd784a6e0ad92df9caf7e2d503bfd698852b",
+    "scripts/ft/areal_pilot.py": "d9b0c76bdca760ae956f8ecad26a371242a012cd67961e474149229cf6c9ae16",
+    "scripts/ft/verify_native_trainer_probe.py": "814eab5ab9a39a92f8508780c88f25841e8eb68b54b9a7b13f92160b6d5adfed",
+    "scripts/ft/reward_return.py": "6ec2696f63519f2aff3156166bc491831980a8324936def507bf538631aa7e51",
+    "third_party/areal/areal/engine/megatron_utils/checkpointer.py": "7ff877a756c10b773ee1ea1f46987dd23c3156fd20a4318f09bed68287792ade"
+  },
+  "checker_sha256": {
+    "tests/ft/check_training_integration.py": "3349910f274a86b6b45a08a433255b0d5ca4fe1de2ae4a4a7da96a52af264e4e"
+  },
+  "trainer_exits": {
+    "first": {
+      "supervisor_pid": 677,
+      "trainer_pid": 678,
+      "exit_code": 0
+    },
+    "resume": {
+      "supervisor_pid": 2179,
+      "trainer_pid": 2180,
+      "exit_code": 0
+    }
+  },
+  "launcher_exits": {
+    "first": {
+      "pid": 26,
+      "exit_code": 1
+    },
+    "resume": {
+      "pid": 1639,
+      "exit_code": 1
+    }
+  },
+  "generations": [
+    "g-53c60e57d24c41ebaa6e9ea9ac17a4b3",
+    "g-b0cdc2910c274f78973447c11af9b942",
+    "g-c0f9d14c89da43ee931f14938c0b3a96"
+  ],
+  "consecutive_native_state_changes": [
+    {
+      "model": true,
+      "optimizer": true,
+      "lr_scheduler": true
+    },
+    {
+      "model": true,
+      "optimizer": true,
+      "lr_scheduler": true
+    }
+  ],
+  "cleanup": {
+    "container": {
+      "id": "724b8f7ac9304974bd62b88fbbfcbba0507a18b4dd148212fd260da9259c534d",
+      "returncode": 1,
+      "stderr": "Error: No such object: 724b8f7ac9304974bd62b88fbbfcbba0507a18b4dd148212fd260da9259c534d\n"
+    },
+    "network": {
+      "id": "6f82548f9850e0d5f5c14cbcd21ff1d7857a4bbdfe4ccc670ba143294cb192aa",
+      "returncode": 1,
+      "stderr": "Error response from daemon: network 6f82548f9850e0d5f5c14cbcd21ff1d7857a4bbdfe4ccc670ba143294cb192aa not found\n"
+    }
+  },
+  "cpu_suite": {
+    "evidence": "p3_evidence/training-final-cpu-r1",
+    "passed": 21,
+    "seconds": 114.711,
+    "skipped": 0
+  },
+  "host_tests": {
+    "passed": 23,
+    "seconds": 1.189,
+    "note": "includes fork/exit cases overlapping CPU suite"
+  }
+}

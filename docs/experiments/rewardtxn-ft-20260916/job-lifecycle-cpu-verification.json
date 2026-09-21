@@ -1,0 +1,18 @@
+{
+  "status": "CPU proposal verified; not installed or GPU-tested",
+  "tests_passed": 5,
+  "skipped": 0,
+  "seconds": 14.566,
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/job-lifecycle-cpu-r2",
+  "cleanup": {
+    "id": "6bfa193ee1e2097bd340d0bd0a8ac51c3a09800974eb6e11ef1f0b9bc94aee85",
+    "returncode": 1,
+    "stderr": "Error: No such object: 6bfa193ee1e2097bd340d0bd0a8ac51c3a09800974eb6e11ef1f0b9bc94aee85\n"
+  },
+  "sha256": {
+    "scripts/ft/job_lifecycle.py": "1c5a828519423a08c49acbea0011be0c44b12ed022d35686c72dd150816f9293",
+    "tests/ft/test_job_lifecycle.py": "ef5b1205c8e212a49a48c28a87079e6b25900b4e84c9109824ec6717d89f81b6",
+    "docs/experiments/rewardtxn-ft-20260916/local-job-lifecycle.patch": "1b79fe85e5c08af75f084999028fc1d17e7003416be767579f3151b0c74756be",
+    "third_party/areal/areal/infra/launcher/local.py": "8e067b15ba25d281c68c96130d0f1914501909ed316f89c17f365bffa21661f1"
+  }
+}

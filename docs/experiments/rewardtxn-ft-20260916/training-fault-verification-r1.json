@@ -1,0 +1,96 @@
+{
+  "verified_at_utc": "2026-09-21T05:56:38.066948+00:00",
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/training-fault-gpu-r1",
+  "verification": {
+    "verified": true,
+    "scope": "single-rank post-optimizer/pre-save SIGKILL; common lifecycle patch",
+    "native_automatic_retries": 1,
+    "signals": 1,
+    "physical_optimizer_successes": 4,
+    "committed_updates": 3,
+    "unique_consumed_samples": 96,
+    "adopted_samples_committed": 64,
+    "abandoned_update_samples_replayed": 32,
+    "abandoned_generation": "g-cb018c2ce49a481fa8ed560127c45aa8",
+    "native_full_state_load_exact": true,
+    "checkpoint_bytes_hashed": 20754258566,
+    "fault_to_next_optimizer_seconds": 173.198439346,
+    "fault_to_next_commit_seconds": 233.613593145
+  },
+  "supplementary": {
+    "verified": true,
+    "job_receipts": {
+      "llm_server.log": 2,
+      "trainer.log": 2
+    },
+    "all_jobs_cleaned": true,
+    "network_id_bound_to_actual_container": true,
+    "frozen_sources_unchanged": true,
+    "raw_controller_config_sha256_verified": true,
+    "private_pid_namespace_verified": true
+  },
+  "cost": {
+    "wall_seconds": 679.5671568999533,
+    "allocated_gpu_hours": 0.7550746187777259,
+    "scope": "engineering run; no comparative performance claim"
+  },
+  "cleanup": {
+    "container": {
+      "id": "c58eb24bccf7279f31bab1e4255b50cb567cd53410751530b650c7eac0fa775e",
+      "returncode": 1,
+      "stderr": "Error: No such object: c58eb24bccf7279f31bab1e4255b50cb567cd53410751530b650c7eac0fa775e\n"
+    },
+    "network": {
+      "id": "e72db8eb26c17eb11e263571267037d3e7654104c3080b043bbb5d14159b0961",
+      "returncode": 1,
+      "stderr": "Error response from daemon: network e72db8eb26c17eb11e263571267037d3e7654104c3080b043bbb5d14159b0961 not found\n"
+    }
+  },
+  "cpu": {
+    "tests_passed": 6,
+    "skipped": 0,
+    "seconds": 32.954,
+    "exitcode": 0,
+    "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/job-lifecycle-cpu-r4",
+    "cleanup": {
+      "id": "fa8e61d7c1b9efc75160f005a9eeea5fc306a49b137981f3f96387d19e847521",
+      "returncode": 1,
+      "stderr": "Error: No such object: fa8e61d7c1b9efc75160f005a9eeea5fc306a49b137981f3f96387d19e847521\n"
+    },
+    "scope": "CPU hardware allocation stub; real torchrun/native local_main retry"
+  },
+  "sources": {
+    "scripts/ft/run.py": "9e123ff789dd4ac4e660b2fcd72d77926c471286b62b2c632c7cc7e429254018",
+    "scripts/ft/areal_native_trainer_probe.py": "925d72cedf93b89b0fa371acd6930a49147b0d0aff577cdaa14045690072f64b",
+    "scripts/ft/native_gpu.py": "cb5142c9fe2e7f778fe77514dc28b925c1eecb3bcbf5178d564131323a7e491e",
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "scripts/ft/job_lifecycle.py": "1c5a828519423a08c49acbea0011be0c44b12ed022d35686c72dd150816f9293",
+    "scripts/ft/training_replay.py": "2e5a7269d1c1b06509c19074965f161b3cc1a7fd0fb0353fdc7cee34d8c08332",
+    "scripts/ft/reward_pool_probe.py": "f9abf032ac265a02be7d0119d96dbb4d5b5a4bfd18487a620df66ab9e912e11f",
+    "scripts/ft/areal_rewardtxn.py": "5e5b01b195dafd8e1ef9c475a391a561854d9faa937aa1d119455058e8f5246f",
+    "scripts/ft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scripts/ft/areal_pilot_hooks.py": "1009c9682bf7b2c3f952cea18ce44f9822c921224c804f70d1f7fc9f5c1d59b4",
+    "scripts/ft/rlvr_replay.py": "a6d2d4a85973f675944dc93137fe3dee5150eb5a71de935734d96a9e4514e77d",
+    "scripts/ft/batch_identity.py": "c2071cde000cc2352524ba0ece8b98e7d8be075d828ce40c56eff1d9e1457d8b",
+    "scripts/ft/areal_training_fault.py": "50319af474cfc1f8380fed79943d5d9c08714246836ce3108172b6822c674722",
+    "scripts/ft/descendants.py": "f93ba3923edb7253a78dc087e7a719c3b0f3a8d3078438b7215b9d68b8e563de",
+    "scripts/ft/namespace_run.py": "8ef9628f3b7094f47ef9dfc6d8a535d0c1a5e77db9e092fcbaaccec98fc4a123",
+    "scripts/ft/state.py": "cfc44c2763102c3aa2d869c14b41acb61faf347e69e7d2286bfee50e0da0f3c0",
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c",
+    "scripts/ft/training_adapter.py": "8b5401c562034b96325a47218dbc35dcafd4a5de76c90802c6a4f0fe6100a28e",
+    "scripts/ft/container_run.py": "1eb8e35c0cc8de28a3462571f6215adba22025ccd52e3e8d71155174787640e8",
+    "scripts/ft/faults.py": "dfe2d62f99085d82f072eb45be0efd784a6e0ad92df9caf7e2d503bfd698852b",
+    "scripts/ft/areal_pilot.py": "d9b0c76bdca760ae956f8ecad26a371242a012cd67961e474149229cf6c9ae16",
+    "scripts/ft/verify_native_trainer_probe.py": "814eab5ab9a39a92f8508780c88f25841e8eb68b54b9a7b13f92160b6d5adfed",
+    "scripts/ft/reward_return.py": "6ec2696f63519f2aff3156166bc491831980a8324936def507bf538631aa7e51",
+    "tests/ft/run_training_fault.py": "ff094321a44eb2117ac8190404c324c9ccdb906bb4d5f1cea0c0243a51c924f9",
+    "tests/ft/check_training_fault.py": "b3ca83a7e11b2a527f08719a53d4c0180729a34a4ccd856ddeb661f37c47386b",
+    "third_party/areal/areal/infra/launcher/local.py": "1cc2a549359d5bee86dbcc44d03dfdf1e69ac467f42933c219c7b42b90ffb16f",
+    "third_party/areal/areal/trainer/rl_trainer.py": "6723092872f27eb24b23f2e7cde0c4521e6403863b1f208111492dbc796c8486",
+    "third_party/areal/areal/utils/recover.py": "19380a7339260236b9e3b8009b6517c4ac4f0fd9491ddbb8fff6a005b9f27b6c",
+    "third_party/areal/areal/engine/megatron_utils/checkpointer.py": "7ff877a756c10b773ee1ea1f46987dd23c3156fd20a4318f09bed68287792ade"
+  },
+  "supplement_checker_sha256": "9e6a1eecc5883f85ae6b07b5874f581db1a73373569125ae73a20bbeffc873da",
+  "approval": "User explicitly approved common A/A+R launcher patch before installation/GPU run",
+  "formal_gpu_samples": 0
+}

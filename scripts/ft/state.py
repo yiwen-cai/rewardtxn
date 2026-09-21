@@ -161,6 +161,10 @@ def _locked(owner):
             raise StateError("stale owner")
         yield control
     finally:
+        # A reward worker can fork while another thread owns this descriptor.
+        # close() alone keeps the flock alive in that child; release the shared
+        # open-file-description lock when the parent's critical section ends.
+        fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
 
 
@@ -500,7 +504,15 @@ def _complete(owner, gid):
             if not paths:
                 raise StateError("empty component")
             for path in paths:
-                _path(directory / "checkpoint", path)
+                _path(directory / "checkpoint", path[:-1] if path.endswith('/') else path)
+                # Native DCP chooses shard filenames during save. A frozen
+                # directory prefix maps its complete finalized inventory.
+                if path.endswith('/'):
+                    matches = {name for name in files if name.startswith(path)}
+                    if not matches:
+                        raise StateError("component directory empty")
+                    referenced.update(matches)
+                    continue
                 if path not in files:
                     raise StateError("component file missing")
                 referenced.add(path)

@@ -16,8 +16,7 @@ def counted_gsm8k(prompt, completions, prompt_ids, completion_ids, **data):
     if data.get('_cpu_delay'):
         time.sleep(data['_cpu_delay'])
     if data.get('_cpu_inner_exception'):
-        # Explicit TEST injection: original worker catches this exception and
-        # original GSM8K returns 0. No production success inference is made.
+        # Explicit test injection into the actual strict verifier boundary.
         from unittest.mock import patch
         from areal.reward import get_math_verify_worker
         with patch.object(get_math_verify_worker(), '_verify_impl', side_effect=RuntimeError('injected inner verifier exception')):
@@ -31,6 +30,9 @@ def counted_gsm8k(prompt, completions, prompt_ids, completion_ids, **data):
     finally:
         os.close(fd)
     return value
+
+
+counted_gsm8k.strict_scoring = True
 
 
 def asset_hash(root):

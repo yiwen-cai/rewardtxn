@@ -1,0 +1,86 @@
+{
+  "verified": true,
+  "common_patch_applied": true,
+  "patch_sha256": "ce7afb69cf6837702efd876276954fc91a1335007567b364cff63d6c03d91343",
+  "results": {
+    "strict-scoring-cpu-r3": {
+      "verified": true,
+      "count": 28,
+      "container_removed": true,
+      "sources_checked": 37,
+      "no_pending_coroutine_warning": true
+    },
+    "strict-scoring-legacy-r3": {
+      "verified": true,
+      "count": 88,
+      "container_removed": true,
+      "sources_checked": 37,
+      "no_pending_coroutine_warning": true
+    },
+    "strict-scoring-data-r1": {
+      "verified": true,
+      "count": 6373,
+      "container_removed": true,
+      "sources_checked": 32,
+      "no_pending_coroutine_warning": true
+    }
+  },
+  "total_tests": 116,
+  "data": {
+    "dataset_sha256": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+    "rows": 6373,
+    "verifier_sha256": "2b4587682685af79b69c2b9fe71e8d5adb9dab1c2f16c80737dd32624b9f91d7",
+    "checked_rows": 6373,
+    "scope": "reference extraction and self-comparison; no answer correctness claim",
+    "verified": true
+  },
+  "policy": {
+    "attempt_timeout_seconds": 15,
+    "max_retries": 1,
+    "max_attempts": 2,
+    "max_workers_per_wrapper": 1,
+    "invalid_gold_retried": false,
+    "formal_freeze": false
+  },
+  "gpu_runs": 0,
+  "formal_samples": 0,
+  "source_sha256": {
+    "scripts/ft/run.py": "9e123ff789dd4ac4e660b2fcd72d77926c471286b62b2c632c7cc7e429254018",
+    "scripts/ft/areal_native_trainer_probe.py": "925d72cedf93b89b0fa371acd6930a49147b0d0aff577cdaa14045690072f64b",
+    "scripts/ft/native_gpu.py": "cb5142c9fe2e7f778fe77514dc28b925c1eecb3bcbf5178d564131323a7e491e",
+    "scripts/ft/writer_recovery.py": "fa9d9782bad2c4621c597622cfae9dbbf66a1d1d92cc30f38d12be847307b594",
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "scripts/ft/job_lifecycle.py": "1c5a828519423a08c49acbea0011be0c44b12ed022d35686c72dd150816f9293",
+    "scripts/ft/training_replay.py": "2e5a7269d1c1b06509c19074965f161b3cc1a7fd0fb0353fdc7cee34d8c08332",
+    "scripts/ft/reward_pool_probe.py": "f9abf032ac265a02be7d0119d96dbb4d5b5a4bfd18487a620df66ab9e912e11f",
+    "scripts/ft/areal_rewardtxn.py": "5e5b01b195dafd8e1ef9c475a391a561854d9faa937aa1d119455058e8f5246f",
+    "scripts/ft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scripts/ft/areal_midwrite_fault.py": "cdff42590ebab32728366bf8ef512afacc311adef8309a1176745a20b06f0472",
+    "scripts/ft/areal_pilot_hooks.py": "4e80ecd7212c151a1643a95d0f3ab1732e99cddbd83dda14d508df30f2612323",
+    "scripts/ft/rlvr_replay.py": "541cdbb35317041243babc1a8a3d1b544c096ba7a28dad06cc3833804971a3c5",
+    "scripts/ft/batch_identity.py": "c2071cde000cc2352524ba0ece8b98e7d8be075d828ce40c56eff1d9e1457d8b",
+    "scripts/ft/areal_training_fault.py": "50319af474cfc1f8380fed79943d5d9c08714246836ce3108172b6822c674722",
+    "scripts/ft/descendants.py": "f93ba3923edb7253a78dc087e7a719c3b0f3a8d3078438b7215b9d68b8e563de",
+    "scripts/ft/namespace_run.py": "8ef9628f3b7094f47ef9dfc6d8a535d0c1a5e77db9e092fcbaaccec98fc4a123",
+    "scripts/ft/state.py": "cfc44c2763102c3aa2d869c14b41acb61faf347e69e7d2286bfee50e0da0f3c0",
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c",
+    "scripts/ft/training_adapter.py": "295f3a519ccbbe217ef63b8824b1ce8b48fd6f0e60b1ef39df81e4019f03b1e9",
+    "scripts/ft/container_run.py": "1eb8e35c0cc8de28a3462571f6215adba22025ccd52e3e8d71155174787640e8",
+    "scripts/ft/faults.py": "dfe2d62f99085d82f072eb45be0efd784a6e0ad92df9caf7e2d503bfd698852b",
+    "scripts/ft/areal_pilot.py": "d9b0c76bdca760ae956f8ecad26a371242a012cd67961e474149229cf6c9ae16",
+    "scripts/ft/verify_native_trainer_probe.py": "814eab5ab9a39a92f8508780c88f25841e8eb68b54b9a7b13f92160b6d5adfed",
+    "scripts/ft/validate_scoring_data.py": "52e7e7dc9c71dc26045eb2816ccbc9dee419d10040844f1af25613013edb9a86",
+    "scripts/ft/reward_return.py": "a42eb30665635121465d7cf18537c60f749c90e05529e788d715a60d8d8fd78e",
+    "tests/ft/test_strict_scoring.py": "0f907ab2a6e6aef6f768102e88a56383cef38ff477973d769d050a12dff1e867",
+    "tests/ft/test_rlvr_replay.py": "32856363bc09944738cd7e8eeff25d52c8d264a34e1a605e7a286844171f4e9e",
+    "tests/ft/test_training_replay.py": "1df1665d621cf09378b16c9420a05bc35164b193aaa38b0637272f113302d27c",
+    "tests/ft/rlvr_replay_fixture.py": "4828af060f009e764951b53defb5a9c32f39f0ab0769690568bb35a5d5ecac9a",
+    "third_party/areal/areal/api/reward_api.py": "4ee177a1a3f4acbcd2e295abfb202f308b3e67b01b832c067e88c5521490f71b",
+    "third_party/areal/areal/reward/__init__.py": "359ef1b606c86ab9e76fe49631eb09abf8657bcb2b1d6741ba1f2625a92fecfb",
+    "third_party/areal/areal/reward/gsm8k.py": "054b6a2629d14a9a7b756d2a574f5af4a2efe74f59a46f52b19022fcdcf0b56f",
+    "third_party/areal/areal/infra/workflow_executor.py": "267f9f59786f52ac4a8b252197ac8826e7e80c32bb59111f2804c49e3b329155",
+    "third_party/areal/areal/infra/remote_inf_engine.py": "b9955d25f12b7d5a6d8e7330babb52dce8ff05ec5a2cd71af634d45f56e53990",
+    "third_party/areal/areal/utils/strict_reward.py": "3b6817cd561d5ce408e201cf5cd1c43825ca3cb46eebb9a641c081146b3fd9a9",
+    "third_party/areal/areal/utils/reward_status.py": "c6a83966c4533c2d2a1056ff910fd5faf981934e41edc1a27d995260c90ba498"
+  }
+}

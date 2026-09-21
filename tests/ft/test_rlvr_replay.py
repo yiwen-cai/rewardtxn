@@ -62,12 +62,12 @@ class RLVRContracts(unittest.TestCase):
                          for i in range(8)}
         (self.root / 'provenance.json').write_text(json.dumps({
             'synthetic_generation': True, 'tokenizer_sha256': self.tokenizer_hash,
-            'gsm8k_sha256': self.verifier, 'max_workers': 1, 'max_retries': 0,
+            'gsm8k_sha256': self.verifier, 'max_workers': 1, 'max_retries': 1,
             'torch_version': torch.__version__,
             'sources': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                         for path in {Path(inspect.getfile(obj)) for obj in
                                      (R.CallReturnRLVR, R.ReturningReward, RLVR, Grouped, Wrapper, F.counted_gsm8k, F.gsm8k_reward_fn)}},
-            'scope': 'official-call-return CPU; inner fallback semantics NOT certified'}, indent=2))
+            'scope': 'strict GSM8K scoring; synthetic generation CPU'}, indent=2))
 
     def workflow(self, **overrides):
         args = dict(owner=self.owner, root=self.root / 'artifacts', attempts=self.attempts,
@@ -236,18 +236,17 @@ class RLVRContracts(unittest.TestCase):
         self.assertEqual(self.count(), 1)
         with state._locked(self.owner) as control: self.assertEqual(len(control['accepted']), 1)
 
-    def test_inner_injected_fallback_is_call_return_not_verification_success(self):
+    def test_inner_exception_is_terminal_and_not_cached(self):
+        from areal.utils.reward_status import RewardEvaluationError
         self.data['_cpu_inner_exception'] = True
         async def run():
-            result = await self.episode(self.workflow(), F.FakeEngine(self.tokenizer))
-            self.assertEqual(result['rewards'].item(), 0.0)
-            self.equal(result, await self.episode(self.workflow(), F.FakeEngine(self.tokenizer)))
+            with self.assertRaises(RewardEvaluationError) as error:
+                await self.episode(self.workflow(), F.FakeEngine(self.tokenizer))
+            self.assertEqual([a['status'] for a in error.exception.attempts], ['error', 'error'])
         asyncio.run(run())
-        path = next((self.root / 'artifacts/samples').glob('*/reward.json'))
-        record = json.loads(replay.BlobStore(self.root / 'artifacts/blobs').get(json.loads(path.read_text())['blob']))
-        self.assertEqual(record['payload']['return']['status'], 'official_call_returned')
-        self.assertEqual(record['payload']['return']['score'], 0.0)
-        self.assertEqual(self.count(), 1)
+        self.assertFalse(list((self.root / 'artifacts/samples').glob('*/reward.json')))
+        self.assertFalse(list((self.root / 'artifacts/samples').glob('*/tensor.json')))
+        self.assertEqual(self.count(), 0)
 
     def test_envelope_binding_and_pickle(self):
         async def run():
@@ -325,17 +324,17 @@ class RLVRContracts(unittest.TestCase):
             self.assertEqual(list((self.root / 'artifacts/samples').glob('*/' + phase + '.json')), [])
         with state._locked(self.owner) as control: self.assertEqual(control['accepted'], {})
 
-    def test_z_actual_wrapper_timeout_zero_is_rejected(self):
+    def test_z_actual_wrapper_timeout_is_terminal_without_late_score(self):
+        from areal.utils.reward_status import RewardEvaluationError
         self.data['_cpu_delay'] = 0.5
         async def run():
-            with self.assertRaises(R.UncertainReward): await self.episode(self.workflow(timeout_seconds=0.02), F.FakeEngine(self.tokenizer))
+            with self.assertRaises(RewardEvaluationError) as error:
+                await self.episode(self.workflow(timeout_seconds=0.02), F.FakeEngine(self.tokenizer))
+            self.assertEqual([a['status'] for a in error.exception.attempts],['timeout','timeout'])
         asyncio.run(run())
         self.assert_no_complete_result()
-        # Official executor may finish after timeout; wait only to preserve evidence.
-        deadline = time.monotonic() + 20
-        while self.count() == 0 and time.monotonic() < deadline: time.sleep(0.05)
-        self.assertEqual(self.count(), 1)
-        self.assertEqual(json.loads(Path(self.data['_cpu_log']).read_text())['value'], 1.0)
+        time.sleep(.6)
+        self.assertEqual(self.count(), 0)
         self.assert_no_complete_result()
 
 

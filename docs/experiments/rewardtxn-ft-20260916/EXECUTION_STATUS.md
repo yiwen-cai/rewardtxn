@@ -1,5 +1,15 @@
 # FT 实验执行状态
 
+2026-09-21最新补充：公共严格评分补丁已经用户授权并应用；116项CPU测试和6373条标准答案检查通过，详见 [报告](SCORING_STATUS_PATCH_REPORT.md) 与 [验收摘要](scoring-status-verification-r3.json)。有效0/1与异常/超时/gold错误分离；两臂同一有界评分进程与最多2次尝试；R仅缓存schema2/scored有效结果；终态错误停止实际Grouped/dispatcher批次并回收兄弟任务，不补样本。7个CPU容器已清理，本轮无GPU。用户已选择单训练rank＋3推理实例；这及重试参数仍需正式freeze。历史异常fallback零分和评分池证据不能当新版本正式结论；下一步FT1成对故障预检、独立分类与正式冻结，F4需按新实际执行进程重新映射，正式矩阵0/184待补不变。
+
+2026-09-21最新补充：P3单rank checkpoint写入中SIGKILL自动恢复验收通过，见 [报告](P3_MIDWRITE_RECOVERY_REPORT.md) 与 [摘要](training-midwrite-verification-r1.json)。原生writer已有272,437,394字节/余703tensor，trainer被杀后writer被公共job清理；绑定旧owner/job的清理凭据允许同namespace pending接管，半成品弃用，保留完整状态精确恢复。96唯一样本/3提交、32未提交样本重放；到下一optimizer178.49秒、commit244.40秒。CPU容器4项和宿主21项通过，唯一GPU尝试及独立文件/消费/进程/资源核验通过。容器、网络、4卡已清理释放。下文未覆盖写入中的描述为历史状态；多rank与连续GPU故障仍未覆盖，正式矩阵0/184待补不变。
+
+2026-09-21最新补充：公共生命周期修订已经用户明确批准并应用，P3单rank post-optimizer/pre-save唯一SIGKILL自动恢复验收通过。原生重试1次、精确加载、4次物理optimizer/3次有效commit、96唯一样本及32个未提交样本重放均独立核验；到下一optimizer173.20秒、下一commit233.61秒，仅本工程样本。见 [报告](P3_AUTOMATIC_RECOVERY_REPORT.md) 与 [验收摘要](training-fault-verification-r1.json)。本轮容器/网络及GPU已释放；旧部署超时不改判，正式矩阵0与184待补不变，写入中接管/多rank仍未覆盖。
+
+2026-09-21最新补充：P3真实训练接入工程验收通过，见 [P3_TRAINING_INTEGRATION_REPORT](P3_TRAINING_INTEGRATION_REPORT.md) 和 [独立验收摘要](training-integration-verification-r6.json)。真实3步optimizer/scheduler→async finalize→完整checkpoint→消费提交链；96个唯一样本、64个跨进程复用并提交；新进程完整状态精确加载通过，20.75GB重新哈希核验。最终同版本CPU21项通过，无跳过；宿主23项含重叠案例。所有本轮容器/网络已清理。剩余工作为真实故障重启/写入窗口安全接管、多rank及正式实验门槛；本结果不计正式GPU样本，不减少184项待补。
+
+2026-09-21补充：双故障CPU隔离探针6项验收全通过，覆盖两次真实SIGKILL、实际fixture加载与保留链、错误触发/不完整候选/旧owner负例；容器删除已独立确认。见 [P2_SECOND_FAULT_REPORT](P2_SECOND_FAULT_REPORT.md)。不减少184项待补，不计为训练oracle或正式GPU样本。
+
 更新：2026-09-20。当前目标：继续执行 FT-v1 及其脚本修复方案，直到对应可实施分支的实现、验证、冻结、实验和结果审计完成。不得用 P0、CPU fixture 或单 actor 探针代替完整交付。
 
 模式：economy-dev 开启，root `01a0bd89-a9c3-7d00-b16d-4a0a766de676`；用户最近明确选择 Astra medium。当前无推理强度覆盖。实现由 Astra 承担，主任务验证及集成；不声称运行中的主管模型已切换。

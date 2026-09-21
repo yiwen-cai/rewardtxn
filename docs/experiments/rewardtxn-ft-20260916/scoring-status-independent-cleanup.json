@@ -1,0 +1,37 @@
+{
+  "strict-scoring-cpu-r1": {
+    "id": "b97755eaddf4c686c828710b70bf4938ac3eb8d8faf3be84afc770fd627e69e5",
+    "removed": true,
+    "stderr": "Error: No such object: b97755eaddf4c686c828710b70bf4938ac3eb8d8faf3be84afc770fd627e69e5\n"
+  },
+  "strict-scoring-cpu-r2": {
+    "id": "1ef1ef6878147792b0485cb59cc46b4b234daba44151ebb12c59c0e5409d5c7e",
+    "removed": true,
+    "stderr": "Error: No such object: 1ef1ef6878147792b0485cb59cc46b4b234daba44151ebb12c59c0e5409d5c7e\n"
+  },
+  "strict-scoring-cpu-r3": {
+    "id": "6a3852faa4f4521ae1031181d67bbd77c616344c8d2acc2ffe71fa80c4fd95bb",
+    "removed": true,
+    "stderr": "Error: No such object: 6a3852faa4f4521ae1031181d67bbd77c616344c8d2acc2ffe71fa80c4fd95bb\n"
+  },
+  "strict-scoring-data-r1": {
+    "id": "0b836b23123839f60b1b6e55533bc56a78cb5b55374fded8a50cfb2c400ddeda",
+    "removed": true,
+    "stderr": "Error: No such object: 0b836b23123839f60b1b6e55533bc56a78cb5b55374fded8a50cfb2c400ddeda\n"
+  },
+  "strict-scoring-legacy-r1": {
+    "id": "06a75037cf9475b3e97f711b593fc82b3b650758458492ae826d812095b155f3",
+    "removed": true,
+    "stderr": "Error: No such object: 06a75037cf9475b3e97f711b593fc82b3b650758458492ae826d812095b155f3\n"
+  },
+  "strict-scoring-legacy-r2": {
+    "id": "b4d7ca69ac77257c36febcc0b90b04d1fb519185a5cc38b6c9f1f4eb33b066d3",
+    "removed": true,
+    "stderr": "Error: No such object: b4d7ca69ac77257c36febcc0b90b04d1fb519185a5cc38b6c9f1f4eb33b066d3\n"
+  },
+  "strict-scoring-legacy-r3": {
+    "id": "99b06fdb2f017e68a249f4632b1dd9a062e7a4cb808c6156d167dba7d1241fc0",
+    "removed": true,
+    "stderr": "Error: No such object: 99b06fdb2f017e68a249f4632b1dd9a062e7a4cb808c6156d167dba7d1241fc0\n"
+  }
+}

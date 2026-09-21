@@ -1,0 +1,118 @@
+{
+  "verified": true,
+  "date": "2026-09-21",
+  "evidence": "docs/experiments/rewardtxn-ft-20260916/p3_evidence/training-midwrite-gpu-r1",
+  "gpu": {
+    "verified": true,
+    "scope": "single-rank checkpoint_midwrite SIGKILL; common lifecycle patch",
+    "incomplete_writer_cleaned_and_abandoned": true,
+    "native_automatic_retries": 1,
+    "signals": 1,
+    "physical_optimizer_successes": 4,
+    "committed_updates": 3,
+    "unique_consumed_samples": 96,
+    "adopted_samples_committed": 64,
+    "abandoned_update_samples_replayed": 32,
+    "abandoned_generation": "g-8aa9ae22a0ca46a99473bfacde5536bd",
+    "native_full_state_load_exact": true,
+    "checkpoint_bytes_hashed": 20754258568,
+    "fault_to_next_optimizer_seconds": 178.48842573,
+    "fault_to_next_commit_seconds": 244.403191468
+  },
+  "supplement": {
+    "verified": true,
+    "job_receipts": {
+      "trainer.log": 2,
+      "llm_server.log": 2
+    },
+    "all_jobs_cleaned": true,
+    "network_id_bound_to_actual_container": true,
+    "frozen_sources_unchanged": true,
+    "raw_controller_config_sha256_verified": true,
+    "private_pid_namespace_verified": true
+  },
+  "cpu": {
+    "verified": true,
+    "cpu_native_tests": 4,
+    "cpu_native_seconds": 39.322,
+    "host_state_tests": 21,
+    "host_state_seconds": 0.83,
+    "frozen_sources_unchanged": true,
+    "container_removed": true,
+    "prior_attempt": "r1 targeted 4 passed; state suite package resolution failed in image; rerun state in project environment"
+  },
+  "cost": {
+    "wall_seconds": 694.9594703819603,
+    "allocated_gpu_hours": 0.7721771893132892,
+    "scope": "engineering run; no comparative performance claim"
+  },
+  "cleanup": {
+    "container": {
+      "argv": [
+        "docker",
+        "inspect",
+        "3689b1b16976818baec4ec9696725a03ceed1800ebe8879174b55f5ec35742b6"
+      ],
+      "returncode": 1,
+      "stderr": "Error: No such object: 3689b1b16976818baec4ec9696725a03ceed1800ebe8879174b55f5ec35742b6\n"
+    },
+    "network": {
+      "argv": [
+        "docker",
+        "network",
+        "inspect",
+        "afc3dad9b1f7108b1fb5446f6890b115ef3127e0c73d54fb16f76afd57694a0f"
+      ],
+      "returncode": 1,
+      "stderr": "Error response from daemon: network afc3dad9b1f7108b1fb5446f6890b115ef3127e0c73d54fb16f76afd57694a0f not found\n"
+    },
+    "collected_at_utc": "2026-09-21T07:12:13.172863+00:00"
+  },
+  "abandoned_marker": {
+    "epoch": 1,
+    "reason": "incomplete candidate: cannot read optimizer.json"
+  },
+  "source_sha256": {
+    "scripts/ft/run.py": "9e123ff789dd4ac4e660b2fcd72d77926c471286b62b2c632c7cc7e429254018",
+    "scripts/ft/areal_native_trainer_probe.py": "925d72cedf93b89b0fa371acd6930a49147b0d0aff577cdaa14045690072f64b",
+    "scripts/ft/native_gpu.py": "cb5142c9fe2e7f778fe77514dc28b925c1eecb3bcbf5178d564131323a7e491e",
+    "scripts/ft/writer_recovery.py": "fa9d9782bad2c4621c597622cfae9dbbf66a1d1d92cc30f38d12be847307b594",
+    "scripts/ft/oracle.py": "2283e77ed27ae568a5a018f7030a37c5aeeb2045ca518692198c7c77939fb031",
+    "scripts/ft/job_lifecycle.py": "1c5a828519423a08c49acbea0011be0c44b12ed022d35686c72dd150816f9293",
+    "scripts/ft/training_replay.py": "2e5a7269d1c1b06509c19074965f161b3cc1a7fd0fb0353fdc7cee34d8c08332",
+    "scripts/ft/reward_pool_probe.py": "f9abf032ac265a02be7d0119d96dbb4d5b5a4bfd18487a620df66ab9e912e11f",
+    "scripts/ft/areal_rewardtxn.py": "5e5b01b195dafd8e1ef9c475a391a561854d9faa937aa1d119455058e8f5246f",
+    "scripts/ft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "scripts/ft/areal_midwrite_fault.py": "cdff42590ebab32728366bf8ef512afacc311adef8309a1176745a20b06f0472",
+    "scripts/ft/areal_pilot_hooks.py": "1009c9682bf7b2c3f952cea18ce44f9822c921224c804f70d1f7fc9f5c1d59b4",
+    "scripts/ft/rlvr_replay.py": "a6d2d4a85973f675944dc93137fe3dee5150eb5a71de935734d96a9e4514e77d",
+    "scripts/ft/batch_identity.py": "c2071cde000cc2352524ba0ece8b98e7d8be075d828ce40c56eff1d9e1457d8b",
+    "scripts/ft/areal_training_fault.py": "50319af474cfc1f8380fed79943d5d9c08714246836ce3108172b6822c674722",
+    "scripts/ft/descendants.py": "f93ba3923edb7253a78dc087e7a719c3b0f3a8d3078438b7215b9d68b8e563de",
+    "scripts/ft/namespace_run.py": "8ef9628f3b7094f47ef9dfc6d8a535d0c1a5e77db9e092fcbaaccec98fc4a123",
+    "scripts/ft/state.py": "cfc44c2763102c3aa2d869c14b41acb61faf347e69e7d2286bfee50e0da0f3c0",
+    "scripts/ft/replay.py": "e9668930590936a3d736450fb946c6ac1a69f7b832a217d56d432e230795a48c",
+    "scripts/ft/training_adapter.py": "fddc38c584148e24dbab8a6988530e9671b5fe5f5dea40e6f41bae8b30f66d61",
+    "scripts/ft/container_run.py": "1eb8e35c0cc8de28a3462571f6215adba22025ccd52e3e8d71155174787640e8",
+    "scripts/ft/faults.py": "dfe2d62f99085d82f072eb45be0efd784a6e0ad92df9caf7e2d503bfd698852b",
+    "scripts/ft/areal_pilot.py": "d9b0c76bdca760ae956f8ecad26a371242a012cd67961e474149229cf6c9ae16",
+    "scripts/ft/verify_native_trainer_probe.py": "814eab5ab9a39a92f8508780c88f25841e8eb68b54b9a7b13f92160b6d5adfed",
+    "scripts/ft/reward_return.py": "6ec2696f63519f2aff3156166bc491831980a8324936def507bf538631aa7e51",
+    "tests/ft/run_training_fault.py": "889653e863933e275c3ba713143f211f083cdedc53d8cc6640129a5ef827e1a8",
+    "tests/ft/check_training_fault.py": "cfa56f33467b84797b706a646897e3aae640a0fcefc484665e785b0024b8113e",
+    "tests/ft/check_training_fault_supplement.py": "9e6a1eecc5883f85ae6b07b5874f581db1a73373569125ae73a20bbeffc873da",
+    "third_party/areal/areal/infra/launcher/local.py": "1cc2a549359d5bee86dbcc44d03dfdf1e69ac467f42933c219c7b42b90ffb16f",
+    "third_party/areal/areal/trainer/rl_trainer.py": "6723092872f27eb24b23f2e7cde0c4521e6403863b1f208111492dbc796c8486",
+    "third_party/areal/areal/utils/recover.py": "19380a7339260236b9e3b8009b6517c4ac4f0fd9491ddbb8fff6a005b9f27b6c",
+    "third_party/areal/areal/engine/megatron_utils/checkpointer.py": "7ff877a756c10b773ee1ea1f46987dd23c3156fd20a4318f09bed68287792ade"
+  },
+  "common_patch": "previously explicitly approved; unchanged this run",
+  "formal_gpu_samples": 0,
+  "limits": [
+    "single actor rank",
+    "same boot and PID namespace",
+    "trusted common job subreaper",
+    "one paused-between-tensors checkpoint fault",
+    "not multi-rank or consecutive GPU faults"
+  ]
+}
