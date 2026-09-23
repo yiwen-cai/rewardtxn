@@ -6,6 +6,11 @@ import os
 from pathlib import Path
 
 
+def gpu_id(value):
+    value=str(value)
+    return value[4:] if value.startswith('GPU-') else value
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--input',required=True)
@@ -26,7 +31,7 @@ def main():
     import torch
     assert torch.cuda.device_count()==1
     actual=str(torch.cuda.get_device_properties(0).uuid)
-    assert actual.removeprefix('GPU-')==os.environ['FT1_GPU_UUID'].removeprefix('GPU-')
+    assert gpu_id(actual)==gpu_id(os.environ['FT1_GPU_UUID'])
     set_random_seed(cfg.seed,'ft1-trainer')
     loader=create_dataloader(load_pilot_dataset(cfg.train_dataset.path),rank=0,world_size=1,dataset_config=cfg.train_dataset)
     saved_reference=None

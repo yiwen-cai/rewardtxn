@@ -5,6 +5,11 @@ import re
 import sys
 
 
+def gpu_id(value):
+    value=str(value)
+    return value[4:] if value.startswith('GPU-') else value
+
+
 def read(path):return json.loads(path.read_text())
 def rows(path):return [json.loads(line) for line in path.read_text().splitlines() if line]
 def one(events,key,value):
@@ -73,7 +78,7 @@ def verify(root):
                   and e['source_row_id']==5518 and e['task_id']==0 and e['sample_idx']==complete['sample_idx']]
         assert returned and min(e['monotonic_ns'] for e in returned)<witness['cut_monotonic_ns']
         result['target_gpu_uuid']=witness['gpu_uuid']
-        assert witness['gpu_uuid'].removeprefix('GPU-') in {gpu.removeprefix('GPU-') for gpu in read(root/'gpu-uuids.json')}
+        assert gpu_id(witness['gpu_uuid']) in {gpu_id(gpu) for gpu in read(root/'gpu-uuids.json')}
     else:raise AssertionError('unmapped scenario')
     jobs=[read(p) for p in (root/'areal').rglob('job-lifecycle/*.json')]
     trained=[e for e in pilot if e['event']=='optimizer_end' and e['stats']['update_successful']==1]

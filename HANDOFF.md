@@ -1,3 +1,46 @@
+<!-- CURRENT_SNAPSHOT_START -->
+# RewardTxn HANDOFF — 当前快照
+
+- **时间戳**: 2026-09-23 08:51:51 
+- **权威工作树**: （对齐 GitHub ）
+- **基线 commit（写此快照前的 master HEAD）**: 
+- **本分支**: 
+- **本分支 tip commit**: 
+- **禁止宣称正式通过**；正式矩阵样本数 **0**（ 仅工程试跑）
+
+## FT1 工程状态（权威摘要）
+
+| 项 | 状态 | 证据 / 备注 |
+|---|---|---|
+| **F2-A s419-r4** | **工程 Go** | ：exit0；FV ；；acceptance= |
+| **F1 s421 A-r1** | **工程 Go** | ：exit0；；FV ； |
+| **F1 s421 R-r1** | **technical_invalid** | ：exit2；无 claim；acceptance=；**保留失败终态，不覆盖** |
+| **F1 s421 R-r2** | **injection OK；acceptance 未完** | ：exit0；/descendant/signal 有；fault 单点已过（/ 中间产物）；acceptance 现为 ；**load/FV 全链 backfill 因 Mac↔H100 断连未完成**；同 seed R 技术补做额度已用，禁止再开 GPU 训练重跑除非新裁定 |
+| **F1 s421 pair** | **仍 No-Go** | 过审前不宣称配对；不启 F2/其他场景 |
+| **正式矩阵样本** | **0** | 上述均为工程试跑 |
+
+## 代码侧已落盘（待随本 handoff 分支提交）
+
+- R 臂 injection 竞态修复：（ 前后 claim；允许 scheduler 内 sibling finished+unfinished 武装）。说明：
+- 主机 Python3.8 兼容：、（去掉 ）
+- 相关：、（F2 async DCP 等工程补丁，未宣称正式冻结）
+
+## 未决（下一步）
+
+1. **acceptance backfill**：对  只补验收链（fault→chain→input→load→finalize），**不动** /；写出完整 FV/load 后再交结果审计。
+2. **pair 重审**：R-r2 验收过审后，由结果审计审 F1 s421 pair；过审前仍 No-Go。
+3. **freeze hash**：正式矩阵前再锁脚本/配置哈希；当前禁止用工程 Go 冒充正式通过。
+
+## 操作红线
+
+- 不启训练 / 不开 GPU 训练重跑（除非科研助手新裁定）
+- 不覆盖 A-r1 / R-r1 / R-r2 失败或既有终态证据
+- 不宣称正式通过、不宣称 pair Go、不启 F2
+
+<!-- CURRENT_SNAPSHOT_END -->
+
+---
+
 # RewardTxn 当前交接
 
 2026-09-21最新补充：用户接受首批单训练rank＋3推理实例，并批准公共评分状态补丁。现已应用并通过116项CPU测试（28严格评分/缓存/重放＋88原有相关测试），当前6373条标准答案解析/自比较检查全通过。A/A+R共用严格评分：正常0/1可复用，回答无表达式仍有效0；gold无解析结果为数据错误，异常/超时不转有效0；默认每wrapper单并发、15秒执行等待、最多2次尝试，超时独立进程回收。终态失败收齐同组任务并停止批次，不静默换样本；R envelope schema2/status=scored，verifier指纹已更新。见 [评分补丁报告](docs/experiments/rewardtxn-ft-20260916/SCORING_STATUS_PATCH_REPORT.md)。7个CPU容器清理完成，未占GPU。下文official_call_returned/异常零分不可辨识是旧版本状态；当前依赖公共评分执行修改，下一步仍需FT1配对预检及F4故障进程重新映射、正式冻结，不能沿用旧GPU结果作新版本正式验收。预检两次尝试尚非正式参数冻结，正式GPU样本仍0。

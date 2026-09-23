@@ -75,24 +75,51 @@ def install(scenario, observer_module):
                 with_client.close()
         observer_module.observe=observe
     else:
+        from pathlib import Path as _Path
         from areal.engine.megatron_engine import MegatronPPOActor
         from scripts.ft.areal_pilot_hooks import writer
         client=Client('trainer',event_id=frozen['event_id'])
         emit('fault_target_registered',scenario=scenario,identity=snapshot(os.getpid()),
              incarnation=client.incarnation,assignment=client.injection)
         original=MegatronPPOActor.optimizer_step
+        original_save=MegatronPPOActor.save
         ordinal=0
+        predecessor={'path':None}
+
+        def save(self, meta):
+            result=original_save(self, meta)
+            # Record recover checkpoint path; completeness checked after wait_async_saves.
+            predecessor['path']=meta.path
+            return result
+
+        def _require_complete_dcp(path):
+            root=_Path(path)
+            if path is None or not root.is_dir():
+                raise RuntimeError('F2 cut lacks prior recover checkpoint directory: %s' % (path,))
+            names={p.name for p in root.iterdir()}
+            if '.metadata' not in names:
+                raise RuntimeError('F2 cut lacks DCP .metadata after wait_async_saves: %s' % (root,))
+            if not any(name.endswith('.distcp') and (root/name).stat().st_size>0 for name in names):
+                raise RuntimeError('F2 cut lacks non-empty .distcp after wait_async_saves: %s' % (root,))
+            return sorted(names)
+
         def optimizer_step(self):
             nonlocal ordinal
             result=original(self)
             if result.get('update_successful')==1:ordinal+=1
             if ordinal==2 and client.injection['status']=='pending':
                 writer().flush()
+                # FT1 keeps async_save=true; drain step-0 DCP before the cut so
+                # native recover does not load a partial recover_checkpoint.
+                self.checkpointer.wait_async_saves()
+                files=_require_complete_dcp(predecessor['path'])
                 emit('fault_ready',scenario=scenario,identity=snapshot(os.getpid()),
-                     incarnation=client.incarnation,evidence=frozen['evidence'])
+                     incarnation=client.incarnation,evidence=frozen['evidence'],
+                     predecessor_checkpoint=predecessor['path'],predecessor_files=files)
                 client.ready(frozen['event_id'],frozen['evidence'])
                 client.wait_release(frozen['event_id'])
                 raise RuntimeError('SIGKILL target survived')
             return result
+        MegatronPPOActor.save=save
         MegatronPPOActor.optimizer_step=optimizer_step
     return client

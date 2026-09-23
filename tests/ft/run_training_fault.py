@@ -118,7 +118,7 @@ finally:
     if ft1 is not None:
         files.extend(REPO/p for p in ('tests/ft/check_ft1_smoke.py','tests/ft/run_ft1.py','tests/ft/run_ft1_faults.py',
             'tests/ft/check_ft1_input_audit.py','tests/ft/check_ft1_load.py','tests/ft/check_ft1_chain.py',
-            'tests/ft/check_ft1_fault.py','tests/ft/finalize_ft1_fault.py','docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',
+            'tests/ft/check_ft1_fault.py','tests/ft/finalize_ft1_fault.py','tests/ft/run_ft1_acceptance.py','docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',
             'third_party/areal/areal/v2/inference_service/sglang/scheduler.py',
             'third_party/areal/areal/api/reward_api.py','third_party/areal/areal/utils/strict_reward.py',
             'third_party/areal/areal/infra/remote_inf_engine.py','third_party/areal/areal/infra/workflow_executor.py',
@@ -177,6 +177,20 @@ finally:
         write(output/'cost.json',{'wall_seconds':elapsed,'allocated_gpu_hours':elapsed*4/3600,
                                  'scope':'engineering run; no comparative performance claim'})
         print('evidence',output)
+        if ft1 is not None:
+            import sys as _sys
+            _sys.path.insert(0, str(REPO / 'tests' / 'ft'))
+            from run_ft1_acceptance import accept
+            gpu = ft1['devices'][0]
+            try:
+                report = accept(output, gpu_uuid=gpu, run_docker=True)
+            except Exception as exc:
+                write(output/'acceptance-status.json', {
+                    'result': 'acceptance_runner_exception',
+                    'error': str(exc),
+                })
+                report = {'result': 'acceptance_runner_exception', 'error': str(exc)}
+            print('acceptance', report.get('result'), flush=True)
 
 
 if __name__=='__main__':
