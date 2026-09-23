@@ -1,33 +1,33 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
-- **时间戳**: 2026-09-23 08:51:51 
-- **权威工作树**: （对齐 GitHub ）
-- **基线 commit（写此快照前的 master HEAD）**: 
-- **本分支**: 
-- **本分支 tip commit**: 
-- **禁止宣称正式通过**；正式矩阵样本数 **0**（ 仅工程试跑）
+- **时间戳**: 2026-09-23 08:55:00 +0800
+- **权威工作树**: `/public/home/caiyiwen/rewardtxn`（对齐 GitHub `yiwen-cai/rewardtxn`）
+- **基线 commit（写快照前 master）**: `41dc0bb`
+- **本分支**: `handoff/20260923-ft1`
+- **本分支 tip**: 见 push 后 `git rev-parse HEAD`（本修复提交会更新 tip）
+- **禁止宣称正式通过**；正式矩阵样本数 **0**（`formal_sample=false` 仅工程试跑）
 
 ## FT1 工程状态（权威摘要）
 
 | 项 | 状态 | 证据 / 备注 |
 |---|---|---|
-| **F2-A s419-r4** | **工程 Go** | ：exit0；FV ；；acceptance= |
-| **F1 s421 A-r1** | **工程 Go** | ：exit0；；FV ； |
-| **F1 s421 R-r1** | **technical_invalid** | ：exit2；无 claim；acceptance=；**保留失败终态，不覆盖** |
-| **F1 s421 R-r2** | **injection OK；acceptance 未完** | ：exit0；/descendant/signal 有；fault 单点已过（/ 中间产物）；acceptance 现为 ；**load/FV 全链 backfill 因 Mac↔H100 断连未完成**；同 seed R 技术补做额度已用，禁止再开 GPU 训练重跑除非新裁定 |
+| **F2-A s419-r4** | **工程 Go** | `docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4`：exit0；FV `safe_discard`；`formal_sample=false`；acceptance=`functional_verification_written` |
+| **F1 s421 A-r1** | **工程 Go** | `.../p3_evidence/ft1-f1-s421-a-r1`：exit0；`f1-claimed`；FV `correct_recovered`；`formal_sample=false` |
+| **F1 s421 R-r1** | **technical_invalid** | `.../p3_evidence/ft1-f1-s421-r-r1`：exit2；无 claim；acceptance=`fault_not_valid_hit`；**保留失败终态，不覆盖** |
+| **F1 s421 R-r2** | **injection OK；acceptance 未完** | `.../p3_evidence/ft1-f1-s421-r-r2`：exit0；`f1-claimed` / descendant / signal 有；fault 单点已过（`valid_hit` / `correct_recovered` 中间产物）；acceptance 现为 `blocked_at_load`；**load/FV 全链 backfill 因 Mac↔H100 断连未完成**；同 seed R 技术补做额度已用，禁止再开 GPU 训练重跑除非新裁定 |
 | **F1 s421 pair** | **仍 No-Go** | 过审前不宣称配对；不启 F2/其他场景 |
 | **正式矩阵样本** | **0** | 上述均为工程试跑 |
 
-## 代码侧已落盘（待随本 handoff 分支提交）
+## 代码侧已落盘（本 handoff 分支）
 
-- R 臂 injection 竞态修复：（ 前后 claim；允许 scheduler 内 sibling finished+unfinished 武装）。说明：
-- 主机 Python3.8 兼容：、（去掉 ）
-- 相关：、（F2 async DCP 等工程补丁，未宣称正式冻结）
+- R 臂 injection 竞态修复：`scripts/ft/ft1_scheduler_observer.py`（`run_batch` 前后 claim；允许 scheduler 内 sibling finished+unfinished 武装）。说明：`docs/experiments/rewardtxn-ft-20260916/F1R_INJECTION_RACE_FIX.md`
+- 主机 Python 3.8 兼容：`tests/ft/check_ft1_fault.py`、`tests/ft/check_ft1_load.py`（去掉 `str.removeprefix`）
+- 相关：`scripts/ft/ft1_fault_hooks.py`、`tests/ft/run_training_fault.py`（F2 async DCP 等工程补丁，未宣称正式冻结）
 
 ## 未决（下一步）
 
-1. **acceptance backfill**：对  只补验收链（fault→chain→input→load→finalize），**不动** /；写出完整 FV/load 后再交结果审计。
+1. **acceptance backfill**：对 `ft1-f1-s421-r-r2` 只补验收链（fault→chain→input→load→finalize），**不动** `events.jsonl` / `exitcode`；写出完整 FV/load 后再交结果审计。
 2. **pair 重审**：R-r2 验收过审后，由结果审计审 F1 s421 pair；过审前仍 No-Go。
 3. **freeze hash**：正式矩阵前再锁脚本/配置哈希；当前禁止用工程 Go 冒充正式通过。
 
@@ -38,6 +38,7 @@
 - 不宣称正式通过、不宣称 pair Go、不启 F2
 
 <!-- CURRENT_SNAPSHOT_END -->
+
 
 ---
 
