@@ -1,0 +1,55 @@
+{
+  "observed_at": "2026-09-22T20:50:35.787761+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f1_s421_r_r2_pre_backfill_snapshot",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f1-s421-r-r2",
+  "verdict": "No-Go",
+  "verdict_note": "exit0 but acceptance blocked_at_fault_check; no FV yet; awaiting Bot backfill of check_ft1_fault+chain; do not upgrade exit0",
+  "exitcode": "0",
+  "result_event": {
+    "classification": "execution_complete",
+    "controller_monotonic_ns": 725850521963320,
+    "kind": "result",
+    "oracle_status": "not_evaluated"
+  },
+  "event_kind_counts": {
+    "controller_started": 1,
+    "launcher_created": 1,
+    "launcher_registered": 1,
+    "descendant_registered": 1,
+    "injection_assignment": 1,
+    "ready": 1,
+    "armed": 1,
+    "signal_intent": 1,
+    "signal_sent": 1,
+    "process_exit_observed": 1,
+    "method_observation": 1,
+    "result": 1
+  },
+  "acceptance_status": {
+    "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f1-s421-r-r2",
+    "arm": "R",
+    "scenario": "F1",
+    "started_local": "2026-09-22 19:36:56 +0800",
+    "immutable": [
+      "events.jsonl",
+      "exitcode"
+    ],
+    "steps": {
+      "check_ft1_fault": {
+        "returncode": 1,
+        "stdout_tail": "",
+        "stderr_tail": "ost recent call last):\n  File \"/public/home/caiyiwen/rewardtxn/tests/ft/check_ft1_fault.py\", line 91, in <module>\n    report=verify(sys.argv[1]);Path(sys.argv[2]).write_text(json.dumps(report,indent=2));print(json.dumps(report))\n  File \"/public/home/caiyiwen/rewardtxn/tests/ft/check_ft1_fault.py\", line 76, in verify\n    assert witness['gpu_uuid'].removeprefix('GPU-') in {gpu.removeprefix('GPU-') for gpu in read(root/'gpu-uuids.json')}\nAttributeError: 'str' object has no attribute 'removeprefix'\n",
+        "path": null
+      }
+    },
+    "result": "blocked_at_fault_check"
+  },
+  "has_fv": false,
+  "r1_preserved": true,
+  "hashes": {
+    "events.jsonl": "d752c27c0751cdf423ed72d890006e6938e2083e3a8af371d11154b5a8e7b07f",
+    "exitcode": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  "pair_status": "still No-Go pending r-r2 acceptance backfill"
+}

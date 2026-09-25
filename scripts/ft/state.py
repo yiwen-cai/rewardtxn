@@ -321,44 +321,137 @@ def _generation(owner, gid):
     return _path(owner.root, "generations/" + gid)
 
 
-def _inventory(directory):
+def _stat_identity(st):
+    return (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_mode, st.st_nlink)
+
+
+def _identities(directory):
+    """Enumerate the whole tree; content is not read."""
     result = {}
     for path in sorted(directory.rglob("*")):
         if path.is_symlink():
             raise StateError("symlink in snapshot")
         if path.is_dir():
             continue
-        if not stat.S_ISREG(path.stat().st_mode):
+        found = path.lstat()
+        if not stat.S_ISREG(found.st_mode):
             raise StateError("nonregular snapshot file")
-        digest = hashlib.sha256()
+        result[str(path.relative_to(directory))] = _stat_identity(found)
+    return result
+
+
+def prehash(directory):
+    """Hash files ahead of commit; reused only while their stat identity is unchanged."""
+    identities = {}
+    files = _inventory(directory, identities=identities)
+    return {name: (identities[name], info) for name, info in files.items()}
+
+
+CONTENT_HASHED = []  # observation only: directories whose files were content-hashed
+
+
+def _inventory(directory, *, cache=None, identities=None):
+    result = {}
+    hashed = False
+    for path in sorted(directory.rglob("*")):
+        if path.is_symlink():
+            raise StateError("symlink in snapshot")
+        if path.is_dir():
+            continue
+        if not stat.S_ISREG(path.lstat().st_mode):
+            raise StateError("nonregular snapshot file")
+        name = str(path.relative_to(directory))
         fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
         with os.fdopen(fd, "rb") as stream:
             before = os.fstat(stream.fileno())
+            cached = None if cache is None else cache.get(name)
+            if cached is not None and cached[0] == _stat_identity(before):
+                result[name] = dict(cached[1])
+                if identities is not None:
+                    identities[name] = cached[0]
+                continue
+            digest = hashlib.sha256()
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                 digest.update(chunk)
             os.fsync(stream.fileno())
             after = os.fstat(stream.fileno())
-        if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (
-                after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+        if _stat_identity(before) != _stat_identity(after):
             raise StateError("snapshot changed while hashing")
-        result[str(path.relative_to(directory))] = {"size": after.st_size, "sha256": digest.hexdigest()}
+        result[name] = {"size": after.st_size, "sha256": digest.hexdigest()}
+        hashed = True
+        if identities is not None:
+            identities[name] = _stat_identity(after)
     if not result:
         raise StateError("empty snapshot")
+    if hashed:
+        CONTENT_HASHED.append(str(directory))
     return result
 
 
-def _validate_token(owner, gid):
+def _prune_marker(directory, token, manifest):
+    """Deterministic pruning record; None when this generation was never pruned."""
+    path = directory / "pruned.json"
+    if not path.exists():
+        return None
+    marker = _read(_path(directory, "pruned.json"))
+    removed = marker.get("removed")
+    if (marker.get("schema") != 1 or marker.get("generation") != token["generation"]
+            or marker.get("manifest_sha256") != token["manifest_sha256"]
+            or not isinstance(removed, dict) or not removed
+            or any(manifest["files"].get(name) != info for name, info in removed.items())):
+        raise StateError("invalid pruning marker")
+    return marker
+
+
+def _check_files(directory, token, manifest):
+    """Metadata check of a committed generation: file set and sizes, no content read."""
+    marker = _prune_marker(directory, token, manifest)
+    removed = set() if marker is None else set(marker["removed"])
+    actual = _identities(_path(directory, "checkpoint"))
+    expected = manifest.get("files")
+    if not isinstance(expected, dict) or not set(actual) <= set(expected):
+        raise StateError("corrupt token or snapshot")
+    for name, info in expected.items():
+        if name not in actual:
+            if name not in removed:
+                raise StateError("corrupt token or snapshot")
+        elif actual[name][2] != info["size"]:
+            raise StateError("corrupt token or snapshot")
+    return marker
+
+
+def _validate_token(owner, gid, *, content=False):
     directory = _generation(owner, gid)
     token = _read(_path(directory, "token.json"))
     manifest = _read(_path(directory, "manifest.json"))
     if (token.get("generation") != gid or token.get("manifest_sha256") != _hash(_bytes(manifest))
-            or token.get("intent_sha256") != _hash(_path(directory, "intent.json").read_bytes())
-            or manifest.get("files") != _inventory(_path(directory, "checkpoint"))):
+            or token.get("intent_sha256") != _hash(_path(directory, "intent.json").read_bytes())):
         raise StateError("corrupt token or snapshot")
+    marker = _check_files(directory, token, manifest)
+    if content:
+        # Only a generation that recovery will actually load is content-hashed.
+        if marker is not None or manifest["files"] != _inventory(_path(directory, "checkpoint")):
+            raise StateError("corrupt token or snapshot")
     return token, manifest
 
 
-def _head(owner, control):
+def _chain(tokens):
+    head, order = None, []
+    remaining = dict(tokens)
+    while remaining:
+        children = [gid for gid, (token, _) in remaining.items() if token["parent"] == head]
+        if len(children) != 1:
+            raise StateError("forked or disconnected committed chain")
+        gid = children[0]
+        token, _ = remaining.pop(gid)
+        head = {"generation": gid, "token_sha256": _hash(_bytes(token))}
+        order.append(gid)
+    return head, order
+
+
+def _head(owner, control, *, verify_head_content=False):
+    """Committed chain from tokens. Ancestors are checked by metadata only;
+    their checkpoint content is never loaded by recovery."""
     root = _path(owner.root, "generations")
     tokens = {}
     if root.exists():
@@ -370,15 +463,9 @@ def _head(owner, control):
                 if token["run_nonce"] != control["run_nonce"] or manifest["config_sha256"] != control["config_sha256"]:
                     raise StateError("token run/config mismatch")
                 tokens[directory.name] = (token, manifest)
-    head = None
-    remaining = dict(tokens)
-    while remaining:
-        children = [gid for gid, (token, _) in remaining.items() if token["parent"] == head]
-        if len(children) != 1:
-            raise StateError("forked or disconnected committed chain")
-        gid = children[0]
-        token, _ = remaining.pop(gid)
-        head = {"generation": gid, "token_sha256": _hash(_bytes(token))}
+    head, _ = _chain(tokens)
+    if verify_head_content and head is not None:
+        _validate_token(owner, head["generation"], content=True)
     return head, tokens
 
 
@@ -474,7 +561,7 @@ def record_evidence(owner, generation, evidence):
         return evidence
 
 
-def _complete(owner, gid):
+def _complete(owner, gid, *, cache=None, identities=None):
     directory = _generation(owner, gid)
     intent = _read(_path(directory, "intent.json"))
     optimizer = _read(_path(directory, "receipts/optimizer.json"))
@@ -495,7 +582,7 @@ def _complete(owner, gid):
                 "rng_python", "rng_numpy", "rng_torch_cpu", "rng_device", "rng_tracker", "policy"}
     if set(components) != required:
         raise StateError("missing state component")
-    files = _inventory(_path(directory, "checkpoint"))
+    files = _inventory(_path(directory, "checkpoint"), cache=cache, identities=identities)
     referenced = set()
     for mapping in components.values():
         if set(mapping) != set(intent["expected_ranks"]):
@@ -522,7 +609,7 @@ def _complete(owner, gid):
     return intent, receipts, files
 
 
-def commit_generation(owner, generation):
+def commit_generation(owner, generation, *, prehashed=None):
     with _locked(owner) as control:
         head, tokens = _head(owner, control)
         if generation in tokens:
@@ -530,7 +617,8 @@ def commit_generation(owner, generation):
         directory = _generation(owner, generation)
         if _path(directory, "abandoned.json").exists():
             raise StateError("abandoned generation")
-        intent, receipts, files = _complete(owner, generation)
+        identities = {}
+        intent, receipts, files = _complete(owner, generation, cache=prehashed, identities=identities)
         if intent["parent"] != head:
             raise StateError("parent CAS failed")
         for update in intent["updates"]:
@@ -547,7 +635,10 @@ def commit_generation(owner, generation):
             if path.is_dir():
                 _sync_dir(path)
         _sync_dir(checkpoint)
-        if _inventory(checkpoint) != files:
+        # Content was hashed once above; re-enumerate the whole tree and require
+        # identical stat identity. Same-size rewrites within one timestamp tick
+        # are a disclosed limitation (writer is already joined and receipted).
+        if _identities(checkpoint) != identities:
             raise StateError("checkpoint changed after finalization")
         manifest = dict(intent, files=files, receipts=receipts)
         _write(_path(directory, "manifest.json"), manifest)
@@ -562,8 +653,9 @@ def commit_generation(owner, generation):
 
 
 def select_recovery(owner):
+    prehashed = None
     with _locked(owner) as control:
-        head, _ = _head(owner, control)
+        head, _ = _head(owner, control, verify_head_content=True)
         root = _path(owner.root, "generations")
         candidates = [] if not root.exists() else [item.name for item in root.iterdir()
             if (item / "intent.json").exists() and not (item / "token.json").exists()
@@ -574,7 +666,9 @@ def select_recovery(owner):
         reason = "verified committed chain"
         for gid in candidates:
             try:
-                intent, _, _ = _complete(owner, gid)
+                identities = {}
+                intent, _, files = _complete(owner, gid, identities=identities)
+                prehashed = {name: (identities[name], info) for name, info in files.items()}
                 if intent["parent"] != head:
                     raise StateError("candidate parent mismatch")
                 promote = gid
@@ -583,7 +677,7 @@ def select_recovery(owner):
                 _write(_path(_generation(owner, gid), "abandoned.json"),
                        {"epoch": owner.epoch, "reason": reason})
     if promote is not None:
-        token = commit_generation(owner, promote)
+        token = commit_generation(owner, promote, prehashed=prehashed)
         head = {"generation": promote, "token_sha256": _hash(_bytes(token))}
         reason = "completed durable candidate"
     # Preserve uncommitted consumption obligations in R's own intents. They are
@@ -594,6 +688,65 @@ def select_recovery(owner):
         return {"generation": None, "checkpoint": None, "pending": [],
                 "rollback_intents": rollback_intents, "reason": reason}
     directory = _generation(owner, head["generation"])
+    # Content was verified above (or hashed by the promotion commit).
     _, manifest = _validate_token(owner, head["generation"])
     return {"generation": head["generation"], "checkpoint": str(directory / "checkpoint"),
             "pending": manifest["data"]["pending"], "rollback_intents": rollback_intents, "reason": reason}
+
+
+def pin_generation(owner, gid, reason):
+    """Evidence pin (FT-v1 section 9): a pinned generation is never pruned."""
+    if reason not in ("recovery_loaded", "first_commit_after_recovery", "terminal"):
+        raise StateError("unknown pin reason")
+    with _locked(owner) as control:
+        _, tokens = _head(owner, control)
+        if gid not in tokens:
+            raise StateError("pin requires committed generation")
+        _write(_path(owner.root, "pins/" + reason + "-" + gid + ".json"),
+               {"schema": 1, "generation": gid, "reason": reason})
+
+
+def pinned(owner):
+    root = owner.root / "pins"
+    result = set()
+    if root.exists():
+        for path in root.iterdir():
+            if path.name.startswith(".tmp-"):
+                continue
+            record = _read(_path(root, path.name))
+            if path.name != record["reason"] + "-" + record["generation"] + ".json":
+                raise StateError("invalid pin record")
+            result.add(record["generation"])
+    return result
+
+
+def prune_generations(owner, prunable, *, keep=2):
+    """Drop bulk files of committed generations older than the last ``keep``
+    on the token-derived chain. The marker is deterministic and durable before
+    any deletion; a crash between them is resumed without rewriting it."""
+    removed_bytes = 0
+    with _locked(owner) as control:
+        _, tokens = _head(owner, control)
+        _, order = _chain(tokens)
+        keep_set = set(order[-keep:]) | pinned(owner)
+        for gid in order[:-keep]:
+            if gid in keep_set:
+                continue
+            token, manifest = tokens[gid]
+            names = sorted(name for name in manifest["files"] if prunable(name))
+            if not names:
+                continue
+            directory = _generation(owner, gid)
+            checkpoint = _path(directory, "checkpoint")
+            present = [name for name in names if (checkpoint / name).exists()]
+            if not present and (directory / "pruned.json").exists():
+                continue
+            marker = {"schema": 1, "generation": gid, "manifest_sha256": token["manifest_sha256"],
+                      "removed": {name: manifest["files"][name] for name in names}}
+            _write(_path(directory, "pruned.json"), marker)
+            for name in present:
+                path = _path(checkpoint, name)
+                removed_bytes += path.lstat().st_size
+                path.unlink()
+                _sync_dir(path.parent)
+    return removed_bytes

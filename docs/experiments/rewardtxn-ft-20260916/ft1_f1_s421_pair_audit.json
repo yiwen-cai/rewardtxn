@@ -1,0 +1,64 @@
+{
+  "observed_at": "2026-09-22T18:25:52.734818+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f1_s421_pair_audit",
+  "pair_verdict": "No-Go",
+  "pair_reason": "R arm technical_invalid without FV; cannot claim F1 A/R pair or comparative recovery",
+  "arms": {
+    "A": {
+      "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f1-s421-a-r1",
+      "verdict": "Go",
+      "verdict_scope": "engineering_non_formal_F1_A",
+      "exitcode": "0",
+      "fv_classification": "correct_recovered",
+      "input_verified": true,
+      "load_engine_exact_match": true,
+      "formal_sample": false
+    },
+    "R": {
+      "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f1-s421-r-r1",
+      "verdict": "No-Go",
+      "exitcode": "2",
+      "result": {
+        "classification": "technical_invalid",
+        "reason": "launcher exited before schedule completion"
+      },
+      "fault_verification": {
+        "scenario": "F1",
+        "arm": "R",
+        "formal_sample": false,
+        "scope": "kernel fault target, semantic cut and native continuation; not reward authority or full retained-chain oracle",
+        "valid_hit": false,
+        "classification": "technical_invalid",
+        "reason": "no unique planned signal",
+        "controller_result": {
+          "classification": "technical_invalid",
+          "controller_monotonic_ns": 721173807526031,
+          "kind": "result",
+          "oracle_status": "not_evaluated",
+          "reason": "launcher exited before schedule completion"
+        }
+      },
+      "missing": [
+        "functional-verification.json",
+        "chain-verification.json",
+        "input",
+        "load"
+      ],
+      "acceptance_result": "fault_not_valid_hit"
+    }
+  },
+  "claim_boundary": [
+    "formal_sample=false on both arms",
+    "do not claim formal matrix or F1 pair pass",
+    "do not upgrade R exit2/technical_invalid via exit0 of A",
+    "F2-A r4 engineering Go unchanged"
+  ],
+  "f2a_r4_preserved": true,
+  "hashes": {
+    "A_fv": "426044670e08f3dd8cece869fc9569b17a443f19e820a89fb5a8a13b0a9ccf54",
+    "A_events": "9975220df17137400304fa5f1be508a24cf87fd7d294803d6fabf8f6e8fb322a",
+    "R_events": "db0834d5f84fd74a5038c30e77e77cf02373a6a56e5c0ad5c0e484baa0440561",
+    "R_fault": "97dd963884850d23b7b1e6687c24f162b22109cf68ac50a5b8c264fd8c37bba3"
+  }
+}

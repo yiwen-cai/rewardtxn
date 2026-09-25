@@ -240,3 +240,19 @@ A/A+R各3次100步运行，共6次；seeds为331/337/347。在第20、50、80次
 - [旧恢复实现](scripts/phase3_auto_recover.sh)、[重评分与成本估计](scripts/phase2_reconciler.py)、[旧提交sidecar](scripts/phase2_manifest.py)。
 - [最后三单元检查](docs/experiments/rewardtxn-last-three-review-20260916/REPORT.md)。
 - [当前交接](HANDOFF.md)、[项目进展](PROGRESS.md)。
+
+## 修订记录
+
+### 修订 R1（2026-09-23，用户批准；在任何正式结果之前冻结）
+
+动机：磁盘可行性（2026-09-23 现场 `/public` 剩 193 GB、`/` 剩 377 GB）。按 §9 原文保留每 run 全量状态，正式矩阵约需 1.5–2 TB，现有磁盘放不下。本修订不涉及任何比较结果，也不是依据比较结果做出的调整。
+
+1. **§9 证据保留**：
+   - 每个 run 的 manifest、token/intent、文件哈希、小文件（policy/recover/元数据）、事件与日志**永久保留**。
+   - 权重大分片（DCP `*.distcp`）按以下规则处理，**两臂同样适用**：
+     - 自动验收链（fault→chain→input→load→finalize）全部通过、且分类为 `correct_recovered` 的 run：验收完成后删除大分片。删除前记录分片哈希，删除后不可再从该 run 复验权重内容。
+     - 分类不是 `correct_recovered` 的 run（含 `technical_invalid`、`timeout`、`safe_stop`、`invalid_commit`、`unverifiable`）：大分片全量保留。
+     - 另按固定种子 `random.Random(20260923)` 在正式配对中抽取 10% 的**配对**，两臂大分片全量保留，作为可复验样本。抽样名单在正式矩阵开始前随 freeze 一同生成并冻结。
+   - "故障前最后可恢复状态、首次恢复 checkpoint、终点"在验收完成前必须存在（R 由 `pins` 保证，A 为原生恢复路径），验收完成后按上条处理。
+2. **R 运行中剪枝**（`R_SLOWDOWN_FIX_PLAN.md` L3）：运行期间 R 只删链上 k−2 及更早、未被 pin 的已提交代的 `native/*.distcp`，并先写确定性 marker。这属于 R 的方法存储策略，按 §6 计费并披露；pin 单列为证据保留成本。
+3. 本修订随正式 freeze 一起冻结。之后如需再修订，按同样方式记录，不回改已完成 run 的判定。

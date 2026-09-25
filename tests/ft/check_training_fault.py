@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from offline_generation import check_files
 import re
 
 
@@ -89,12 +90,7 @@ def verify(root):
         assert sha(d/'token.json')==head['token_sha256']
         assert sha(d/'manifest.json')==token['manifest_sha256'] and sha(d/'intent.json')==token['intent_sha256']
         assert token['parent']==manifest['parent']
-        assert not any(p.is_symlink() for p in (d/'checkpoint').rglob('*'))
-        files={str(p.relative_to(d/'checkpoint')):p for p in (d/'checkpoint').rglob('*') if p.is_file()}
-        assert set(files)==set(manifest['files'])
-        for name,info in manifest['files'].items():
-            assert files[name].stat().st_size==info['size'] and sha(files[name])==info['sha256']
-            hashed+=info['size']
+        hashed+=check_files(d,token,manifest,sha)[0]
         generations.append((d.name,manifest));head=token['parent']
     generations.reverse()
     assert [g for g,m in generations]==[e['generation'] for e in commits]

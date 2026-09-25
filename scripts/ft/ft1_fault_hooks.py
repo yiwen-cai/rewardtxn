@@ -4,6 +4,13 @@ import os
 import time
 
 
+def f2_ordinal():
+    # Default 2 is the frozen FT1 pilot cut; 30-step gate pilots set 12 (FT-v1 section 6).
+    value=int(os.environ.get('FT1_F2_ORDINAL','2'))
+    if value not in (2,12):raise ValueError('unfrozen F2 ordinal')
+    return value
+
+
 def contract(scenario):
     if scenario=='F1':
         return {'event_id':'ft1-f1-generator','target':'generator','waiters':['generator'],
@@ -13,7 +20,7 @@ def contract(scenario):
                 'evidence':{'phase':'fourth_score_worker_entry','source_row_id':5518,'k':8,'ordinal':4}}
     if scenario=='F2':
         return {'event_id':'ft1-f2-trainer','target':'trainer','waiters':['trainer'],
-                'evidence':{'phase':'post_optimizer_pre_save','successful_ordinal':2}}
+                'evidence':{'phase':'post_optimizer_pre_save','successful_ordinal':f2_ordinal()}}
     raise ValueError('unmapped FT1 fault')
 
 
@@ -107,7 +114,7 @@ def install(scenario, observer_module):
             nonlocal ordinal
             result=original(self)
             if result.get('update_successful')==1:ordinal+=1
-            if ordinal==2 and client.injection['status']=='pending':
+            if ordinal==frozen['evidence']['successful_ordinal'] and client.injection['status']=='pending':
                 writer().flush()
                 # FT1 keeps async_save=true; drain step-0 DCP before the cut so
                 # native recover does not load a partial recover_checkpoint.

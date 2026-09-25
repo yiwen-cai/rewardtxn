@@ -71,6 +71,7 @@ class SyntheticRLVR(hooks.ObservedRLVRWorkflow):
             "logprobs": torch.tensor([[0., 0., 0., -.5, -.5, 0.]]),
             "versions": torch.tensor([[-1, -1, -1, 0, 0, -1]]),
             "rewards": torch.tensor([float(index % 2)]),
+            "pilot_sample_attempt": torch.tensor([index + 100], dtype=torch.int64),
         }
 
 
@@ -87,6 +88,7 @@ def test_group_identity_survives_real_ppo_and_minibatching(tmp_path, monkeypatch
         grouped = asyncio.run(collect())
         assert grouped["pilot_sample_idx"].tolist() == list(range(8))
         assert grouped["pilot_source_row_id"].tolist() == [42] * 8
+        assert grouped["pilot_sample_attempt"].tolist() == list(range(100, 108))
         assert grouped["input_ids"][:, 3].tolist() == list(range(4, 12))
         batches = [copy.deepcopy(grouped) for _ in range(4)]
         plain = [{k: v.clone() for k, v in b.items() if k not in hooks.IDENTITY_KEYS}

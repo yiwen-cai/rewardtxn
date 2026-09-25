@@ -1430,6 +1430,19 @@ def inspect_storage_cut(directory, case, message, operations):
             "writer_identity": message["identity"], "raw_receipt_sequences": [event["sequence"] for event in operations]}
 
 
+def token_head(root):
+    """Head of the committed chain derived from tokens, not control.json."""
+    tokens = {}
+    for item in (root / "generations").iterdir():
+        if (item / "token.json").exists():
+            tokens[item.name] = json.loads((item / "token.json").read_text())
+    parents = {t["parent"]["generation"] for t in tokens.values() if t["parent"] is not None}
+    heads = [gid for gid in tokens if gid not in parents]
+    if len(heads) != 1:
+        raise HarnessError("no unique committed head for corruption")
+    return heads[0]
+
+
 def check_storage_recovery(directory, case, cut_snapshot, bootstrap, decision, receipt):
     promote = case["cell"] == "F2" and case["boundary"] == 9
     visible = case["cell"] == "F3" and case["boundary"] == 1
@@ -1625,7 +1638,10 @@ def run_case(case, directory, timeout=30):
             control_report = audit_variant(directory, "pre-state-mutation-control", oracle_graph(inputs, case["id"], "token-reload" if case["id"].startswith("F3.b01.") else "continuous"))
             if control_report["status"] != "correct_recovered":
                 raise HarnessError("unmodified control failed before state corruption")
-            path = directory / "state-run/generations" / bootstrap["generation"] / "checkpoint/actor-0/model.bin"
+            # Recovery content-hashes only the generation it loads (the
+            # token-derived head); ancestors are metadata-checked online and
+            # content-checked offline. Corrupt the generation recovery loads.
+            path = directory / "state-run/generations" / token_head(directory / "state-run") / "checkpoint/actor-0/model.bin"
             before = digest(path.read_bytes())
             with path.open("r+b") as stream:
                 stream.seek(16384)

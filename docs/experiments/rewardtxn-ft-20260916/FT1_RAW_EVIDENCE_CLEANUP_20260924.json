@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-09-24T08:38:21.329370+08:00",
+  "authorization": "user requested deletion of old FT1 data and minimal storage for new F2 experiment",
+  "scope": "Delete untracked raw files and symlinks only inside the five old FT1 evidence directories; preserve git-tracked summaries and files outside these directories. Raw legacy checkpoints cannot be independently reloaded after deletion.",
+  "free_before": 254443429888,
+  "directories": [
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p0_evidence",
+      "deleted_files": 35,
+      "deleted_bytes": 13837588991,
+      "preserved_tracked_files": 8,
+      "errors": 0,
+      "error_examples": [],
+      "remaining_bytes": 21298
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p1_evidence",
+      "deleted_files": 930,
+      "deleted_bytes": 6957554282,
+      "preserved_tracked_files": 32,
+      "errors": 0,
+      "error_examples": [],
+      "remaining_bytes": 24700
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p2_evidence",
+      "deleted_files": 279067,
+      "deleted_bytes": 1308831494,
+      "preserved_tracked_files": 47,
+      "errors": 0,
+      "error_examples": [],
+      "remaining_bytes": 81415
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/p3_evidence",
+      "deleted_files": 71997,
+      "deleted_bytes": 144355095439,
+      "preserved_tracked_files": 15,
+      "errors": 0,
+      "error_examples": [],
+      "remaining_bytes": 8283
+    },
+    {
+      "path": "docs/experiments/rewardtxn-ft-20260916/pilot_evidence",
+      "deleted_files": 134,
+      "deleted_bytes": 13843854518,
+      "preserved_tracked_files": 9,
+      "errors": 0,
+      "error_examples": [],
+      "remaining_bytes": 24639
+    }
+  ],
+  "free_after": 435934638080,
+  "freed_bytes_approx": 181491208192,
+  "total_deleted_files": 352163,
+  "total_errors": 0
+}

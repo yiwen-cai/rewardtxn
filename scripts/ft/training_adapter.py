@@ -4,7 +4,7 @@ Uses native asynchronous DCP then waits for finalization before publishing the
 retained consumption token. Pending saves require a bound common-job cleanup
 receipt before same-namespace takeover; arbitrary orphan recovery is unsupported.
 """
-import copy
+import concurrent.futures
 import dataclasses
 import hashlib
 import os
@@ -70,6 +70,69 @@ def native_snapshot(engine):
     return result
 
 
+def _normalized_async(value, pool):
+    """Mirror of ``normalized`` whose tensor hashes run in ``pool``."""
+    from megatron.core.dist_checkpointing.mapping import LocalNonpersistentObject
+    if isinstance(value, (LocalNonpersistentObject, torch.Tensor, np.ndarray)):
+        return pool.submit(normalized, value)
+    if isinstance(value, dict):
+        return {str(k): _normalized_async(v, pool) for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))}
+    if isinstance(value, (tuple, list)):
+        return [_normalized_async(v, pool) for v in value]
+    if type(value).__module__.startswith('megatron.core.dist_checkpointing') and hasattr(value, 'data'):
+        return {'type': type(value).__name__, 'key': value.key, 'data': _normalized_async(value.data, pool)}
+    return normalized(value)
+
+
+def _resolve(value):
+    if isinstance(value, concurrent.futures.Future):
+        return value.result()
+    if isinstance(value, dict):
+        return {k: _resolve(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_resolve(v) for v in value]
+    return value
+
+
+SNAPSHOT_THREADS = 8
+
+
+def native_snapshot_r(engine):
+    """R-only copy of ``native_snapshot`` with per-tensor hashing in parallel.
+    Output is byte-identical; the shared observer keeps the serial original."""
+    state_dict = engine.checkpointer.generate_state_dict(with_optimizer=True, with_rng=True)
+    with concurrent.futures.ThreadPoolExecutor(SNAPSHOT_THREADS) as pool:
+        result = _resolve(_normalized_async(state_dict, pool))
+    return _check_snapshot(result)
+
+
+def _check_snapshot(result):
+    if set(result) != {'model', 'optimizer', 'lr_scheduler', 'rng_state'}:
+        raise RuntimeError('unsupported native full-state schema')
+    optimizer = result['optimizer']
+    def keys(value):
+        if isinstance(value, dict):
+            return set(value) | set().union(*(keys(v) for v in value.values()))
+        if isinstance(value, list):
+            return set().union(*(keys(v) for v in value))
+        return set()
+    if not {'param', 'exp_avg', 'exp_avg_sq', 'step'} <= keys(optimizer):
+        raise RuntimeError('missing native optimizer master/moments/step')
+    rng = result['rng_state']['data']
+    if len(rng) != 1 or not {'random_rng_state', 'np_rng_state', 'torch_rng_state',
+                             'cuda_rng_state', 'rng_tracker_states'} <= set(rng[0]):
+        raise RuntimeError('missing native RNG components')
+    return result
+
+
+def prunable(name):
+    """Only bulk DCP shards are dropped; small metadata/policy files stay."""
+    return name.startswith('native/') and name.endswith('.distcp')
+
+
+PRUNE_KEEP = 2
+
+
 class TrainingStop(Exception):
     """Engineering probe reached its explicit committed-step boundary."""
 
@@ -85,6 +148,7 @@ class Runtime:
         self.finalized_ids = []
         self.scheduled_ids = []
         self.closed = False
+        self.pin_first_commit = False
         self.config_hash = digest(dataclasses.asdict(config))
         self.root.mkdir(parents=True, exist_ok=True)
 
@@ -110,7 +174,15 @@ class Runtime:
         self.owner = state.acquire_owner(ledger, -1 if control is None else control['epoch'],
             None if control is None else control['processes'], run_nonce=self.config_hash,
             config_sha256=self.config_hash, verifier_version=verifier)
+        import time
+        mark, started = len(state.CONTENT_HASHED), time.monotonic()
         self.recovery = state.select_recovery(self.owner)
+        self.event('recovery_selected', generation=self.recovery['generation'],
+                   seconds=time.monotonic() - started,
+                   content_hashed=[Path(p).parent.name for p in state.CONTENT_HASHED[mark:]])
+        self.pin_first_commit = self.recovery['generation'] is not None
+        if self.pin_first_commit:
+            state.pin_generation(self.owner, self.recovery['generation'], 'recovery_loaded')
         if cleanup is not None:
             self.event('pending_writer_abandoned', **cleanup,
                        recovered_generation=self.recovery['generation'])
@@ -174,7 +246,9 @@ class Runtime:
             groups[group]['samples'].append({'sample_index': int(row['sample'].rsplit(':', 1)[1]),
                                             'sample': row['sample'], 'receipt': record['receipt']})
         with state._locked(self.owner) as control:
-            parent = copy.deepcopy(control['head'])
+            # Token-derived head: control['head'] can be stale after a crash
+            # between token and control writes.
+            parent, _ = state._head(self.owner, control)
         intent = {'parent': parent, 'ack_capability': 'none', 'config_sha256': self.config_hash,
             'expected_ranks': ['actor:0'], 'data_snapshot_id': self.update['physical_invocation_id'],
             'components': {c: {'actor:0': ['native/', 'recover/', 'policy.json', 'native-state.json']} for c in COMPONENTS},
@@ -207,7 +281,12 @@ class Runtime:
         scheduled = self.scheduled_ids[before:]
         if len(scheduled) != 1 or not set(scheduled) <= set(self.finalized_ids):
             raise RuntimeError('missing actual async request/finalize identity')
-        signature = native_snapshot(self.actor)
+        # Hash the finalized checkpoint while R snapshots the in-memory state;
+        # commit reuses these digests only for unchanged stat identities.
+        with concurrent.futures.ThreadPoolExecutor(1) as pool:
+            prehashed = pool.submit(state.prehash, checkpoint)
+            signature = native_snapshot_r(self.actor)
+            prehashed = prehashed.result()
         _publish(checkpoint / 'native-state.json', _encode(signature), 'native_state')
         _publish(checkpoint / 'policy.json', _encode({'version': self.actor.get_version(),
             'step_info': dataclasses.asdict(step_info), 'optimizer': self.optimizer_stats}), 'policy')
@@ -219,11 +298,17 @@ class Runtime:
         # Writers are finished; checkpoint inventory is fsynced and hashed by
         # state.commit_generation before the token becomes consumption authority.
         self.writer_gate(False)
-        token = state.commit_generation(self.owner, self.generation)
+        token = state.commit_generation(self.owner, self.generation, prehashed=prehashed)
         with state._locked(self.owner) as control:
             _, chain = state._head(self.owner, control)
             self.loader.consumed = set(chain[self.generation][1]['data']['consumed'])
         self.event('committed', generation=self.generation, token=token, global_step=step_info.global_step)
+        if self.pin_first_commit:
+            state.pin_generation(self.owner, self.generation, 'first_commit_after_recovery')
+            self.pin_first_commit = False
+        removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
+        if removed:
+            self.event('pruned', generation=self.generation, removed_bytes=removed)
         self.generation = self.update = None
         if self.stop_after is not None and step_info.global_step + 1 == self.stop_after:
             raise TrainingStop()
@@ -273,7 +358,7 @@ def install(runtime):
                 raise RuntimeError('only actor checkpoint supported')
             engine.load(SaveLoadMeta(path=str(runtime.io_checkpoint / 'native'), weight_format='dcp', with_optim=True))
             expected = _decode(_read(runtime.io_checkpoint / 'native-state.json'))
-            if native_snapshot(engine) != expected:
+            if native_snapshot_r(engine) != expected:
                 raise RuntimeError('native loaded model/optimizer/scheduler/RNG differs from retained snapshot')
             runtime.event('native_state_loaded', generation=runtime.recovery['generation'], exact_match=True)
 

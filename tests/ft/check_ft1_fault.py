@@ -63,7 +63,7 @@ def verify(root):
         witness=one(events,'event','fault_ready');assert witness['identity']==sent['identity']
         updates=[e for e in pilot if e['event']=='optimizer_end' and e['pid']==sent['identity']['pid']
                  and e['monotonic_ns']<sent['controller_monotonic_ns'] and e['stats']['update_successful']==1]
-        assert len(updates)==2 and updates[-1]['monotonic_ns']<witness['monotonic_ns']
+        assert len(updates)==case.get('f2_ordinal',2) and updates[-1]['monotonic_ns']<witness['monotonic_ns']
         assert not any(e['event']=='checkpoint_save_start' and e['update_id']==updates[-1]['update_id'] for e in pilot)
         result['killed_uncheckpointed_update_id']=updates[-1]['update_id']
     elif scenario=='F1':

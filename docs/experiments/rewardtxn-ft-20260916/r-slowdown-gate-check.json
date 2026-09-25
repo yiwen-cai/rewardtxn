@@ -1,0 +1,96 @@
+{
+  "gate": "r-slowdown-fix-v2",
+  "formal_sample": false,
+  "passed": false,
+  "checks": {
+    "r_wall_seconds": {
+      "value": 2739.546551809064,
+      "limit": 2700,
+      "pass": false
+    },
+    "r_step_interval_slope": {
+      "value": 1.5657437725090313,
+      "limit": 1.0,
+      "pass": false
+    },
+    "r_recovery_full_hash_generations": {
+      "value": [
+        1
+      ],
+      "limit": 1,
+      "pass": true
+    },
+    "acceptance": {
+      "value": {
+        "R": "blocked_missing_final_native_state",
+        "A": "functional_verification_written"
+      },
+      "limit": "functional_verification_written",
+      "pass": false
+    },
+    "r_disk_peak_bytes": {
+      "value": 34729556478,
+      "limit": 48318382080,
+      "pass": true
+    }
+  },
+  "wall_seconds": {
+    "R": 2739.546551809064,
+    "A": 1149.4146285599563
+  },
+  "r_committed_steps": 30,
+  "r_step_intervals_seconds": [
+    54.156187051,
+    53.793816387,
+    58.809216552,
+    57.890761837,
+    61.576568332,
+    59.986447397,
+    63.152902141,
+    67.450804084,
+    63.435988402,
+    66.95702897,
+    69.244107986,
+    67.108147193,
+    69.723356424,
+    73.518267076,
+    76.287396045,
+    80.46215468,
+    76.383655561,
+    78.691934138,
+    83.366253107,
+    86.388111488,
+    83.076081805,
+    88.133707405,
+    89.430362944,
+    90.132121013,
+    91.633697481,
+    89.31588614,
+    93.34793062,
+    96.879256143
+  ],
+  "r_restart_gap_seconds": [
+    282.703421434
+  ],
+  "r_recovery_events": [
+    {
+      "content_hashed": [],
+      "event": "recovery_selected",
+      "generation": null,
+      "monotonic_ns": 780461828116117,
+      "pid": 688,
+      "seconds": 0.0005674810381606221
+    },
+    {
+      "content_hashed": [
+        "g-1ae0bdccd77f4048a0cf23473d2c6b99"
+      ],
+      "event": "recovery_selected",
+      "generation": "g-1ae0bdccd77f4048a0cf23473d2c6b99",
+      "monotonic_ns": 781403641712985,
+      "pid": 3009,
+      "seconds": 8.020030486979522
+    }
+  ],
+  "disk_samples": 201
+}

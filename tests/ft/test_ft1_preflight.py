@@ -13,6 +13,41 @@ from run_ft1 import REPO, smoke_config
 
 
 class Preparation(unittest.TestCase):
+    def test_engine_return_is_observed_at_physical_call(self):
+        from areal import workflow_context
+        from areal.workflow.rlvr import RLVRWorkflow
+        from areal.utils import strict_reward
+        from scripts.ft.rlvr_replay import CallReturnRLVR
+        from scripts.ft.areal_ft1 import install_observer
+        original_collect, original_rewards = RLVRWorkflow._collect_samples, RLVRWorkflow._compute_rewards
+        original_episode, original_worker = CallReturnRLVR.arun_episode, strict_reward._worker
+        context = workflow_context.get()
+
+        class Engine:
+            async def agenerate(self, request):
+                return SimpleNamespace(input_tokens=[11], output_tokens=[22],
+                                       output_versions=[0], stop_reason='stop')
+
+        async def collect(self, engine, request, prompt, data):
+            return await engine.agenerate(request)
+
+        try:
+            RLVRWorkflow._collect_samples = collect
+            with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {'FT1_OBSERVE': directory}):
+                workflow_context.set(SimpleNamespace(task_id=7, sample_idx=3))
+                install_observer()
+                asyncio.run(RLVRWorkflow._collect_samples(object(), Engine(),
+                            SimpleNamespace(rid='physical-request'), '', {'source_row_id': 23}))
+                events = [json.loads(line) for path in Path(directory).glob('*.jsonl')
+                          for line in path.read_text().splitlines()]
+                self.assertEqual([e['event'] for e in events], ['engine_generation_returned'])
+                self.assertEqual(events[0]['request_id'], 'physical-request')
+                self.assertTrue(events[0]['execution_id'])
+        finally:
+            RLVRWorkflow._collect_samples, RLVRWorkflow._compute_rewards = original_collect, original_rewards
+            CallReturnRLVR.arun_episode, strict_reward._worker = original_episode, original_worker
+            workflow_context.set(context)
+
     def test_config_preserves_common_async_and_sampling(self):
         from areal.api.cli_args import GRPOConfig, load_expr_config
         base = (REPO/'docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml').read_text()
@@ -53,7 +88,9 @@ class Preparation(unittest.TestCase):
         from areal.workflow.rlvr import RLVRWorkflow
         from areal.utils import strict_reward
         from scripts.ft.areal_ft1 import install_observer
-        original_rewards, original_worker = RLVRWorkflow._compute_rewards, strict_reward._worker
+        from scripts.ft.rlvr_replay import CallReturnRLVR
+        original_rewards, original_collect = RLVRWorkflow._compute_rewards, RLVRWorkflow._collect_samples
+        original_episode, original_worker = CallReturnRLVR.arun_episode, strict_reward._worker
         context = workflow_context.get()
         try:
             with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {'FT1_OBSERVE': directory}):
@@ -66,14 +103,18 @@ class Preparation(unittest.TestCase):
                 value = asyncio.run(workflow._compute_rewards(response, '2+2', {'source_row_id': 23, 'answer': '4'}))
                 self.assertEqual(value, 1)
                 events = [json.loads(line) for path in Path(directory).glob('*.jsonl') for line in path.read_text().splitlines()]
-                generated, started = sorted(events, key=lambda e: e['monotonic_ns'])
-                self.assertEqual([generated['event'], started['event']], ['generation_complete', 'score_execution_started'])
+                generated, started, returned = sorted(events, key=lambda e: e['monotonic_ns'])
+                self.assertEqual([generated['event'], started['event'], returned['event']],
+                                 ['generation_complete', 'score_execution_started', 'score_execution_returned'])
+                self.assertEqual(generated['observation_scope'], 'score_entry_not_physical_generation')
+                self.assertEqual(returned['execution_id'], started['execution_id'])
                 self.assertEqual((started['source_row_id'], started['task_id'], started['sample_idx']), (23, 7, 3))
                 self.assertNotEqual(started['pid'], os.getpid())
                 self.assertEqual(started['pid'], started['identity']['pid'])
                 self.assertFalse(Path(f"/proc/{started['pid']}").exists())
         finally:
-            RLVRWorkflow._compute_rewards, strict_reward._worker = original_rewards, original_worker
+            RLVRWorkflow._compute_rewards, RLVRWorkflow._collect_samples = original_rewards, original_collect
+            CallReturnRLVR.arun_episode, strict_reward._worker = original_episode, original_worker
             workflow_context.set(context)
 
 

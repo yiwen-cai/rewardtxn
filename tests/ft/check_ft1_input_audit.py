@@ -53,9 +53,9 @@ async def main():
     taken=[e for e in pilot if e['event']=='batch_taken']
     trained=[e for e in pilot if e['event']=='train_batch']
     applied=[e for e in pilot if e['event']=='optimizer_end']
-    no_fault=json.loads((root/'ft1-case.json').read_text())['scenario']=='no_fault'
+    case=json.loads((root/'ft1-case.json').read_text());no_fault=case['scenario']=='no_fault'
     assert len(taken)==len(trained)==len(applied)
-    if no_fault:assert len(applied)==10
+    if no_fault:assert len(applied)==case.get('steps',10)
     assert applied,'no optimizer input available for authority audit'
     cases=[];claimed=Counter();groups=defaultdict(set)
     for batch,train,update in zip(taken,trained,applied):

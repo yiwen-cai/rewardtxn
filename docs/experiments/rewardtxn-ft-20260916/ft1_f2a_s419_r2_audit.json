@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-09-22T11:54:43.529460+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f2a_s419_r2_audit",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r2",
+  "verdict": "No-Go",
+  "exitcode": "2",
+  "ft1_case": {
+    "arm": "A",
+    "seed": 419,
+    "devices": [
+      "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+      "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+      "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+      "GPU-57adc905-df4c-7006-349f-bfccb8f6f358"
+    ],
+    "scenario": "F2",
+    "steps": 10,
+    "formal_sample": false,
+    "recovery_observation_seconds": 900
+  },
+  "result_event": {
+    "classification": "technical_invalid",
+    "controller_monotonic_ns": 697914607547805,
+    "kind": "result",
+    "oracle_status": "not_evaluated",
+    "reason": "pending assignment lost its process; no reassignment"
+  },
+  "checks": {
+    "functional_verification": {
+      "present": false,
+      "pass": false
+    },
+    "load": {
+      "present": false,
+      "pass": false
+    },
+    "input_rescoring": {
+      "present": false,
+      "note": "no functional-verification/load artifacts to rescore against",
+      "pass": false
+    },
+    "technical_invalid_not_upgraded": true,
+    "historical_blockers_not_overwritten": true,
+    "a_r1_and_f2_r_untouched": true
+  },
+  "missing": [
+    "functional-verification.json",
+    "load.json",
+    "successful recovery/reassignment evidence"
+  ],
+  "do_not": [
+    "treat as FT1 arm pass",
+    "start F1 on this failure",
+    "rewrite technical_invalid as functional pass"
+  ],
+  "note": "angry_carver/rewardtxn-ft-pilot currently on GPU0-3 is a separate job, not this F2-A r2 evidence",
+  "hashes": {
+    "events.jsonl": "f963d031368072283af8b3adab1f7f728066b4c4b4e281ccc9b417dce6c22ce2",
+    "ft1-case.json": "8eacfb94a7562920114064b4ae68d43d398a3940729fac7bc72b03814ed955ad",
+    "input-sha256.json": "7992ff5dd952809aad9b8bc1b85461ed831878d636cdc7f995a7771ad9024885"
+  }
+}

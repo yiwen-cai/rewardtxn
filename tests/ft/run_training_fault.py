@@ -37,7 +37,9 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
         raise ValueError('unsupported fault scenario')
     if not re.fullmatch('[a-z0-9-]+', rid):
         raise ValueError('invalid fresh run name')
-    output = REPO / 'docs/experiments/rewardtxn-ft-20260916/p3_evidence' / rid
+    evidence_subdir = 'minimal_evidence' if ft1 is not None and ft1.get('minimal') is True else 'p3_evidence'
+    output = REPO / 'docs/experiments/rewardtxn-ft-20260916' / evidence_subdir / rid
+    output.parent.mkdir(exist_ok=True)
     output.mkdir()
     query = subprocess.check_output(['nvidia-smi', '--query-gpu=uuid,memory.used,utilization.gpu',
                                     '--format=csv,noheader,nounits'], text=True)
@@ -53,8 +55,12 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
     config = (REPO / 'docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml').read_text()
     config = config.replace('trial_name: native-trainer0', 'trial_name: r-fault-integration').replace('async_save: false', 'async_save: true')
     if ft1 is not None:
-        from run_ft1 import smoke_config
-        if ft1['scenario']=='no_fault':config=smoke_config(config,ft1['seed'])
+        if ft1.get('minimal') is True:
+            from run_ft_minimal import minimal_config
+            config = minimal_config(config, ft1['scenario'], ft1['seed'])
+        elif ft1['scenario']=='no_fault':
+            from run_ft1 import smoke_config
+            config=smoke_config(config,ft1['seed'])
         else:
             from run_ft1_faults import fault_config
             config=fault_config(config,ft1['scenario'],ft1['seed'])
@@ -74,13 +80,34 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
     if ft1 is not None:
         env['FT1_ARM']=ft1['arm']
         env['FT1_SCENARIO']=ft1['scenario']
+        env['FT1_STEPS']=str(ft1.get('steps',10))
+        if ft1.get('minimal') is True and not ft1.get('dcp_diag'):
+            env['FT_MINIMAL_BLOCKING_D2H']='1'
+        if ft1.get('minimal') is True and ft1.get('pointwise_autotune_off'):
+            env['FT_MINIMAL_AUTOTUNE_POINTWISE']='0'
+        if ft1.get('pinned_host_register'):
+            env['PYTORCH_ALLOC_CONF']='pinned_use_cuda_host_register:True,pinned_num_register_threads:8'
+        if ft1.get('dcp_diag'):
+            env['FT_DCP_DIAG_PATH']='/output/dcp-diag.jsonl'
+            env['FT_DCP_DIAG_PRESYNC']='1' if ft1.get('dcp_diag_presync') else '0'
+            if ft1.get('dcp_diag_blocking_copy'):
+                env['FT_DCP_DIAG_BLOCKING_COPY']='1'
+        if ft1.get('cuda_launch_blocking'):
+            env['CUDA_LAUNCH_BLOCKING']='1'
+        if 'f2_ordinal' in ft1:env['FT1_F2_ORDINAL']=str(ft1['f2_ordinal'])
         if ft1['scenario']!='no_fault':
             from scripts.ft.ft1_fault_hooks import contract as fault_contract
-            schedule=[fault_contract(ft1['scenario'])]
+            previous=os.environ.pop('FT1_F2_ORDINAL',None)
+            if 'f2_ordinal' in ft1:os.environ['FT1_F2_ORDINAL']=str(ft1['f2_ordinal'])
+            try:schedule=[fault_contract(ft1['scenario'])]
+            finally:
+                os.environ.pop('FT1_F2_ORDINAL',None)
+                if previous is not None:os.environ['FT1_F2_ORDINAL']=previous
     contract = {'argv':['/opt/.venv/bin/python','-m','areal.infra.launcher.local',
                          entry,'--config','/output/training.yaml'],
         'env':env, 'schedule':schedule if ft1 is not None else [{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
-        'timeouts':{'run':2400 if ft1 is not None else 1200,'handshake':10,'lease':20}}
+        # 30-step gate: FT-v1 section 6 caps a 30-step run at 45 minutes.
+        'timeouts':{'run':(2700 if ft1.get('steps',10)==30 else 2400) if ft1 is not None else 1200,'handshake':10,'lease':20}}
     write(output / 'controller-config.json', contract)
     inputs = ['training.yaml', 'controller-config.json']
     if ft1 is not None and ft1['scenario'] == 'F1': inputs.append('f1-target.json')
@@ -123,6 +150,11 @@ finally:
             'third_party/areal/areal/api/reward_api.py','third_party/areal/areal/utils/strict_reward.py',
             'third_party/areal/areal/infra/remote_inf_engine.py','third_party/areal/areal/infra/workflow_executor.py',
             'third_party/areal/areal/reward/gsm8k.py','third_party/areal/areal/reward/__init__.py'))
+        if ft1.get('minimal') is True:
+            files.extend(REPO/p for p in ('tests/ft/run_ft_minimal.py',
+                'tests/ft/check_ft_minimal_source.py', 'tests/ft/minimal_storage.py'))
+            if ft1.get('dcp_diag'):
+                files.append(REPO/'tests/ft/run_ft_dcp_diag.py')
     if ft1 is not None: files.extend((REPO/'third_party/areal/areal').rglob('*.py'))
     files = sorted(set(files))
     write(output / 'source-sha256.json', {str(p.relative_to(REPO)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
@@ -157,7 +189,7 @@ finally:
         write(output/'host_lease.json',{'nonce':nonce,'counter':0})
         thread.start()
         subprocess.run(['docker','start',cid],check=True,capture_output=True)
-        (output/'exitcode').write_text(subprocess.check_output(['docker','wait',cid],text=True,timeout=2600 if ft1 is not None else 1400).strip())
+        (output/'exitcode').write_text(subprocess.check_output(['docker','wait',cid],text=True,timeout=(2900 if ft1.get('steps',10)==30 else 2600) if ft1 is not None else 1400).strip())
     finally:
         stopped.set()
         if thread.ident: thread.join()

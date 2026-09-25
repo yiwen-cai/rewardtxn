@@ -1,0 +1,101 @@
+{
+  "observed_at": "2026-09-22T15:33:54.277256+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f2a_s419_r4_backfill_fv_load_audit",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4",
+  "verdict": "Go",
+  "verdict_scope": "engineering_non_formal_F2_A_acceptance",
+  "claim_boundary": [
+    "formal_sample=false; not formal matrix / freeze claim",
+    "classification=safe_discard is A-arm F2 expected (killed uncheckpointed target not retained); not R-arm correct_recovered",
+    "recovery_within_900_seconds=false and persistence null are consistent with discard path",
+    "does not auto-authorize F1; 科研助手 decides"
+  ],
+  "exitcode": "0",
+  "checks": {
+    "events_exitcode_immutable": true,
+    "fault_verification_unchanged": true,
+    "chain_rehashed_during_backfill": true,
+    "fv_present": true,
+    "fv_classification": "safe_discard",
+    "fv_safety_retained_chain": true,
+    "fv_training_continuation": true,
+    "fv_full_native_reload": true,
+    "fv_affected_work_recovered": false,
+    "input_verified": true,
+    "load_engine_exact_match": true,
+    "acceptance_result": "functional_verification_written",
+    "formal_sample": false,
+    "bot_said_correct_discard_but_actual": "safe_discard"
+  },
+  "artifacts": {
+    "functional-verification": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4/functional-verification.json",
+    "input-verification": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-input-ft1-f2-s419-a-r4/input-verification.json",
+    "load-verification": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-load-ft1-f2-s419-a-r4/load-verification.json",
+    "backfill_meta": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4/backfill/BACKFILL_META.json"
+  },
+  "fv_summary": {
+    "classification": "safe_discard",
+    "valid_hit": true,
+    "training_returned": true,
+    "successful_updates_after_fault": 9,
+    "affected_work_recovery": "target not retained",
+    "affected_work_recovered": false,
+    "retained_target_source_rows": [],
+    "safety_verified_for_retained_chain": true,
+    "training_continuation_verified": true,
+    "full_native_reload_verified": true,
+    "recovery_within_900_seconds": false,
+    "formal_rto_eligible": false
+  },
+  "input_summary": {
+    "verified": true,
+    "updates": 11,
+    "rows": 352,
+    "all_groups_have_eight_distinct_slots": true
+  },
+  "load_summary": {
+    "engine_exact_match": true,
+    "native_cursor_roundtrip_equal": true,
+    "terminal_components_equal": {
+      "lr_scheduler": true,
+      "model": true,
+      "optimizer": true,
+      "rng_state": true
+    },
+    "last_step_info": {
+      "epoch": 0,
+      "epoch_step": 9,
+      "global_step": 9,
+      "steps_per_epoch": 1593
+    }
+  },
+  "backfill": {
+    "kind": "backfill",
+    "scope": "input→load→finalize",
+    "created_local": "2026-09-22 15:04:40 +0800",
+    "immutable_sha256": {
+      "events.jsonl": "eeee9da34dc92f9aa8142565156f993741fb532a2c06eb48b86c93a3264fde4e",
+      "exitcode": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "notes": "USER/LOGNAME=cpu fix in run_ft1_acceptance.py; prior input blocked on getpwuid 1028",
+    "resume": "load→finalize",
+    "result": "functional_verification_written",
+    "memory_fix": "--memory=32g",
+    "artifacts": {
+      "functional-verification": "functional-verification.json",
+      "input": "../ft1-input-ft1-f2-s419-a-r4/input-verification.json",
+      "load": "../ft1-load-ft1-f2-s419-a-r4/load-verification.json",
+      "acceptance-status": "acceptance-status.json"
+    },
+    "immutable_match_after": true,
+    "env_fix": "USER=LOGNAME=cpu"
+  },
+  "r2_r3_preserved": true,
+  "hashes": {
+    "events.jsonl": "eeee9da34dc92f9aa8142565156f993741fb532a2c06eb48b86c93a3264fde4e",
+    "functional-verification.json": "c8428c6fa71f983ab2bcefb8b246b7a1a2ae27a490f96a87a1802ff403f46d63",
+    "input-verification.json": "b3b971f2bfffed06aed89895e73310d2d46bf2e1bd0718c1487a88a17a636dfc",
+    "load-verification.json": "cd66aa331e390c14d310a9475a7b07f077443ab92857934eb5e1ba5baa5903a9"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "observed_at": "2026-09-22T15:02:10.283966+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f2a_s419_r4_audit",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4",
+  "verdict": "No-Go",
+  "exitcode": "0",
+  "ft1_case": {
+    "arm": "A",
+    "seed": 419,
+    "devices": [
+      "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+      "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+      "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+      "GPU-57adc905-df4c-7006-349f-bfccb8f6f358"
+    ],
+    "scenario": "F2",
+    "steps": 10,
+    "formal_sample": false,
+    "recovery_observation_seconds": 900
+  },
+  "result_event": {
+    "classification": "execution_complete",
+    "oracle_status": "not_evaluated",
+    "launcher_exit_code": 1
+  },
+  "progress_vs_r3": {
+    "predecessor_files_has_metadata": true,
+    "recover_checkpoint_files": [
+      ".metadata",
+      "__0_0.distcp",
+      "common.pt",
+      "metadata.json"
+    ],
+    "final_native_state_present": true,
+    "fault_training_returned": true,
+    "chain_verified": true
+  },
+  "fault_ready": {
+    "predecessor_files": [
+      ".metadata",
+      "__0_0.distcp",
+      "common.pt",
+      "metadata.json"
+    ],
+    "predecessor_checkpoint": "/output/areal/checkpoints/caiyiwen/rewardtxn-ft-pilot/r-fault-integration/default/recover_checkpoint",
+    "evidence": {
+      "phase": "post_optimizer_pre_save",
+      "successful_ordinal": 2
+    }
+  },
+  "fault_verification": {
+    "scenario": "F2",
+    "arm": "A",
+    "formal_sample": false,
+    "scope": "kernel fault target, semantic cut and native continuation; not reward authority or full retained-chain oracle",
+    "killed_uncheckpointed_update_id": "b17a1b67ea09419cac1fb9d3651dfd60",
+    "valid_hit": true,
+    "classification": "training_returned",
+    "signals": 1,
+    "physical_optimizer_successes": 11,
+    "successful_updates_after_fault": 9,
+    "native_run_ids": [
+      "0",
+      "1"
+    ],
+    "job_receipts": 4,
+    "all_jobs_cleaned": true,
+    "training_returned": true,
+    "affected_work_recovery": "pending independent retained-input/checkpoint audit"
+  },
+  "chain_verification": {
+    "verified": true,
+    "arm": "A",
+    "final_checkpoint_retains_step": 9,
+    "retained_updates": 10,
+    "discarded_physical_updates": 1,
+    "scope": "observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately"
+  },
+  "acceptance_status": {
+    "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4",
+    "arm": "A",
+    "scenario": "F2",
+    "started_local": "2026-09-22 14:52:34 +0800",
+    "immutable": [
+      "events.jsonl",
+      "exitcode"
+    ],
+    "steps": {
+      "check_ft1_fault": {
+        "returncode": 0,
+        "stdout_tail": "t target, semantic cut and native continuation; not reward authority or full retained-chain oracle\", \"killed_uncheckpointed_update_id\": \"b17a1b67ea09419cac1fb9d3651dfd60\", \"valid_hit\": true, \"classification\": \"training_returned\", \"signals\": 1, \"physical_optimizer_successes\": 11, \"successful_updates_after_fault\": 9, \"native_run_ids\": [\"0\", \"1\"], \"job_receipts\": 4, \"all_jobs_cleaned\": true, \"training_returned\": true, \"affected_work_recovery\": \"pending independent retained-input/checkpoint audit\"}\n",
+        "stderr_tail": "",
+        "path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4/fault-verification.json"
+      },
+      "check_ft1_chain": {
+        "returncode": 0,
+        "stdout_tail": "ed98489130c46a8f37\", \"3d80dbc03f42437b884b5d8a9fb531ab\", \"4be0a2e7a2344ae29270abb7cf5219a2\", \"64f6d41a1b2d436c9a4e997ba92d3ba9\", \"711c041c8f4b40f9842502076c69eb71\", \"b7a9bad14f3f4e50bb3a6d16168267d8\"], \"discarded_physical_updates\": 1, \"retained_source_rows\": [720, 1332, 1412, 1640, 1927, 1957, 2474, 2511, 2618, 2653, 2685, 2898, 3234, 3323, 3412, 3741, 4047, 4075, 4170, 4247, 4500, 4522, 4597, 4872, 5047, 5105, 5145, 5184, 5282, 5360, 5402, 5407, 5518, 5610, 5674, 5740, 5883, 6001, 6007, 6014]}\n",
+        "stderr_tail": "",
+        "path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r4/chain-verification.json"
+      },
+      "input": {
+        "kind": "input",
+        "exitcode": 1,
+        "output": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-input-ft1-f2-s419-a-r4"
+      }
+    },
+    "result": "blocked_at_input"
+  },
+  "input_step": {
+    "dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-input-ft1-f2-s419-a-r4",
+    "exitcode": "1",
+    "error_summary": "KeyError getpwuid uid not found: 1028 during areal import in input verify container",
+    "verify_log_tail": "r import (\n  File \"/workspace/third_party/areal/areal/infra/utils/launcher.py\", line 13, in <module>\n    from areal.utils import logging, name_resolve, names\n  File \"/workspace/third_party/areal/areal/utils/names.py\", line 10, in <module>\n    USER_NAMESPACE = getpass.getuser()\n                     ^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/getpass.py\", line 169, in getuser\n    return pwd.getpwuid(os.getuid())[0]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nKeyError: 'getpwuid(): uid not found: 1028'\n"
+  },
+  "checks": {
+    "functional_verification": {
+      "present": false,
+      "pass": false
+    },
+    "load": {
+      "present": false,
+      "pass": false
+    },
+    "input_rescoring": {
+      "attempted": true,
+      "pass": false
+    },
+    "r2_r3_preserved": true,
+    "formal_sample": false,
+    "exit0_not_upgraded": true
+  },
+  "missing": [
+    "functional-verification.json",
+    "load.json",
+    "successful input rescoring"
+  ],
+  "do_not": [
+    "treat as F2-A arm pass",
+    "start F1",
+    "claim formal matrix",
+    "overwrite r2/r3"
+  ],
+  "hashes": {
+    "events.jsonl": "eeee9da34dc92f9aa8142565156f993741fb532a2c06eb48b86c93a3264fde4e",
+    "fault-verification.json": "a4e30723b21d879d02d67f7c70da9fef5ac48406aef5ae82d0732869e8cb6cb9",
+    "chain-verification.json": "afd757aebfbe46032b878d98106105696a4350c0ebb0727c51fc69e9d345d70c",
+    "acceptance-status.json": "488c82bccfd7b9e5cef47500541466a9a083b890315584d26157636a4e5bb9aa"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "observed_at": "2026-09-22T14:26:58.931614+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f2a_s419_r3_audit",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r3",
+  "verdict": "No-Go",
+  "exitcode": "0",
+  "ft1_case": {
+    "arm": "A",
+    "seed": 419,
+    "devices": [
+      "GPU-e3a46342-07b6-3c91-ce7f-833f0201a336",
+      "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+      "GPU-57adc905-df4c-7006-349f-bfccb8f6f358",
+      "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+    ],
+    "scenario": "F2",
+    "steps": 10,
+    "formal_sample": false,
+    "recovery_observation_seconds": 900
+  },
+  "result_event": {
+    "classification": "execution_complete",
+    "controller_monotonic_ns": 706568529869315,
+    "kind": "result",
+    "oracle_status": "not_evaluated"
+  },
+  "method_observations": [
+    {
+      "controller_monotonic_ns": 706568529363320,
+      "kind": "method_observation",
+      "launcher_exit_code": 1
+    }
+  ],
+  "event_kind_counts": {
+    "controller_started": 1,
+    "launcher_created": 1,
+    "launcher_registered": 1,
+    "descendant_registered": 2,
+    "injection_assignment": 2,
+    "ready": 1,
+    "armed": 1,
+    "signal_intent": 1,
+    "signal_sent": 1,
+    "process_exit_observed": 1,
+    "method_observation": 1,
+    "result": 1
+  },
+  "observer_ft1_files": 109,
+  "checks": {
+    "functional_verification": {
+      "present": false,
+      "pass": false
+    },
+    "load": {
+      "present": false,
+      "pass": false
+    },
+    "input_rescoring": {
+      "present": false,
+      "pass": false,
+      "note": "no FV/load to rescore"
+    },
+    "exit0_not_upgraded_to_pass": true,
+    "oracle_not_evaluated": true,
+    "r2_preserved": true,
+    "input_sha_unchanged_vs_r2": true,
+    "formal_sample": false
+  },
+  "missing": [
+    "functional-verification.json",
+    "load.json",
+    "oracle evaluation / recovery acceptance evidence"
+  ],
+  "do_not": [
+    "treat exitcode=0 as FT1 arm pass",
+    "start F1 on this run",
+    "overwrite r2 technical_invalid evidence"
+  ],
+  "hashes": {
+    "events.jsonl": "4fd58b964b44fa1ebd5e7f7b91fcaf2ad0a47ae1191a0c5afc95d7d760af9b82",
+    "ft1-case.json": "c03784551a86b7526068953582fbfb3412ed731e5d9ac83d668c94ce015c8e02",
+    "input-sha256.json": "7992ff5dd952809aad9b8bc1b85461ed831878d636cdc7f995a7771ad9024885"
+  }
+}

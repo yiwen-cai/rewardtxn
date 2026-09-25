@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import sys
 import time
+import uuid
 
 
 TRAINER_IDENTITY = None
@@ -21,22 +22,81 @@ def install_observer():
     from areal import workflow_context
     from areal.workflow.rlvr import RLVRWorkflow
     from areal.utils import strict_reward
+    from scripts.ft.areal_pilot_hooks import generation_origin
+    from scripts.ft.rlvr_replay import CallReturnRLVR
     from scripts.ft.descendants import snapshot
+
+    def physical_engine(engine, task_data):
+        class ObservedEngine:
+            def __getattr__(self, name):
+                return getattr(engine, name)
+
+            async def agenerate(self, request):
+                response = await engine.agenerate(request)
+                ctx = workflow_context.get()
+                execution_id = uuid.uuid4().hex
+                observe('engine_generation_returned', execution_id=execution_id,
+                    request_id=request.rid, source_row_id=task_data['source_row_id'],
+                    task_id=ctx.task_id, sample_idx=ctx.sample_idx,
+                    input_tokens=response.input_tokens, output_tokens=response.output_tokens,
+                    output_versions=response.output_versions, stop_reason=response.stop_reason)
+                generation_origin.set({'generation_execution_id': execution_id,
+                                       'origin_request_id': request.rid})
+                return response
+        return ObservedEngine()
+
+    collect = RLVRWorkflow._collect_samples
+    @functools.wraps(collect)
+    async def observed_collect(self, engine, req, prompt_str, task_data):
+        if isinstance(self, CallReturnRLVR):
+            return await collect(self, engine, req, prompt_str, task_data)
+        token = generation_origin.set(None)
+        try:
+            return await collect(self, physical_engine(engine, task_data), req, prompt_str, task_data)
+        finally:
+            generation_origin.reset(token)
+    RLVRWorkflow._collect_samples = observed_collect
+
+    run_episode = CallReturnRLVR.arun_episode
+    @functools.wraps(run_episode)
+    async def observed_r_episode(self, engine, data):
+        token = generation_origin.set(None)
+        try:
+            return await run_episode(self, physical_engine(engine, data), data)
+        finally:
+            generation_origin.reset(token)
+    CallReturnRLVR.arun_episode = observed_r_episode
+
     original=RLVRWorkflow._compute_rewards
     @functools.wraps(original)
     async def rewards(self,resp,prompt_str,task_data):
         ctx=workflow_context.get()
         observe('generation_complete',source_row_id=task_data['source_row_id'],
             task_id=ctx.task_id,sample_idx=ctx.sample_idx,input_tokens=resp.input_tokens,
-            output_tokens=resp.output_tokens,output_versions=resp.output_versions)
+            output_tokens=resp.output_tokens,output_versions=resp.output_versions,
+            observation_scope='score_entry_not_physical_generation')
         return await original(self,resp,prompt_str,task_data)
     RLVRWorkflow._compute_rewards=rewards
     worker=strict_reward._worker
     def scoring(channel,scorer,args,kwargs):
         ctx=workflow_context.get()
+        execution_id=uuid.uuid4().hex
+        fields={'source_row_id':kwargs['source_row_id'],'task_id':ctx.task_id,
+                'sample_idx':ctx.sample_idx,'execution_id':execution_id,
+                'sample_attempt':kwargs.get('pilot_observation',{}).get('sample_attempt'),
+                'reward_invocation_nonce':kwargs.get('_r_reward_request',{}).get('invocation_nonce')}
         observe('score_execution_started',source_row_id=kwargs['source_row_id'],
-            task_id=ctx.task_id,sample_idx=ctx.sample_idx,identity=snapshot(os.getpid()))
-        return worker(channel,scorer,args,kwargs)
+            task_id=ctx.task_id,sample_idx=ctx.sample_idx,identity=snapshot(os.getpid()),
+            execution_id=execution_id)
+        def measured(*call_args, **call_kwargs):
+            try:
+                value=scorer(*call_args, **call_kwargs)
+            except BaseException as exc:
+                observe('score_execution_failed', **fields, error=type(exc).__name__)
+                raise
+            observe('score_execution_returned', **fields, score=getattr(value,'score',value))
+            return value
+        return worker(channel,measured,args,kwargs)
     strict_reward._worker=scoring
 
 
@@ -66,6 +126,9 @@ def install_load_observer():
 
 
 def main(args):
+    if os.environ.get('FT_MINIMAL_AUTOTUNE_POINTWISE') == '0':
+        from torch._inductor import config as inductor_config
+        inductor_config.triton.autotune_pointwise = False
     from areal import PPOTrainer
     from areal.api.cli_args import GRPOConfig,load_expr_config
     from areal.utils.seeding import set_random_seed,get_seed
@@ -80,7 +143,8 @@ def main(args):
     arm=os.environ['FT1_ARM'];root=Path(config.cluster.fileroot).parent
     scenario=os.environ.get('FT1_SCENARIO','no_fault')
     if scenario not in ('no_fault','F1','F2','F4'):raise RuntimeError('unmapped FT1 scenario')
-    if arm not in ('A','R') or config.total_train_steps!=10 or config.recover.retries!=(0 if scenario=='no_fault' else 1):
+    steps=int(os.environ.get('FT1_STEPS','10'))
+    if arm not in ('A','R') or steps not in (10,30) or config.total_train_steps!=steps or config.recover.retries!=(0 if scenario=='no_fault' else 1):
         raise RuntimeError('unsupported FT1 smoke configuration')
     if not config.actor.megatron.async_save or config.gconfig.n_samples!=8 or config.train_dataset.batch_size!=4:
         raise RuntimeError('FT1 requires common async DCP K8/U4')
@@ -98,7 +162,8 @@ def main(args):
         client=install_fault(scenario,sys.modules[__name__])
         install_load_observer()
     observe('configured',arm=arm,scenario=scenario,config=dataclasses.asdict(config),effective_seed=get_seed(),
-            verifier_sha256=verifier_fingerprint())
+            verifier_sha256=verifier_fingerprint(),
+            autotune_pointwise=os.environ.get('FT_MINIMAL_AUTOTUNE_POINTWISE'))
     try:
         dataset=load_pilot_dataset(config.train_dataset.path)
         with PPOTrainer(config,train_dataset=dataset,valid_dataset=None) as trainer:

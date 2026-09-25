@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 import time
 from check_ft1_input_audit import batch_rows,fingerprint,rows
+from offline_generation import check_files,pinned_generations
 
 
 def read(path):return json.loads(path.read_text())
@@ -21,6 +22,7 @@ def verify(root):
     started=time.monotonic();root=Path(root)
     case=read(root/'ft1-case.json');arm=case['arm']
     no_fault=case['scenario']=='no_fault'
+    steps=case.get('steps',10);n_samples=steps*32;n_groups=steps*4
     repo=Path(__file__).resolve().parents[2]
     for name,digest in read(root/'source-sha256.json').items():
         archived=root/'source-archive'/name
@@ -30,7 +32,7 @@ def verify(root):
     batches=[e for e in pilot if e['event']=='batch_taken'];trained=[e for e in pilot if e['event']=='train_batch']
     applied=[e for e in pilot if e['event']=='optimizer_end']
     assert len(batches)==len(trained)==len(applied)
-    if no_fault:assert len(applied)==10
+    if no_fault:assert len(applied)==steps
     for b,t,a in zip(batches,trained,applied):
         assert b['monotonic_ns']<t['monotonic_ns']<a['monotonic_ns'] and t['update_id']==a['update_id']
         assert Counter(k for k,r in batch_rows(b['batches']))==Counter(k for k,r in batch_rows(t['batches'],training=True))
@@ -45,7 +47,7 @@ def verify(root):
                 p=actual[info['path']]
                 assert not p.is_symlink() and p.stat().st_size==info['size'] and sha(p)==info['sha256']
                 size+=info['size'];files_checked+=1
-        assert read(root/Path(record['metadata']).relative_to('/output')/'step_info.json')['global_step']==9
+        assert read(root/Path(record['metadata']).relative_to('/output')/'step_info.json')['global_step']==steps-1
         retained=[]
         incarnations=list(dict.fromkeys(e['pid'] for e in applied))
         for pid in incarnations:
@@ -61,7 +63,7 @@ def verify(root):
                 retained=retained[:base_step]
             else:retained=[]
             retained.extend(local)
-        assert len(retained)==10
+        assert len(retained)==steps
         actual_by_update={t['update_id']:b for b,t in zip(batches,trained)}
         retained_slots=[]
         for update in retained:
@@ -69,14 +71,15 @@ def verify(root):
                 sources=batch['pilot_source_row_id'];slots=batch['pilot_sample_idx']
                 assert len(sources)==len(slots)==batch['batch_size']
                 retained_slots.extend(zip(sources,slots))
-        assert len(retained_slots)==len(set(retained_slots))==320
+        assert len(retained_slots)==len(set(retained_slots))==n_samples
         source_rows={row for row,idx in retained_slots}
-        assert len(source_rows)==40
-        extra={'final_checkpoint_retains_step':9,'retained_updates':10,
+        assert len(source_rows)==n_groups
+        extra={'final_checkpoint_retains_step':steps-1,'retained_updates':steps,
                'retained_physical_update_ids':[e['update_id'] for e in retained],
                'discarded_physical_updates':len(applied)-len(retained),'retained_source_rows':sorted(source_rows)}
     else:
         method=root/'rewardtxn';head=read(method/'state/control.json')['head'];chain=[]
+        pins=pinned_generations(method/'state');pruned_files=0
         while head is not None:
             directory=method/'state/generations'/head['generation']
             token=read(directory/'token.json');manifest=read(directory/'manifest.json');intent=read(directory/'intent.json')
@@ -85,15 +88,13 @@ def verify(root):
             assert token['parent']==manifest['parent']==intent['parent']
             assert manifest['updates']==intent['updates'] and len(manifest['updates'])==1
             checkpoint=directory/'checkpoint'
-            assert not any(p.is_symlink() for p in checkpoint.rglob('*'))
-            files={str(p.relative_to(checkpoint)):p for p in checkpoint.rglob('*') if p.is_file()}
-            assert set(files)==set(manifest['files'])
-            assert {'native/.metadata','native-state.json','policy.json'}<=set(files)
-            for name,info in manifest['files'].items():
-                assert files[name].stat().st_size==info['size'] and sha(files[name])==info['sha256'],name
-                size+=info['size'];files_checked+=1
+            assert {'native/.metadata','native-state.json','policy.json'}<={str(p.relative_to(checkpoint)) for p in checkpoint.rglob('*') if p.is_file()}
+            hashed,counted,dropped=check_files(directory,token,manifest,sha,pinned=pins)
+            size+=hashed;files_checked+=counted;pruned_files+=dropped
             chain.append((directory,manifest));head=token['parent']
-        chain.reverse();assert len(chain)==10
+        chain.reverse();assert len(chain)==steps
+        assert not (method/'state/generations'/chain[-1][0].name/'pruned.json').exists(),'head pruned'
+        assert set(pins)<={d.name for d,m in chain},'pin outside retained chain'
         log=rows(method/'events.jsonl');commits=[e for e in log if e['event']=='committed']
         assert [e['generation'] for e in commits]==[d.name for d,m in chain]
         retained=[]
@@ -135,8 +136,9 @@ def verify(root):
             consumed.update(samples)
             data=manifest['data'];assert set(data['consumed'])==consumed and len(data['consumed'])==len(consumed)
             assert consumed<=set(data['drawn']) and {p['sample'] for p in data['pending']}==set(data['drawn'])-consumed
-        assert len(consumed)==320 and len(source_rows)==40
-        extra={'retained_generations':10,'unique_consumed_samples':320,'unique_source_rows':40,'retained_source_rows':sorted(source_rows)}
+        assert len(consumed)==n_samples and len(source_rows)==n_groups
+        extra={'retained_generations':steps,'unique_consumed_samples':n_samples,'unique_source_rows':n_groups,'retained_source_rows':sorted(source_rows),
+               'pruned_files':pruned_files,'pins':pins}
     return {'verified':True,'arm':arm,'scope':'observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately',
             'checkpoint_bytes_hashed':size,'files_hashed':files_checked,'wall_seconds':time.monotonic()-started,**extra}
 

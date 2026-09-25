@@ -5,6 +5,7 @@ No observation is read back into training or recovery. Not an oracle or R.
 from __future__ import annotations
 
 import atexit
+from contextvars import ContextVar
 import dataclasses
 import functools
 import hashlib
@@ -19,7 +20,9 @@ import uuid
 from areal import workflow_context
 from areal.workflow.rlvr import RLVRWorkflow
 
-IDENTITY_KEYS = ("pilot_source_row_id", "pilot_task_id", "pilot_sample_idx")
+IDENTITY_KEYS = ("pilot_source_row_id", "pilot_task_id", "pilot_sample_idx", "pilot_sample_attempt")
+generation_origin = ContextVar("ft1_generation_origin", default=None)
+_sample_attempt = ContextVar("ft1_sample_attempt", default=None)
 _writer = None
 _installed = False
 
@@ -133,11 +136,27 @@ observed_gsm8k_reward.strict_scoring = True
 
 
 class ObservedRLVRWorkflow(RLVRWorkflow):
+    async def arun_episode(self, engine, data):
+        import torch
+        token = _sample_attempt.set(None)
+        try:
+            result = await super().arun_episode(engine, data)
+            attempt = _sample_attempt.get()
+            if attempt is None:
+                raise RuntimeError("missing observed sample attempt")
+            result["pilot_sample_attempt"] = torch.tensor([attempt], dtype=torch.int64)
+            return result
+        finally:
+            _sample_attempt.reset(token)
+
     async def _compute_rewards(self, resp, prompt_str, task_data):
         ctx = workflow_context.get()
+        attempt = uuid.uuid4().int & ((1 << 63) - 1)
+        _sample_attempt.set(attempt)
+        origin = generation_origin.get() or {}
         observation = {"source_row_id": task_data["source_row_id"],
                        "task_id": ctx.task_id, "sample_idx": ctx.sample_idx,
-                       "sample_attempt": uuid.uuid4().hex}
+                       "sample_attempt": attempt, **origin}
         emit("generation_done", **observation, source_role="rollout", messages=task_data["messages"],
              answer=task_data["answer"], input_tokens=resp.input_tokens,
              output_tokens=resp.output_tokens, output_logprobs=resp.output_logprobs,
@@ -192,11 +211,13 @@ def install_hooks():
                 raise TypeError("pilot requires native integer WorkflowContext.task_id")
             if result["input_ids"].shape[0] != self.group_size:
                 raise RuntimeError("pilot observed incomplete group")
-            for key, values in zip(IDENTITY_KEYS, (
+            for key, values in zip(IDENTITY_KEYS[:3], (
                 [data["source_row_id"]] * self.group_size,
                 [ctx.task_id] * self.group_size, list(range(self.group_size)),
             )):
                 result[key] = torch.tensor(values, dtype=torch.int64)
+            if result["pilot_sample_attempt"].shape != (self.group_size,) or len(set(result["pilot_sample_attempt"].tolist())) != self.group_size:
+                raise RuntimeError("pilot sample attempt identity missing or repeated")
             emit("group_admitted", source_role="rollout", source_row_id=data["source_row_id"], task_id=ctx.task_id,
                  sample_indices=list(range(self.group_size)))
         return result

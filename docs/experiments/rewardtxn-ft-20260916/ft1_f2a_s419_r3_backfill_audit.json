@@ -1,0 +1,137 @@
+{
+  "observed_at": "2026-09-22T14:36:32.024765+08:00",
+  "reviewer": "结果审计/independent",
+  "kind": "ft1_f2a_s419_r3_backfill_audit",
+  "evidence_dir": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r3",
+  "verdict": "No-Go",
+  "prior_r3_verdict": "No-Go",
+  "exitcode": "0",
+  "immutable_check": {
+    "events_sha256": "4fd58b964b44fa1ebd5e7f7b91fcaf2ad0a47ae1191a0c5afc95d7d760af9b82",
+    "matches_prior_audit": true,
+    "exitcode_unchanged": true
+  },
+  "backfill": {
+    "meta": {
+      "kind": "backfill",
+      "created_local": "2026-09-22 14:31:54 +0800",
+      "source_evidence": "ft1-f2-s419-a-r3",
+      "immutable": [
+        "events.jsonl",
+        "exitcode",
+        "cleanup.json",
+        "inspect-final.json",
+        "launcher.log"
+      ],
+      "notes": "post-hoc check_ft1_fault only; events/exitcode untouched",
+      "check_ft1_fault": "done",
+      "fault_verification": "backfill/fault-verification.json",
+      "valid_hit": true,
+      "training_returned": false,
+      "successful_updates_after_fault": 0,
+      "blocked": [
+        "check_ft1_chain",
+        "check_ft1_input_audit",
+        "check_ft1_load",
+        "finalize_ft1_fault"
+      ],
+      "blocker": "native recover after F2 kill failed: default/recover_checkpoint missing .metadata/metadata.json (only __0_0.distcp+common.pt); no final_checkpoint observer event; no final-native-state.json; launcher.log JobException on recover load",
+      "events_exitcode_untouched": true,
+      "launcher_hook": "tests/ft/run_training_fault.py calls run_ft1_acceptance.accept after FT1 cleanup",
+      "acceptance_module": "tests/ft/run_ft1_acceptance.py",
+      "accept_dry_run_result": "see backfill/acceptance-status.json"
+    },
+    "blocked": {
+      "status": "backfill_incomplete",
+      "result": "blocked_missing_final_native_state",
+      "completed": [
+        "check_ft1_fault"
+      ],
+      "not_run": [
+        "check_ft1_chain",
+        "check_ft1_input_audit",
+        "check_ft1_load",
+        "finalize_ft1_fault"
+      ],
+      "reason": "A-arm F2 recover failed after valid hit: default/recover_checkpoint missing .metadata/metadata.json; no final-native-state.json; training_returned=false; successful_updates_after_fault=0",
+      "artifacts": {
+        "fault_verification": "backfill/fault-verification.json",
+        "acceptance_status": "backfill/acceptance-status.json",
+        "meta": "backfill/BACKFILL_META.json"
+      },
+      "immutable_untouched": [
+        "events.jsonl",
+        "exitcode"
+      ],
+      "launcher_hook": "tests/ft/run_training_fault.py -> run_ft1_acceptance.accept"
+    },
+    "acceptance_status": {
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r3",
+      "arm": "A",
+      "scenario": "F2",
+      "started_local": "2026-09-22 14:35:51 +0800",
+      "immutable": [
+        "events.jsonl",
+        "exitcode"
+      ],
+      "steps": {
+        "check_ft1_fault": {
+          "returncode": 0,
+          "stdout_tail": " target, semantic cut and native continuation; not reward authority or full retained-chain oracle\", \"killed_uncheckpointed_update_id\": \"3ec7a600ba724c54bb22ab097f248cab\", \"valid_hit\": true, \"classification\": \"safe_stop_or_error\", \"signals\": 1, \"physical_optimizer_successes\": 2, \"successful_updates_after_fault\": 0, \"native_run_ids\": [\"0\", \"1\"], \"job_receipts\": 4, \"all_jobs_cleaned\": true, \"training_returned\": false, \"affected_work_recovery\": \"pending independent retained-input/checkpoint audit\"}\n",
+          "stderr_tail": "",
+          "path": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/p3_evidence/ft1-f2-s419-a-r3/fault-verification.json"
+        }
+      },
+      "result": "blocked_missing_final_native_state",
+      "blocker": "final-native-state.json missing; typically native recover failed after fault. Cannot run chain/load/finalize without inventing terminal state."
+    },
+    "fault_verification": {
+      "scenario": "F2",
+      "arm": "A",
+      "formal_sample": false,
+      "scope": "kernel fault target, semantic cut and native continuation; not reward authority or full retained-chain oracle",
+      "killed_uncheckpointed_update_id": "3ec7a600ba724c54bb22ab097f248cab",
+      "valid_hit": true,
+      "classification": "safe_stop_or_error",
+      "signals": 1,
+      "physical_optimizer_successes": 2,
+      "successful_updates_after_fault": 0,
+      "native_run_ids": [
+        "0",
+        "1"
+      ],
+      "job_receipts": 4,
+      "all_jobs_cleaned": true,
+      "training_returned": false,
+      "affected_work_recovery": "pending independent retained-input/checkpoint audit"
+    },
+    "root_fault_verification_present": false
+  },
+  "checks": {
+    "functional_verification": {
+      "present": false,
+      "pass": false
+    },
+    "load": {
+      "present": false,
+      "pass": false
+    },
+    "valid_hit_alone_not_sufficient": true,
+    "training_returned": false,
+    "successful_updates_after_fault": 0,
+    "recover_checkpoint_complete": false,
+    "note": "default/recover_checkpoint has __0_0.distcp+common.pt only; no .metadata; no final-native-state.json"
+  },
+  "missing": [
+    "functional-verification.json",
+    "load.json",
+    "final-native-state.json",
+    "recover .metadata"
+  ],
+  "do_not": [
+    "upgrade exit0 or valid_hit to arm pass",
+    "invent final-native-state / FV",
+    "start F1",
+    "rewrite events/exitcode"
+  ]
+}

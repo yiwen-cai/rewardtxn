@@ -1,0 +1,12 @@
+{
+  "created_local": "2026-09-24T13:27:02.184798+08:00",
+  "initial_status": "waiting_for_four_frozen_gpus",
+  "pid_at_launch": 883992,
+  "exec_session_id": 49458,
+  "freeze": "FORMAL_FREEZE_20260924.json",
+  "freeze_sha256": "c0e386e88dda06fcb7231506636506af246cb3ffcfe03718de591e69b280343b",
+  "max_gpu_wait_seconds": 43200,
+  "first_pair": "formal-f2-p01-s250-20260924",
+  "first_pair_started": false,
+  "reason": "GPU5 external compute process occupied 74103 MiB; require fresh four-GPU idle snapshot before exec; no formal run directory exists at record creation"
+}

@@ -1,6 +1,84 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
+> **2026-09-25 更新（覆盖下方 09-23 快照的"正式矩阵样本数 0"等表述）**：已转入最小方案（每 run 10 次更新；30 步 R 变慢问题本身未在此验证），正式冻结 2026-09-24 13:14 后 13/13 对全部 `formal_pair_verified`：F2 10 对 R 全部 `correct_recovered`（32/32）、A 全部 `safe_discard`（0/32）；无故障 3 对均通过；p02 一次技术无效已按规则重做。汇总与数字见 [PROGRESS.md](PROGRESS.md) 顶部。下一步：写正式结果报告并脚本化统计、提交本分支改动。
+
+> 2026-09-24 更新：用户要求删除旧 FT1 原始试跑数据并以最小空间执行新方案。五个旧 `*_evidence/` 目录中的未跟踪原始文件已清理，仅保留已跟踪的小型摘要；见 [清理记录](docs/experiments/rewardtxn-ft-20260916/FT1_RAW_EVIDENCE_CLEANUP_20260924.json)。旧报告与判定仍是历史记录，原检查点已无法在本机重新加载复验。新执行范围及逐 run 存储规则见 [最小方案](docs/experiments/rewardtxn-ft-20260916/FT_MINIMAL_AREAL_PROPOSAL_20260923.md)；下列 2026-09-23 快照中的旧 FT1 原始证据保留要求不再适用，其他历史判定不变。
+
+- **时间**：2026-09-23 晚（本机 H100，`/public/home/caiyiwen/rewardtxn`）
+- **分支**：`handoff/20260923-ft1`，HEAD `9884bbf`；**本日全部改动尚未提交**（见文末"Git 状态"）
+- **正式矩阵样本数：0**。以下都是工程试跑或 pilot（`formal_sample=false`），不得宣称正式通过。
+
+## 一句话现状
+FT1 配对审计已完成，F1 s421 为工程 Go。随后发现 **R 臂每步线性变慢**，30 步 run 会超过 FT-v1 §6 的 45 分钟上限。第一轮修复（v2）已实现并通过 CPU 验证，但 **30 步 F2 门控不通过**：R 用了 2739.5 s，超上限 40 s，残余增长 1.57 s/步。按规则已停下，等用户决定第二轮修复。
+
+## 今日完成
+1. **R-r2 验收补齐**：F1 s421 R-r2 的 load 重跑通过（上次失败是 `draw-copy` 目录残留导致的工具缺陷），FV = `correct_recovered`。记录：`p3_evidence/ft1-f1-s421-r-r2/acceptance-load-rerun-20260923-090847.json`。原 `acceptance-status.json` 仍写着 `blocked_at_load`，这是历史记录，**以重跑记录为准**。
+2. **验收脚本可重入**：`tests/ft/run_ft1_acceptance.py` 在输出目录已存在时自动改用 `-rerun-<时间戳>` 新目录；每个验收容器 900 s 超时 kill。
+3. **F1 s421 配对审计**：工程 Go，但不是同一冻结版本的配对（A-r1 的 observer 是修复前版本），不能进正式矩阵。报告：`docs/experiments/rewardtxn-ft-20260916/ft1_f1_s421_pair_audit_20260923.json`。
+4. **R 变慢根因**：`state._head()` 每次都对全部历史代的 checkpoint（每代 6.9 GB）重做全量 SHA-256，每步 3k+3 次，恢复路径同理。方案 v1 → 独立审计（有条件通过）→ v2：`R_SLOWDOWN_FIX_PLAN.md`、`R_SLOWDOWN_FIX_PLAN_AUDIT.md`、`R_SLOWDOWN_FIX_PLAN_v1.md`。
+5. **用户批准并已实现**（记录：`R_SLOWDOWN_FIX_IMPLEMENTATION.md`）：
+   - L1：历史代只做元数据加 stat 检查；恢复时只对要加载的 head 做内容哈希。
+   - L2：commit 的第二次全量哈希改为完整 stat 身份比较。
+   - L3：运行中剪掉链上 k−2 及更早代的 `native/*.distcp`；marker 内容确定、先写后删；pin 恢复加载代与恢复后首次提交。
+   - C1a/C1b：R 专用并行 `native_snapshot_r`（与原函数输出逐字节一致），与 prehash 并发执行。
+   - 活性修复：`prepare` 的 parent 改用 token 链派生的 head。
+   - P2 `*.i09` 改为篡改 head；审计工具支持 marker、pin 和步数参数化。
+   - FT-v1 方案追加"修订 R1"（§9 证据保留：验收通过的 `correct_recovered` run 删除大分片；失败 run 与固定抽样的 10% 配对全量保留；两臂同样适用）。
+6. **CPU 验证**：
+   - 宿主 state 系 39/39 通过；
+   - 容器全部 `tests/ft` 与 HEAD 基线逐项对照一致；
+   - P2 60 个 i09 用例前后都是 51 通过、9 个未执行；
+   - 旧证据回归：`ft1-f1-s421-{r-r2,a-r1}` 与原判定一致。
+7. **30 步 F2 门控**（1 对，seed 431，GPU 4–7，第 12 次更新后 kill trainer）：报告 `R_SLOWDOWN_GATE_REPORT.md`，判定 `r-slowdown-gate-check.json`。
+
+| 判据 | 结果 |
+|---|---|
+| R 墙钟 ≤ 2700 s | ❌ 2739.5 s（在 2700 s 被判 timeout，30 次提交已完成，收尾未完成） |
+| 每步斜率 < 1 s/步 | ❌ 1.57（修复前约 20） |
+| 恢复只哈希 1 代 | ✅（8.0 s） |
+| 两臂验收 | ❌ A `functional_verification_written`（`safe_discard`）；R `blocked_missing_final_native_state` |
+| 磁盘峰值 ≤ 45 GiB | ✅ 34.7 GB |
+
+A 臂墙钟 1149 s。
+
+## 残余问题（下一步的核心）
+R 每步逐段拆分：prepare→opt、opt→scheduled、scheduled→finalized、finalized→commit 都恒定；**只有 committed→下一 update_prepared 在涨（13.9 → 39 s）**，主体是 R 独有的 `batch_taken→train_batch`（7 → 28 s）。
+
+最可能的来源（**未剖析确认**）：批次身份桥和 RetainedLoader 每步、每行对线性增长的 `control.json` 做 `_locked` 读和带 fsync 的整文件重写。相关位置：`batch_identity.py:68,80,114`、`training_replay.py:155`、`validate_rows` 的 `_current`、`authorize_attempt`/`accept_result`。
+
+## 后续方案（按顺序，每步需要的用户决定已标出）
+1. **【待用户批准】C1c 剖析**：CPU 上用真实大小的 `control.json`（30 步约 1.4 MB、约 1000 个 attempts）重放 bridge/loader 路径，给出每个调用点随 k 的耗时。不占 GPU。
+2. **第二轮修复方案 → 独立审计 → 用户批准 → 实现**。候选方向：进程内缓存 control（锁内 mtime/ino 校验）、按批合并多行读写、attempts/accepted 拆分为追加式日志。不得改变提交与恢复语义，也不根据 RTO 挑选变体。
+3. **【需再批 GPU 预算】重跑 30 步 F2 门控**（新 seed，判据不变）。FT1 预检上限 16 次已超出，本轮已用 2 次。
+4. 门控通过后：
+   - 写 `run_pair.py`（全自动配对：GPU 空闲检查 → 两臂 → 自动验收 → 分类 → 追加 `runs.csv`，含超时 kill 和按规则补一次）和 `audit_pair.py`（把今天人工核对的 9 项脚本化）；
+   - 生成**正式 freeze**（镜像、源码、配置、seed 表、配对 schedule、FT-v1 修订 R1、10% 抽样名单；补齐 `OVERLAY_PIN.json` 的 commit）。
+5. 用户已同意的简化范围：本轮只做 **AReaL 分支 F4 20 对＋F1、F2 各 10 对，共 80 次 30 步 run**；C/B 分支、X1/X2、FT4 推迟，184 项 CPU 合同与正式实验解耦。主检验不变：F4 A+R 对 A 的 RTO 中位节省 ≥ 20% 且区间下界 > 0。
+6. **统一两臂 RTO 口径**：现在 A 用"最终 checkpoint 上界"，R 用"commit 观测"，不可比。正式冻结前必须统一为"受影响工作首次正确持久提交"。
+
+## 另立的已知问题
+- 容器内 uid 1028 没有 passwd 条目：跑测试需设 `USER`/`LOGNAME`。
+- `tests.ft` 包名被 `third_party/areal` 的 `tests` 遮蔽：子进程式 state 测试需在宿主跑。
+- `check_training_fault.py`、`check_training_integration.py` 对应的旧证据（`training-*-gpu-r*`）本机不存在，只做了编译检查。
+- 磁盘：`/public` 约 185–193 GB 可用（98%），`/` 约 377 GB。正式矩阵依赖修订 R1 的清理策略。
+
+## 操作红线（不变）
+- 不宣称正式通过，不宣称 R 恢复更快，不启动正式矩阵。
+- 不覆盖、不删除任何既有证据（包括失败和 timeout 的目录）；重跑一律使用新目录。
+- 开 GPU run 前确认用户已批准预算；每个 run 都要有超时 kill。
+- 实现修改结束当前版本批次，修改前后的结果不合并。
+
+## Git 状态
+- 已修改（tracked）：`scripts/ft/{state,training_adapter,areal_ft1,ft1_fault_hooks}.py`，`tests/ft/{check_ft1_chain,check_ft1_fault,check_ft1_input_audit,check_ft1_load,check_training_fault,check_training_integration,p2_schedule_driver,run_training_fault}.py`，FT-v1 方案 md。
+- 新增（untracked）：`tests/ft/{run_ft1_acceptance,offline_generation,run_ft1_gate,check_ft1_gate,test_state_efficiency,test_native_snapshot_r}.py`，`docs/experiments/rewardtxn-ft-20260916/R_SLOWDOWN_*.md`、`r-slowdown-gate-check.json`、`ft1_f1_s421_pair_audit_20260923.json`。
+- 备份：被改文件旁的 `*.bak-20260923-100804`；`HANDOFF.md.bak-20260923`。
+- 大证据目录（`p3_evidence/ft1-gate-*` 等）只留在本机，不入库。
+
+<!-- CURRENT_SNAPSHOT_END -->
+
+## 历史快照 2026-09-23 08:55（已被上方新快照取代）
+
 - **时间戳**: 2026-09-23 08:55:00 +0800
 - **权威工作树**: `/public/home/caiyiwen/rewardtxn`（对齐 GitHub `yiwen-cai/rewardtxn`）
 - **基线 commit（写快照前 master）**: `41dc0bb`
@@ -37,7 +115,6 @@
 - 不覆盖 A-r1 / R-r1 / R-r2 失败或既有终态证据
 - 不宣称正式通过、不宣称 pair Go、不启 F2
 
-<!-- CURRENT_SNAPSHOT_END -->
 
 
 ---

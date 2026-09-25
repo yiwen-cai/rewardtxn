@@ -1,0 +1,197 @@
+{
+  "created_local": "2026-09-24T13:14:25.355882+08:00",
+  "purpose": "minimal RewardTxn x AReaL 10-step formal experiment; immutable before first formal run",
+  "formal_sample": true,
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "areal_base_commit": "b83d1f40196e5bd7d9f83092563443561870d550",
+  "areal_tracked_patch_sha256": "f12f7767a69e9a807885e646d622a407d16725bba97d43c5587c404cd84e0a8e",
+  "source_map_file": "FORMAL_SOURCE_SHA256_20260924.json",
+  "source_map_sha256": "4a3a44f8ae5bd251b82776c7abc4d9108a832ad5b2aa00ce5e2d42d815e89894",
+  "source_file_count": 510,
+  "extra_sha256": {
+    "tests/ft/run_ft_formal.py": "84c48facb8f68733fe39eaf6e861188c005f6343afbcc92c073a4463e93a81ce",
+    "docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml": "599b8ebcf3747c74fd32dcd27562e143458b47217691522ed5191b7cd3fc58db",
+    "runs/diagnosis-20260910/train.jsonl": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+    "models/Qwen2.5-0.5B-Instruct/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "models/Qwen2.5-0.5B-Instruct/LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+    "models/Qwen2.5-0.5B-Instruct/README.md": "b19c806a904db6dc878a0462e70b551f6b7ac78dfbb88c2eb966ca2b9109ae15",
+    "models/Qwen2.5-0.5B-Instruct/config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "models/Qwen2.5-0.5B-Instruct/configuration.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "models/Qwen2.5-0.5B-Instruct/generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "models/Qwen2.5-0.5B-Instruct/merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "models/Qwen2.5-0.5B-Instruct/model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "models/Qwen2.5-0.5B-Instruct/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "tests/ft/launch_ft_formal_when_idle.py": "733a5d90a921b4b1e8fee5d42848762ef96ae3c6baad4998246eef65d146e7c9",
+    "tests/ft/launch_ft_formal_redo.py": "9994affd11df49228e6fd90de04a51659af0117ef2d0e511545bd43b48df8c50",
+    "tests/ft/launch_ft_formal_dynamic.py": "10b4e0d913165aa6b2cc00cb600320977164528aa0495cbc54f383ddfc4f4f6d"
+  },
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "training_gpu": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d",
+  "pairs": [
+    {
+      "name": "formal-f2-p01-s250-20260924",
+      "scenario": "F2",
+      "seed": 250,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2-p02-s8954-20260924-redo1",
+      "scenario": "F2",
+      "seed": 8954,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2-p03-s2381-20260924",
+      "scenario": "F2",
+      "seed": 2381,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2-p04-s9155-20260924",
+      "scenario": "F2",
+      "seed": 9155,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2-p05-s9318-20260924",
+      "scenario": "F2",
+      "seed": 9318,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2-p06-s938-20260924",
+      "scenario": "F2",
+      "seed": 938,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2-p07-s6992-20260924",
+      "scenario": "F2",
+      "seed": 6992,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2-p08-s4558-20260924",
+      "scenario": "F2",
+      "seed": 4558,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2-p09-s6026-20260924",
+      "scenario": "F2",
+      "seed": 6026,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2-p10-s7259-20260924",
+      "scenario": "F2",
+      "seed": 7259,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-nofault-p11-s8830-20260924",
+      "scenario": "no_fault",
+      "seed": 8830,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-nofault-p12-s5459-20260924",
+      "scenario": "no_fault",
+      "seed": 5459,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-nofault-p13-s5657-20260924",
+      "scenario": "no_fault",
+      "seed": 5657,
+      "order": [
+        "R",
+        "A"
+      ]
+    }
+  ],
+  "seed_selection": "Python random.Random(20260924).sample([0..9999 excluding pilot seeds 419,421],13), frozen output listed",
+  "retain_full_pair_index": 5,
+  "retain_full_pair_name": "formal-f2-p06-s938-20260924",
+  "pilot_peak_bytes": 34727661568,
+  "minimum_free_bytes": 56202498048,
+  "training": {
+    "model": "models/Qwen2.5-0.5B-Instruct",
+    "data": "runs/diagnosis-20260910/train.jsonl",
+    "steps": 10,
+    "K": 8,
+    "U": 4,
+    "f2_ordinal": 2,
+    "fault_window": "after second successful optimizer update, after prior async checkpoint drain and before save of this update",
+    "recover_retries": {
+      "F2": 1,
+      "no_fault": 0
+    },
+    "async_full_dcp": true,
+    "checkpoint_freq_steps": 1,
+    "pointwise_autotune": false,
+    "blocking_d2h": true,
+    "run_timeout_seconds": 2400,
+    "recovery_observation_seconds": 900,
+    "handshake_timeout_seconds": 10,
+    "lease_timeout_seconds": 20
+  },
+  "failure_rule": "Stop after invalid_commit, safe_stop, timeout, technical_invalid, unverifiable or independent load failure; preserve failed run shards and all evidence. No automatic retry.",
+  "redo_rule": "At most one same-seed, same-order full-pair redo only for documented technical invalidity, in fresh directories; retain originals and register both attempts. No redo for a valid hit with safe but zero reuse. If implementation/cleanup changes, remeasure P and refreeze before redo.",
+  "analysis_rule": "Ten F2 pairs: per-run binary 32/32 same-execution-source retention, paired exact two-sided McNemar p<0.05 only if all ten pairs safe and decidable; exact 95% intervals; report all run costs and no-fault costs separately; no seed expansion for significance.",
+  "storage_rule": "One run at a time; each arm independent fault/chain/input/fresh native load/source verification, then SHA-256 every DCP shard. Retain full DCP for preselected F2 pair index 5 both arms; delete passed other shards only after verification; preserve all failed shards. Check free space >= P+20GiB and four GPU idle before every run.",
+  "formal_evidence_parent": "docs/experiments/rewardtxn-ft-20260916/minimal_evidence",
+  "pilot_pair_names": [
+    "pilot-f2-pointwiseoff-s419-20260924",
+    "pilot-nofault-pointwiseoff-s421-20260924"
+  ],
+  "gpu_assignment_amendment": {
+    "original_freeze_sha256": "c0e386e88dda06fcb7231506636506af246cb3ffcfe03718de591e69b280343b",
+    "failed_pair": "formal-f2-p02-s8954-20260924",
+    "reason": "one full-pair redo after documented technical invalidity",
+    "policy": "any four simultaneously idle identical H100s, fixed within R/A pair"
+  }
+}

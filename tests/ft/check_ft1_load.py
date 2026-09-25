@@ -62,7 +62,7 @@ def main():
         info=RecoverInfo.load(str(recover))
         report['last_step_info']=dataclasses.asdict(info.last_step_info)
         report['next_step_info']=dataclasses.asdict(info.last_step_info.next())
-        assert info.last_step_info.global_step==9
+        assert info.last_step_info.global_step==json.loads((root/'ft1-case.json').read_text()).get('steps',10)-1
         descriptor=info.dataloader_info[0] if isinstance(info.dataloader_info,list) else info.dataloader_info
         if args.arm=='A':
             loader.load_state_dict(descriptor)
