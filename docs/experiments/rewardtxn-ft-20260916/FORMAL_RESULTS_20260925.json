@@ -1,0 +1,573 @@
+{
+  "scope": "frozen minimal FT matrix (AReaL branch, 10 updates/run); formal pairs only",
+  "pairs": [
+    {
+      "name": "formal-f2-p01-s250-20260924",
+      "scenario": "F2",
+      "seed": 250,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "c0e386e88dda06fcb7231506636506af246cb3ffcfe03718de591e69b280343b",
+      "runs": {
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 125952,
+          "wall_seconds": 777.3953898609616,
+          "gpu_hours": 0.8637726554010684,
+          "peak_incremental_bytes": 7247568896,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 101506,
+          "wall_seconds": 1088.9712244470138,
+          "gpu_hours": 1.2099680271633486,
+          "peak_incremental_bytes": 34688139264,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p02-s8954-20260924-redo1",
+      "scenario": "F2",
+      "seed": 8954,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "ccc7b72275add0fad16acea306d4cddb89e50a156d31e8f452f55888eb7d0a9a",
+      "runs": {
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 98051,
+          "wall_seconds": 1074.882292527007,
+          "gpu_hours": 1.1943136583633411,
+          "peak_incremental_bytes": 34693386240,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 127821,
+          "wall_seconds": 789.1117753140861,
+          "gpu_hours": 0.8767908614600957,
+          "peak_incremental_bytes": 7004717056,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p03-s2381-20260924",
+      "scenario": "F2",
+      "seed": 2381,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "a20a8aeafa21189f0a6dd2d88d89ec0b25b0ca9db84e8d52ec92a442e4122ecc",
+      "runs": {
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 125142,
+          "wall_seconds": 803.8818240819965,
+          "gpu_hours": 0.8932020267577738,
+          "peak_incremental_bytes": 7003226112,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 100833,
+          "wall_seconds": 1106.2348685819888,
+          "gpu_hours": 1.2291498539799877,
+          "peak_incremental_bytes": 34719105024,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p04-s9155-20260924",
+      "scenario": "F2",
+      "seed": 9155,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "b7cfe631af5864c5d45a634f1775d761c17c745335204431d8deeac9cfdf8e4a",
+      "runs": {
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 101443,
+          "wall_seconds": 1075.60706227005,
+          "gpu_hours": 1.1951189580778332,
+          "peak_incremental_bytes": 34694168576,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 122858,
+          "wall_seconds": 771.6888666270534,
+          "gpu_hours": 0.8574320740300593,
+          "peak_incremental_bytes": 7052337152,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p05-s9318-20260924",
+      "scenario": "F2",
+      "seed": 9318,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "b82fc90082509f9c69b3b0435640954c4674b08a0357747e141a1c4d7b925136",
+      "runs": {
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 122728,
+          "wall_seconds": 786.8089846940711,
+          "gpu_hours": 0.8742322052156346,
+          "peak_incremental_bytes": 7048830976,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 104533,
+          "wall_seconds": 1121.089893501019,
+          "gpu_hours": 1.2456554372233546,
+          "peak_incremental_bytes": 34775687168,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p06-s938-20260924",
+      "scenario": "F2",
+      "seed": 938,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "615d3ddf4525314641f25d3a96fd949448e3530f1adc5edb141ce884cb761574",
+      "runs": {
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 101385,
+          "wall_seconds": 1095.7812306109117,
+          "gpu_hours": 1.2175347006787909,
+          "peak_incremental_bytes": 34708742144,
+          "storage": "retained_full"
+        },
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 121307,
+          "wall_seconds": 795.3932088939473,
+          "gpu_hours": 0.8837702321043859,
+          "peak_incremental_bytes": 6990106624,
+          "storage": "retained_full"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p07-s6992-20260924",
+      "scenario": "F2",
+      "seed": 6992,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "0015c852d390d45e91142b465715b2b628182863091030d4404103fe26a732c8",
+      "runs": {
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 123514,
+          "wall_seconds": 779.4686744809151,
+          "gpu_hours": 0.8660763049787945,
+          "peak_incremental_bytes": 6990082048,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 101224,
+          "wall_seconds": 1094.2974311979488,
+          "gpu_hours": 1.2158860346643876,
+          "peak_incremental_bytes": 34692001792,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p08-s4558-20260924",
+      "scenario": "F2",
+      "seed": 4558,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "3059ea324dfbc9a34f77d66c16f561e148c15823ec121d518beeb014ebedd389",
+      "runs": {
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 100440,
+          "wall_seconds": 1082.4308321450371,
+          "gpu_hours": 1.2027009246055969,
+          "peak_incremental_bytes": 34685157376,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 124153,
+          "wall_seconds": 783.2625798919471,
+          "gpu_hours": 0.8702917554354967,
+          "peak_incremental_bytes": 7037231104,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p09-s6026-20260924",
+      "scenario": "F2",
+      "seed": 6026,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "c96402af32124b9abdc47049c525789c27c3658eb2c5e5404f8cf8a3cb6888de",
+      "runs": {
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 126787,
+          "wall_seconds": 774.314870798029,
+          "gpu_hours": 0.8603498564422545,
+          "peak_incremental_bytes": 6997819392,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 99784,
+          "wall_seconds": 1089.2622429219773,
+          "gpu_hours": 1.2102913810244191,
+          "peak_incremental_bytes": 34697920512,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-f2-p10-s7259-20260924",
+      "scenario": "F2",
+      "seed": 7259,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "aca9895dbb79427c9e97832408f6dbc927f533eee5db330b4f08744b6c06471a",
+      "runs": {
+        "R": {
+          "classification": "correct_recovered",
+          "reused_rows": 32,
+          "target_rows": 32,
+          "all_reused": true,
+          "generated_tokens_after_fault": 99007,
+          "wall_seconds": 1105.5808462189743,
+          "gpu_hours": 1.228423162465527,
+          "peak_incremental_bytes": 34765758464,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "safe_discard",
+          "reused_rows": 0,
+          "target_rows": 32,
+          "all_reused": false,
+          "generated_tokens_after_fault": 126030,
+          "wall_seconds": 803.0702990099089,
+          "gpu_hours": 0.8923003322332321,
+          "peak_incremental_bytes": 7055597568,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-nofault-p11-s8830-20260924",
+      "scenario": "no_fault",
+      "seed": 8830,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "8423c1037b0f1130f535351759ce39b68564b090da13f9c3fe7b5f5c5c3d43d1",
+      "runs": {
+        "R": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 837.6571800430538,
+          "gpu_hours": 0.9307302000478376,
+          "peak_incremental_bytes": 20882423808,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 520.8772040510084,
+          "gpu_hours": 0.578752448945565,
+          "peak_incremental_bytes": 6980440064,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-nofault-p12-s5459-20260924",
+      "scenario": "no_fault",
+      "seed": 5459,
+      "order": [
+        "A",
+        "R"
+      ],
+      "freeze_sha256": "2841cfb230ab0eadb1263bfcc8d707244b8d65152c7d5149a2d6034c8792efbf",
+      "runs": {
+        "A": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 529.5145481319632,
+          "gpu_hours": 0.5883494979244036,
+          "peak_incremental_bytes": 6984282112,
+          "storage": "shards_deleted"
+        },
+        "R": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 846.944890253013,
+          "gpu_hours": 0.9410498780589034,
+          "peak_incremental_bytes": 20906426368,
+          "storage": "shards_deleted"
+        }
+      }
+    },
+    {
+      "name": "formal-nofault-p13-s5657-20260924",
+      "scenario": "no_fault",
+      "seed": 5657,
+      "order": [
+        "R",
+        "A"
+      ],
+      "freeze_sha256": "5db628897814176d2698cb6404f99fddbe85c38b8a4424f6e667edf315f22539",
+      "runs": {
+        "R": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 862.5455648970092,
+          "gpu_hours": 0.9583839609966769,
+          "peak_incremental_bytes": 21004251136,
+          "storage": "shards_deleted"
+        },
+        "A": {
+          "classification": "no_fault_verified",
+          "reused_rows": 0,
+          "target_rows": 0,
+          "all_reused": false,
+          "generated_tokens_after_fault": null,
+          "wall_seconds": 581.2476340320427,
+          "gpu_hours": 0.6458307044800474,
+          "peak_incremental_bytes": 7187668992,
+          "storage": "shards_deleted"
+        }
+      }
+    }
+  ],
+  "excluded_attempts": [
+    {
+      "name": "formal-f2-p02-s8954-20260924",
+      "status": "stopped_for_review",
+      "error": "RuntimeError('acceptance failed: fault_not_valid_hit')"
+    }
+  ],
+  "f2": {
+    "pairs": 10,
+    "all_safe_and_decidable": true,
+    "A_success": 0,
+    "R_success": 10,
+    "A_exact95": [
+      0.0,
+      0.3084971078187607
+    ],
+    "R_exact95": [
+      0.6915028921812392,
+      1.0
+    ],
+    "discordant_R_only": 10,
+    "discordant_A_only": 0,
+    "mcnemar_exact_two_sided_p": 0.001953125,
+    "alpha": 0.05
+  },
+  "cost": {
+    "F2": {
+      "A": {
+        "wall_seconds": {
+          "n": 10,
+          "median": 785.0357822930091,
+          "min": 771.6888666270534,
+          "max": 803.8818240819965
+        },
+        "gpu_hours": {
+          "n": 10,
+          "median": 0.8722619803255657,
+          "min": 0.8574320740300593,
+          "max": 0.8932020267577738
+        },
+        "peak_incremental_bytes": {
+          "n": 10,
+          "median": 7020974080.0,
+          "min": 6990082048,
+          "max": 7247568896
+        },
+        "generated_tokens_after_fault": {
+          "n": 10,
+          "median": 124647.5,
+          "min": 121307,
+          "max": 127821
+        }
+      },
+      "R": {
+        "wall_seconds": {
+          "n": 10,
+          "median": 1091.779837059963,
+          "min": 1074.882292527007,
+          "max": 1121.089893501019
+        },
+        "gpu_hours": {
+          "n": 10,
+          "median": 1.2130887078444035,
+          "min": 1.1943136583633411,
+          "max": 1.2456554372233546
+        },
+        "peak_incremental_bytes": {
+          "n": 10,
+          "median": 34696044544.0,
+          "min": 34685157376,
+          "max": 34775687168
+        },
+        "generated_tokens_after_fault": {
+          "n": 10,
+          "median": 101028.5,
+          "min": 98051,
+          "max": 104533
+        }
+      }
+    },
+    "no_fault": {
+      "A": {
+        "wall_seconds": {
+          "n": 3,
+          "median": 529.5145481319632,
+          "min": 520.8772040510084,
+          "max": 581.2476340320427
+        },
+        "gpu_hours": {
+          "n": 3,
+          "median": 0.5883494979244036,
+          "min": 0.578752448945565,
+          "max": 0.6458307044800474
+        },
+        "peak_incremental_bytes": {
+          "n": 3,
+          "median": 6984282112,
+          "min": 6980440064,
+          "max": 7187668992
+        },
+        "generated_tokens_after_fault": null
+      },
+      "R": {
+        "wall_seconds": {
+          "n": 3,
+          "median": 846.944890253013,
+          "min": 837.6571800430538,
+          "max": 862.5455648970092
+        },
+        "gpu_hours": {
+          "n": 3,
+          "median": 0.9410498780589034,
+          "min": 0.9307302000478376,
+          "max": 0.9583839609966769
+        },
+        "peak_incremental_bytes": {
+          "n": 3,
+          "median": 20906426368,
+          "min": 20882423808,
+          "max": 21004251136
+        },
+        "generated_tokens_after_fault": null
+      }
+    }
+  },
+  "cost_note": "descriptive only; no-fault cost is not subtracted to infer fault benefit (frozen rule)"
+}

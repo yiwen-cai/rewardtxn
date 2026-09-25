@@ -9,11 +9,11 @@
 | F2 | 10 | 10/10 `safe_discard`，目标 0/32 复用 | 10/10 `correct_recovered`，目标 32/32 复用 | 无 `invalid_commit`/`safe_stop`/timeout |
 | 无故障 | 3 | 3/3 `no_fault_verified` | 3/3 `no_fault_verified` | 仅描述正常路径成本 |
 
-- 按冻结判定规则（10 对均安全可判定）：不一致对 10:0，双侧精确 McNemar p≈0.002 < 0.05；精确 95% 区间 A 0/10 为 [0, 0.31]，R 10/10 为 [0.69, 1]。以上为我据逐对记录复算，正式统计报告尚未单独产出。
+- 按冻结判定规则（10 对均安全可判定）：不一致对 10:0，双侧精确 McNemar p≈0.002 < 0.05；精确 95% 区间 A 0/10 为 [0, 0.31]，R 10/10 为 [0.69, 1]。正式结果见[FORMAL_RESULTS_20260925.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_RESULTS_20260925.md)（`tests/ft/analyze_ft_formal.py` 生成）。
 - F2 故障后生成 token：A 约 12.1–12.8 万，R 约 9.8–10.5 万。单 run 墙钟中位（cost.json，训练至验收）：F2 A≈785 s、R≈1094 s；无故障 A≈530 s、R≈847 s。R 正常路径成本明显更高，不得宣称 R 整体更快；按冻结规则不以无故障耗时直接相减推断收益。
 - 第 2 对原尝试 R 在故障信号前权重同步 CUDA OOM → `technical_invalid`，按冻结规则做唯一一次同 seed/同顺序完整重做（`-redo1`）通过，见[重做记录](docs/experiments/rewardtxn-ft-20260916/FORMAL_P02_TECHNICAL_INVALID_REDO_20260924.md)；原件保留。GPU 分配改为任意四张同时空闲 H100，见[修订](docs/experiments/rewardtxn-ft-20260916/FORMAL_GPU_ASSIGNMENT_AMENDMENT_20260924.md)。
 - 存储：第 6 对（s938）两臂全量保留，其余通过 run 已删大分片。峰值增量 A≈7 GB、R F2≈34.7 GB / 无故障≈21 GB。
-- 未完成：正式结果报告与统计脚本化；F1/F4 及 C/B 分支仍推迟；本日改动（大量 tracked 修改与新文件）尚未提交。
+- 旧实验权重已清理（清单 `OLD_WEIGHTS_CLEANUP_20260925.tsv`）。未完成：F1/F4 及 C/B 分支仍推迟；R 正常路径开销待优化。
 
 ## 2026-09-20 状态（历史）
 

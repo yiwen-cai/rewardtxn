@@ -1,7 +1,7 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
-> **2026-09-25 更新（覆盖下方 09-23 快照的"正式矩阵样本数 0"等表述）**：已转入最小方案（每 run 10 次更新；30 步 R 变慢问题本身未在此验证），正式冻结 2026-09-24 13:14 后 13/13 对全部 `formal_pair_verified`：F2 10 对 R 全部 `correct_recovered`（32/32）、A 全部 `safe_discard`（0/32）；无故障 3 对均通过；p02 一次技术无效已按规则重做。汇总与数字见 [PROGRESS.md](PROGRESS.md) 顶部。下一步：写正式结果报告并脚本化统计、提交本分支改动。
+> **2026-09-25 更新（覆盖下方 09-23 快照的"正式矩阵样本数 0"等表述）**：已转入最小方案（每 run 10 次更新；30 步 R 变慢问题本身未在此验证），正式冻结 2026-09-24 13:14 后 13/13 对全部 `formal_pair_verified`：F2 10 对 R 全部 `correct_recovered`（32/32）、A 全部 `safe_discard`（0/32）；无故障 3 对均通过；p02 一次技术无效已按规则重做。汇总与数字见 [PROGRESS.md](PROGRESS.md) 顶部。结果报告见 `docs/experiments/rewardtxn-ft-20260916/FORMAL_RESULTS_20260925.md`。下一步待用户选择：F1/F4 扩展或 R 开销优化。
 
 > 2026-09-24 更新：用户要求删除旧 FT1 原始试跑数据并以最小空间执行新方案。五个旧 `*_evidence/` 目录中的未跟踪原始文件已清理，仅保留已跟踪的小型摘要；见 [清理记录](docs/experiments/rewardtxn-ft-20260916/FT1_RAW_EVIDENCE_CLEANUP_20260924.json)。旧报告与判定仍是历史记录，原检查点已无法在本机重新加载复验。新执行范围及逐 run 存储规则见 [最小方案](docs/experiments/rewardtxn-ft-20260916/FT_MINIMAL_AREAL_PROPOSAL_20260923.md)；下列 2026-09-23 快照中的旧 FT1 原始证据保留要求不再适用，其他历史判定不变。
 
