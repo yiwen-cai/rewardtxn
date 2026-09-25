@@ -1,0 +1,21 @@
+{
+  "name": "formal-f2-p02-s8954-20260924",
+  "scenario": "F2",
+  "seed": 8954,
+  "order": [
+    "R",
+    "A"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-03d6dfd0-fe60-5231-596d-72069e4d413c",
+    "GPU-57adc905-df4c-7006-349f-bfccb8f6f358",
+    "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "d910d2d763ae5cd5a9be4b22c183dabd24f1179d2a51a62792d8b1bbb0777b76",
+  "status": "stopped_for_review",
+  "runs": [],
+  "failed_arm": "R",
+  "error": "RuntimeError('acceptance failed: fault_not_valid_hit')"
+}

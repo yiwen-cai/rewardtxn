@@ -1,0 +1,74 @@
+{
+  "name": "formal-f2-p04-s9155-20260924",
+  "scenario": "F2",
+  "seed": 9155,
+  "order": [
+    "R",
+    "A"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-da816a5b-68f4-71fb-1ba8-d8ad7e505605",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "b7cfe631af5864c5d45a634f1775d761c17c745335204431d8deeac9cfdf8e4a",
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f2-p04-s9155-20260924-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F2",
+        "target_rows": 32,
+        "same_execution_source_rows": 32,
+        "all_32_reused": true,
+        "retained_rows": 320,
+        "target_output_tokens": 11782,
+        "unused_generated_attempts": null,
+        "generated_tokens_after_fault": 101443,
+        "score_returns_after_fault": 290,
+        "scope": "actual engine call return and score execution ID to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 410277183488,
+        "free_minimum": 375583014912,
+        "peak_incremental_bytes": 34694168576,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f2-p04-s9155-20260924-a",
+      "classification": "safe_discard",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F2",
+        "target_rows": 32,
+        "same_execution_source_rows": 0,
+        "all_32_reused": false,
+        "retained_rows": 320,
+        "target_output_tokens": 11029,
+        "unused_generated_attempts": 160,
+        "generated_tokens_after_fault": 122858,
+        "score_returns_after_fault": 384,
+        "scope": "actual engine call return and score execution ID to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 410167390208,
+        "free_minimum": 403115053056,
+        "peak_incremental_bytes": 7052337152,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    }
+  ]
+}
