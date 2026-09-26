@@ -1,6 +1,8 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
+> **2026-09-26 晚更新**：F4'/F1 试点完成（HEAD `5e09b5a`）。F4' s3922：R 保留 40/41 已完成评分、A 0/46；F1 两对两臂均恢复（在途仅 3–4 条）；F4' 第 2 对因外部 GPU 占用两次技术无效。详见 PROGRESS.md 顶部与 `PILOT_F4F1_RESULT_20260926.md`。下一步待用户决定：正式矩阵规模、F1 切点后移、GPU 独占策略。
+
 > **2026-09-26 更新**：R 性能重设计（阶段 1+B、阶段 2）已实现、审计并通过 GPU 门控；用户接受当前版本（端到端 R/A 1.02–1.06，循环 1.21–1.29，F2 恢复正常）。分支 HEAD 即当前版本。详见 PROGRESS.md 顶部。下一步：新冻结 + F4/F1 扩展（需统一 RTO 口径、批准 GPU 预算）。
 
 > **2026-09-25 更新（覆盖下方 09-23 快照的"正式矩阵样本数 0"等表述）**：已转入最小方案（每 run 10 次更新；30 步 R 变慢问题本身未在此验证），正式冻结 2026-09-24 13:14 后 13/13 对全部 `formal_pair_verified`：F2 10 对 R 全部 `correct_recovered`（32/32）、A 全部 `safe_discard`（0/32）；无故障 3 对均通过；p02 一次技术无效已按规则重做。汇总与数字见 [PROGRESS.md](PROGRESS.md) 顶部。结果报告见 `docs/experiments/rewardtxn-ft-20260916/FORMAL_RESULTS_20260925.md`。下一步待用户选择：F1/F4 扩展或 R 开销优化。
