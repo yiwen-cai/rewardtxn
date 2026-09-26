@@ -20,6 +20,7 @@ from areal.workflow.rlvr import RLVRWorkflow
 
 from .reward_return import RewardReturn, ReturningReward, input_digest
 from . import state
+from . import perf_probe
 from .replay import BlobStore, ReplayError, _decode, _directory, _encode, _publish, _read
 
 
@@ -79,15 +80,16 @@ class CallReturnRLVR(RLVRWorkflow):
                 raise ArtifactError('inactive CPU authorization; adoption is unsupported')
 
     async def _io(self, context, operation):
-        self._check(context)
+        # Authority is checked on the I/O thread immediately before and after
+        # the operation; the event loop never blocks on mutation.lock. Fencing
+        # itself rests on owner.lock and the CAS in state.accept_result.
         def guarded():
-            self._check(context)
-            result = operation()
-            self._check(context)
-            return result
-        result = await asyncio.get_running_loop().run_in_executor(self._io_pool, guarded)
-        self._check(context)
-        return result
+            with perf_probe.span('rlvr.io'):
+                self._check(context)
+                result = operation()
+                self._check(context)
+                return result
+        return await asyncio.get_running_loop().run_in_executor(self._io_pool, guarded)
 
     def _stage(self, context, name):
         path = context['directory'] / (name + '.json')
@@ -103,7 +105,7 @@ class CallReturnRLVR(RLVRWorkflow):
         return record['payload'], index['blob']['sha256']
 
     def _put(self, context, name, payload):
-        self._check(context)
+        # Only called inside _io(), which already checked authority.
         ref = self.blobs.put(_encode({'binding': context['binding'], 'stage': name, 'payload': payload}))
         _directory(context['directory'])
         _publish(context['directory'] / (name + '.json'), _encode({'blob': ref}), 'rlvr_' + name)
@@ -226,8 +228,10 @@ class CallReturnRLVR(RLVRWorkflow):
         if attempt['sample'] != sample:
             raise ArtifactError('sample/authorization mismatch')
         input_ids = self.get_input_ids_fn(self.data_extract_prompt_fn(data), self.tokenizer, self.enable_thinking)
-        with state._locked(self.owner) as control:
-            run = {k: control[k] for k in ('run_nonce', 'config_sha256', 'scope')}
+        def run_fields():
+            with state._locked(self.owner) as control:
+                return {k: control[k] for k in ('run_nonce', 'config_sha256', 'scope')}
+        run = await asyncio.get_running_loop().run_in_executor(self._io_pool, run_fields)
         binding = {'schema': 2, 'run': run, 'attempt': attempt, 'draw': draw, 'data_sha256': digest(data),
                    'tokenizer_sha256': self.tokenizer_sha256,
                    'request_gconfig_sha256': digest(dataclasses.asdict(self.gconfig.new(n_samples=1))),
@@ -235,7 +239,8 @@ class CallReturnRLVR(RLVRWorkflow):
         context = {'binding': binding, 'input_ids': input_ids, 'data': data,
                    'directory': self.root / 'samples' / digest([sample, attempt['epoch'], attempt['owner_nonce'], attempt['attempt']])}
         context = self.bind_context(context)
-        self._check(context)
+        if sample in self._active:
+            raise ArtifactError('concurrent duplicate sample invocation')
         self._active.add(sample)
         token = self._context.set(context)
         try:
@@ -247,7 +252,6 @@ class CallReturnRLVR(RLVRWorkflow):
                 result = await self._io(context, lambda: self._load_tensors(context, tensor, response, reward))
             else:
                 result = await super().arun_episode(engine, data)
-                self._check(context)
                 response, reward = await self._io(context, lambda: (self._stage(context, 'response'), self._stage(context, 'reward')))
                 def persist():
                     self._validate_tensors(context, result, response, reward)
@@ -272,7 +276,6 @@ class CallReturnRLVR(RLVRWorkflow):
                 if cached is not None:
                     return outer._response(context, cached[0])
                 resp = await engine.agenerate(request)
-                outer._check(context)
                 if resp.input_images or resp.processor is not None or resp.routed_experts is not None:
                     raise ArtifactError('only plain text responses supported')
                 payload = {k: copy.deepcopy(getattr(resp, k)) for k in
@@ -282,7 +285,6 @@ class CallReturnRLVR(RLVRWorkflow):
                 await outer._io(context, lambda: outer._put(context, 'response', payload))
                 return resp
         result = await super()._collect_samples(ResponseSource(), req, prompt_str, task_data)
-        self._check(context)
         return result
 
     async def _compute_rewards(self, resp, prompt_str, task_data):
@@ -294,7 +296,6 @@ class CallReturnRLVR(RLVRWorkflow):
         request = {'invocation_nonce': nonce, 'input_sha256': self._scoring_input(context, response),
                    'verifier_sha256': context['binding']['attempt']['versions']['verifier_version']}
         envelope = await super()._compute_rewards(resp, prompt_str, dict(task_data, _r_reward_request=request))
-        self._check(context)
         self._validate_return(context, response, envelope)
         payload = {'response_sha256': response[1], 'return': dataclasses.asdict(envelope)}
         reward = await self._io(context, lambda: self._put(context, 'reward', payload))

@@ -28,9 +28,9 @@ class Counter:
         self.files = 0
         self.original = state._inventory
 
-    def __call__(self, directory, *, cache=None, identities=None):
+    def __call__(self, directory, *, cache=None, identities=None, **kwargs):
         before = dict(cache or {})
-        result = self.original(directory, cache=cache, identities=identities)
+        result = self.original(directory, cache=cache, identities=identities, **kwargs)
         self.files += sum(1 for name in result if name not in before)
         return result
 

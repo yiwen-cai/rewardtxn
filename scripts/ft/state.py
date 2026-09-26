@@ -16,6 +16,8 @@ import stat
 import uuid
 from dataclasses import dataclass
 
+from . import perf_probe
+
 
 class StateError(RuntimeError):
     pass
@@ -41,10 +43,19 @@ def _pairs(items):
 
 def _read(path):
     try:
-        return json.loads(path.read_bytes(), object_pairs_hook=_pairs,
-                          parse_constant=lambda value: (_ for _ in ()).throw(
-                              StateError("nonfinite JSON")))
-    except (OSError, ValueError) as exc:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise StateError(f"cannot read {path.name}") from exc
+    return _parse(raw, path)
+
+
+def _parse(raw, path):
+    try:
+        with perf_probe.span("state.json_parse"):
+            return json.loads(raw, object_pairs_hook=_pairs,
+                              parse_constant=lambda value: (_ for _ in ()).throw(
+                                  StateError("nonfinite JSON")))
+    except ValueError as exc:
         raise StateError(f"cannot read {path.name}") from exc
 
 
@@ -148,18 +159,43 @@ class Owner:
         self.close()
 
 
+# Parsed control.json per state root, keyed by its exact bytes. Accessed only
+# while holding mutation.lock. Read-only sections share the cached object;
+# write sections get a private parse and drop the cache entry on exit, so a
+# failed or partial write is never visible in-process.
+_CONTROL_CACHE = {}
+
+
 @contextlib.contextmanager
-def _locked(owner):
+def _locked(owner, *, write=False):
     if owner.fd < 0 or owner.pid != os.getpid():
         raise StateError("inactive or inherited owner")
     fd = os.open(_path(owner.root, "mutation.lock"),
                  os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    key = str(owner.root)
     try:
-        fcntl.flock(fd, fcntl.LOCK_EX)
-        control = _read(_path(owner.root, "control.json"))
+        with perf_probe.span("state.flock_wait"):
+            fcntl.flock(fd, fcntl.LOCK_EX)
+        path = _path(owner.root, "control.json")
+        try:
+            raw = path.read_bytes()
+        except OSError as exc:
+            raise StateError("cannot read control.json") from exc
+        cached = _CONTROL_CACHE.get(key)
+        if write:
+            _CONTROL_CACHE.pop(key, None)
+            control = _parse(raw, path)
+        elif cached is not None and cached[0] == raw:
+            control = cached[1]
+        else:
+            control = _parse(raw, path)
+            _CONTROL_CACHE[key] = (raw, control)
         if (control["epoch"], control["owner_nonce"]) != (owner.epoch, owner.nonce):
             raise StateError("stale owner")
         yield control
+    except BaseException:
+        _CONTROL_CACHE.pop(key, None)
+        raise
     finally:
         # A reward worker can fork while another thread owns this descriptor.
         # close() alone keeps the flock alive in that child; release the shared
@@ -237,7 +273,7 @@ def _digest(value):
 def authorize_attempt(owner, logical_sample, expected_attempt, new_attempt, *, expected_policy_version):
     if type(expected_policy_version) is not int or expected_policy_version < 0:
         raise StateError("explicit nonnegative policy version required")
-    with _locked(owner) as control:
+    with _locked(owner, write=True) as control:
         old = control["attempts"].get(logical_sample)
         if ((old["attempt"] if old else None) != expected_attempt or not new_attempt
                 or new_attempt == expected_attempt):
@@ -250,6 +286,36 @@ def authorize_attempt(owner, logical_sample, expected_attempt, new_attempt, *, e
         control["accepted"].pop(logical_sample, None)
         _write(_path(owner.root, "control.json"), control, immutable=False)
         return attempt
+
+
+def authorize_attempts(owner, requests):
+    """Batch form of ``authorize_attempt``: ``requests`` is a list of
+    (logical_sample, expected_attempt, new_attempt, expected_policy_version).
+    All CAS checks pass before one durable write; otherwise control is unchanged."""
+    if not requests:
+        return []
+    samples = [item[0] for item in requests]
+    if len(samples) != len(set(samples)):
+        raise StateError("duplicate sample in batch authorization")
+    for _, _, _, version in requests:
+        if type(version) is not int or version < 0:
+            raise StateError("explicit nonnegative policy version required")
+    with _locked(owner, write=True) as control:
+        attempts = []
+        for logical_sample, expected_attempt, new_attempt, version in requests:
+            old = control["attempts"].get(logical_sample)
+            if ((old["attempt"] if old else None) != expected_attempt or not new_attempt
+                    or new_attempt == expected_attempt):
+                raise StateError("attempt CAS failed")
+            attempts.append({"sample": logical_sample, "attempt": new_attempt,
+                             "epoch": owner.epoch, "owner_nonce": owner.nonce,
+                             "versions": {"policy_version": version,
+                                          "verifier_version": control["verifier_version"]}})
+        for attempt in attempts:
+            control["attempts"][attempt["sample"]] = attempt
+            control["accepted"].pop(attempt["sample"], None)
+        _write(_path(owner.root, "control.json"), control, immutable=False)
+        return attempts
 
 
 def _check_versions(control, attempt, payload):
@@ -274,7 +340,7 @@ def _check_group_versions(control, group):
 
 
 def accept_result(owner, attempt, payload_manifest):
-    with _locked(owner) as control:
+    with _locked(owner, write=True) as control:
         if (attempt.get("epoch"), attempt.get("owner_nonce")) != (owner.epoch, owner.nonce):
             raise StateError("stale result")
         if control["attempts"].get(attempt.get("sample")) != attempt:
@@ -340,17 +406,92 @@ def _identities(directory):
     return result
 
 
-def prehash(directory):
-    """Hash files ahead of commit; reused only while their stat identity is unchanged."""
+def prehash(directory, *, only=None):
+    """Hash files ahead of commit; reused only while their stat identity is
+    unchanged. ``only`` (name predicate) restricts which files are hashed."""
     identities = {}
-    files = _inventory(directory, identities=identities)
+    with perf_probe.span("state.prehash"):
+        files = _inventory(directory, identities=identities, only=only)
     return {name: (identities[name], info) for name, info in files.items()}
 
 
 CONTENT_HASHED = []  # observation only: directories whose files were content-hashed
 
+# Large-file digest format (R_PERF_REDESIGN_PLAN v2.1 section 8.3). Files of at
+# least CHUNK_THRESHOLD bytes are recorded as fixed-size SHA-256 chunks bound by
+# ``chunked_digest``; smaller files keep the legacy whole-file ``sha256`` entry.
+# Legacy manifests (large files with ``sha256``) stay verifiable read-only; a
+# chain mixing both large-file formats is rejected.
+DIGEST_SCHEMA = "sha256-chunked-v1"
+CHUNK_THRESHOLD = 256 * 1024 * 1024
+CHUNK_BYTES = 64 * 1024 * 1024
+HASH_THREADS = 8
+COMMIT_CHUNKED = True  # frozen with the source; False reproduces legacy manifests
 
-def _inventory(directory, *, cache=None, identities=None):
+
+def _chunk_count(size, chunk_bytes):
+    return -(-size // chunk_bytes)
+
+
+def _chunked_digest(size, chunk_bytes, chunks):
+    return _hash(DIGEST_SCHEMA.encode() + b"\0" + size.to_bytes(8, "big")
+                 + chunk_bytes.to_bytes(8, "big") + b"".join(bytes.fromhex(c) for c in chunks))
+
+
+def _hash_chunks(fd, size):
+    import concurrent.futures
+    chunk_bytes = CHUNK_BYTES
+
+    def one(index):
+        offset, digest = index * chunk_bytes, hashlib.sha256()
+        end = min(size, offset + chunk_bytes)
+        while offset < end:
+            data = os.pread(fd, min(8 * 1024 * 1024, end - offset), offset)
+            if not data:
+                raise StateError("snapshot truncated while hashing")
+            digest.update(data)
+            offset += len(data)
+        return digest.hexdigest()
+
+    with concurrent.futures.ThreadPoolExecutor(HASH_THREADS) as pool:
+        chunks = list(pool.map(one, range(_chunk_count(size, chunk_bytes))))
+    return {"size": size, "digest_schema": DIGEST_SCHEMA, "chunk_bytes": chunk_bytes,
+            "chunk_sha256": chunks, "chunked_digest": _chunked_digest(size, chunk_bytes, chunks)}
+
+
+def _entry_chunked(info):
+    """True for a well-formed chunked entry, False for a whole-file entry."""
+    if "digest_schema" not in info:
+        if set(info) != {"size", "sha256"}:
+            raise StateError("malformed file digest entry")
+        return False
+    if (set(info) != {"size", "digest_schema", "chunk_bytes", "chunk_sha256", "chunked_digest"}
+            or info["digest_schema"] != DIGEST_SCHEMA or type(info["size"]) is not int
+            or info["size"] < CHUNK_THRESHOLD or info["chunk_bytes"] != CHUNK_BYTES
+            or not isinstance(info["chunk_sha256"], list)
+            or len(info["chunk_sha256"]) != _chunk_count(info["size"], info["chunk_bytes"])
+            or not all(_digest(c) for c in info["chunk_sha256"])
+            or info["chunked_digest"] != _chunked_digest(info["size"], info["chunk_bytes"], info["chunk_sha256"])):
+        raise StateError("malformed chunked digest entry")
+    return True
+
+
+def _manifest_schema(manifest):
+    """Large-file digest format of a manifest: DIGEST_SCHEMA, "legacy" or None (no large file)."""
+    found = set()
+    for info in manifest["files"].values():
+        if _entry_chunked(info):
+            found.add(DIGEST_SCHEMA)
+        elif info["size"] >= CHUNK_THRESHOLD:
+            found.add("legacy")
+    if len(found) > 1:
+        raise StateError("mixed file digest formats")
+    return found.pop() if found else None
+
+
+def _inventory(directory, *, cache=None, identities=None, chunked=None, only=None):
+    """``chunked`` is None for a new commit (COMMIT_CHUNKED decides) or a
+    name -> bool map that reproduces an existing manifest's entry formats."""
     result = {}
     hashed = False
     for path in sorted(directory.rglob("*")):
@@ -361,6 +502,8 @@ def _inventory(directory, *, cache=None, identities=None):
         if not stat.S_ISREG(path.lstat().st_mode):
             raise StateError("nonregular snapshot file")
         name = str(path.relative_to(directory))
+        if only is not None and not only(name):
+            continue
         fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
         with os.fdopen(fd, "rb") as stream:
             before = os.fstat(stream.fileno())
@@ -370,14 +513,19 @@ def _inventory(directory, *, cache=None, identities=None):
                 if identities is not None:
                     identities[name] = cached[0]
                 continue
-            digest = hashlib.sha256()
-            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                digest.update(chunk)
+            large = before.st_size >= CHUNK_THRESHOLD
+            if (COMMIT_CHUNKED and large) if chunked is None else chunked.get(name, False):
+                info = _hash_chunks(stream.fileno(), before.st_size)
+            else:
+                digest = hashlib.sha256()
+                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(chunk)
+                info = {"size": before.st_size, "sha256": digest.hexdigest()}
             os.fsync(stream.fileno())
             after = os.fstat(stream.fileno())
         if _stat_identity(before) != _stat_identity(after):
             raise StateError("snapshot changed while hashing")
-        result[name] = {"size": after.st_size, "sha256": digest.hexdigest()}
+        result[name] = info
         hashed = True
         if identities is not None:
             identities[name] = _stat_identity(after)
@@ -430,7 +578,8 @@ def _validate_token(owner, gid, *, content=False):
     marker = _check_files(directory, token, manifest)
     if content:
         # Only a generation that recovery will actually load is content-hashed.
-        if marker is not None or manifest["files"] != _inventory(_path(directory, "checkpoint")):
+        chunked = {name: _entry_chunked(info) for name, info in manifest["files"].items()}
+        if marker is not None or manifest["files"] != _inventory(_path(directory, "checkpoint"), chunked=chunked):
             raise StateError("corrupt token or snapshot")
     return token, manifest
 
@@ -463,6 +612,8 @@ def _head(owner, control, *, verify_head_content=False):
                 if token["run_nonce"] != control["run_nonce"] or manifest["config_sha256"] != control["config_sha256"]:
                     raise StateError("token run/config mismatch")
                 tokens[directory.name] = (token, manifest)
+    if len({_manifest_schema(m) for _, m in tokens.values()} - {None}) > 1:
+        raise StateError("mixed file digest formats in committed chain")
     head, _ = _chain(tokens)
     if verify_head_content and head is not None:
         _validate_token(owner, head["generation"], content=True)
@@ -610,7 +761,7 @@ def _complete(owner, gid, *, cache=None, identities=None):
 
 
 def commit_generation(owner, generation, *, prehashed=None):
-    with _locked(owner) as control:
+    with _locked(owner, write=True) as control:
         head, tokens = _head(owner, control)
         if generation in tokens:
             return tokens[generation][0]
@@ -641,6 +792,9 @@ def commit_generation(owner, generation, *, prehashed=None):
         if _identities(checkpoint) != identities:
             raise StateError("checkpoint changed after finalization")
         manifest = dict(intent, files=files, receipts=receipts)
+        schemas = {_manifest_schema(m) for _, m in tokens.values()} | {_manifest_schema(manifest)}
+        if len(schemas - {None}) > 1:
+            raise StateError("mixed file digest formats in committed chain")
         _write(_path(directory, "manifest.json"), manifest)
         token = {"schema": 1, "run_nonce": control["run_nonce"], "generation": generation,
                  "parent": head, "intent_sha256": _hash(_bytes(intent)), "manifest_sha256": _hash(_bytes(manifest)),

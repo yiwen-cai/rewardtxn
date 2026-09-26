@@ -4,11 +4,31 @@ A generation may carry a ``pruned.json`` marker (R_SLOWDOWN_FIX_PLAN v2, L3):
 bulk DCP shards listed there were removed after later commits. A file missing
 without such a marker is unverifiable and fails the audit.
 """
+import hashlib
 import json
 
 
 def _bulk(name):
     return name.startswith('native/') and name.endswith('.distcp')
+
+
+CHUNKED_SCHEMA = 'sha256-chunked-v1'
+
+
+def file_matches(path, info, sha):
+    """Independent check of either manifest file format (whole-file or chunked)."""
+    if 'digest_schema' not in info:
+        return set(info) == {'size', 'sha256'} and sha(path) == info['sha256']
+    assert info['digest_schema'] == CHUNKED_SCHEMA, 'unknown digest schema'
+    size, step, chunks = info['size'], info['chunk_bytes'], info['chunk_sha256']
+    assert len(chunks) == -(-size // step), 'chunk count'
+    bound = hashlib.sha256(CHUNKED_SCHEMA.encode() + b'\0' + size.to_bytes(8, 'big') + step.to_bytes(8, 'big')
+                           + b''.join(bytes.fromhex(c) for c in chunks)).hexdigest()
+    assert bound == info['chunked_digest'], 'chunked digest binding'
+    with open(path, 'rb') as stream:
+        actual = [hashlib.sha256(stream.read(step)).hexdigest() for _ in chunks]
+        assert stream.read(1) == b'', 'trailing bytes'
+    return actual == chunks
 
 
 def check_files(directory, token, manifest, sha, *, pinned=()):
@@ -33,7 +53,7 @@ def check_files(directory, token, manifest, sha, *, pinned=()):
     size = 0
     for name, path in files.items():
         info = expected[name]
-        assert path.stat().st_size == info['size'] and sha(path) == info['sha256'], name
+        assert path.stat().st_size == info['size'] and file_matches(path, info, sha), name
         size += info['size']
     return size, len(files), len(missing)
 

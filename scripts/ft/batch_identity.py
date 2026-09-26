@@ -49,6 +49,9 @@ class IdentityBridge:
         self.blobs = BlobStore(self.root / 'blobs')
         self.io = ThreadPoolExecutor(max_workers=1, thread_name_prefix='r-identity')
         self.intent = None
+        # Per-update memo of fully verified identity records (training thread
+        # only). Authority is still re-checked on every use via _current().
+        self._resolved = {}
 
     def close(self):
         self.io.shutdown(wait=True)
@@ -109,6 +112,15 @@ class IdentityBridge:
         self._current(record)
         return record, tensors
 
+    def resolve_verified(self, sha):
+        """Training-side _resolve memoized within one update."""
+        found = self._resolved.get(sha)
+        if found is None:
+            found = self._resolved[sha] = self._resolve(sha)
+        else:
+            self._current(found[0])
+        return found
+
     def _attach(self, data, index, tensors):
         sample = data['_r_draw']['group_id'] + ':' + str(index)
         with state._locked(self.owner) as control:
@@ -133,9 +145,9 @@ class IdentityBridge:
         index = workflow_context.get().sample_idx
         tensors = await self.workflow.arun_episode(engine, data)
         result, record = await asyncio.get_running_loop().run_in_executor(self.io, self._attach, data, index, tensors)
-        # Only the small current-owner/CAS read after await; full blobs and
-        # tensor comparison stay in the single dedicated I/O worker.
-        self._current(record)
+        # Current-owner/CAS re-read after await, on the I/O worker so the event
+        # loop never blocks on mutation.lock.
+        await asyncio.get_running_loop().run_in_executor(self.io, self._current, record)
         return result
 
     def validate_rows(self, data):
@@ -158,7 +170,7 @@ class IdentityBridge:
                     raise ArtifactError('nonconstant row identity')
                 words.append(values[0].item())
             sha = struct.pack('>4q', *words).hex()
-            record, original = self._resolve(sha)
+            record, original = self.resolve_verified(sha)
             # These structural inputs stay unchanged through PPO advantage transforms.
             for key in ('input_ids', 'versions'):
                 actual = data[key][row][mask[row]].detach().cpu()
@@ -192,6 +204,7 @@ class IdentityBridge:
 
     def begin_update(self, trajectories, config):
         """Validate complete K once, before native PPO splits microbatches."""
+        self._resolved = {}
         rows = [row for trajectory in trajectories for row in self.validate_rows(trajectory)]
         samples = [row['sample'] for row in rows]
         if len(samples) != len(set(samples)):

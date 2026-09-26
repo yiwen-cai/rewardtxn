@@ -9,10 +9,12 @@ import dataclasses
 import hashlib
 import os
 from pathlib import Path
+import threading
 
 import numpy as np
 import torch
 
+from . import perf_probe
 from . import state
 from . import writer_recovery
 from .batch_identity import strip_identity
@@ -70,11 +72,24 @@ def native_snapshot(engine):
     return result
 
 
+def _normalized_leaf_r(value):
+    """``normalized`` for one leaf, hashing the tensor buffer in place instead
+    of via an extra ``tobytes()`` copy. Output is identical."""
+    if isinstance(value, torch.Tensor):
+        tensor = value.detach().contiguous().cpu()
+        return {'shape': list(tensor.shape), 'dtype': str(tensor.dtype),
+                'sha256': hashlib.sha256(tensor.reshape(-1).view(torch.uint8).numpy()).hexdigest()}
+    if isinstance(value, np.ndarray) and value.flags['C_CONTIGUOUS']:
+        return {'shape': list(value.shape), 'dtype': str(value.dtype),
+                'sha256': hashlib.sha256(value.reshape(-1).view(np.uint8)).hexdigest()}
+    return normalized(value)
+
+
 def _normalized_async(value, pool):
     """Mirror of ``normalized`` whose tensor hashes run in ``pool``."""
     from megatron.core.dist_checkpointing.mapping import LocalNonpersistentObject
     if isinstance(value, (LocalNonpersistentObject, torch.Tensor, np.ndarray)):
-        return pool.submit(normalized, value)
+        return pool.submit(_normalized_leaf_r, value)
     if isinstance(value, dict):
         return {str(k): _normalized_async(v, pool) for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))}
     if isinstance(value, (tuple, list)):
@@ -100,10 +115,55 @@ SNAPSHOT_THREADS = 8
 def native_snapshot_r(engine):
     """R-only copy of ``native_snapshot`` with per-tensor hashing in parallel.
     Output is byte-identical; the shared observer keeps the serial original."""
-    state_dict = engine.checkpointer.generate_state_dict(with_optimizer=True, with_rng=True)
-    with concurrent.futures.ThreadPoolExecutor(SNAPSHOT_THREADS) as pool:
-        result = _resolve(_normalized_async(state_dict, pool))
+    return snapshot_of(engine.checkpointer.generate_state_dict(with_optimizer=True, with_rng=True))
+
+
+def snapshot_of(state_dict):
+    """Signature of an already captured native state dict (see native_snapshot_r)."""
+    with perf_probe.span('r.native_snapshot'):
+        with concurrent.futures.ThreadPoolExecutor(SNAPSHOT_THREADS) as pool:
+            result = _resolve(_normalized_async(state_dict, pool))
     return _check_snapshot(result)
+
+
+def _writer_exited(pid):
+    """Read-only /proc check (never waitpid: finalize owns reaping)."""
+    try:
+        raw = Path(f'/proc/{pid}/stat').read_text()
+    except FileNotFoundError:
+        return True
+    return raw[raw.rfind(')') + 2:].split()[0] in ('Z', 'X')
+
+
+HASH_WAIT_SECONDS = 900
+
+
+class _Hasher(threading.Thread):
+    """Speculative off-path work for one pending generation: once the forked
+    DCP writer has exited (or the barrier says finalize succeeded), hash the
+    bulk shards and the captured state. No collectives, no AsyncCallsQueue
+    access; any failure only means the barrier recomputes synchronously."""
+
+    def __init__(self, checkpoint, writer_pid, state_dict):
+        super().__init__(name='r-commit-hasher', daemon=True)
+        self.checkpoint, self.writer_pid, self.state_dict = checkpoint, writer_pid, state_dict
+        self.finalized = threading.Event()
+        self.prehashed = self.signature = self.error = None
+
+    def run(self):
+        try:
+            self.signature = snapshot_of(self.state_dict)
+        except BaseException as exc:  # recomputed at the barrier
+            self.error = exc
+        try:
+            while not self.finalized.is_set():
+                if self.writer_pid is not None and _writer_exited(self.writer_pid):
+                    break
+                self.finalized.wait(0.05)
+            self.prehashed = state.prehash(self.checkpoint, only=prunable)
+        except BaseException as exc:
+            self.error = self.error or exc
+            self.prehashed = None
 
 
 def _check_snapshot(result):
@@ -148,6 +208,7 @@ class Runtime:
         self.finalized_ids = []
         self.scheduled_ids = []
         self.closed = False
+        self.pending = None
         self.pin_first_commit = False
         self.config_hash = digest(dataclasses.asdict(config))
         self.root.mkdir(parents=True, exist_ok=True)
@@ -216,17 +277,23 @@ class Runtime:
         def scheduled(request):
             result = schedule(request)
             self.scheduled_ids.append(result)
-            self.event('async_scheduled', call_id=result, generation=self.generation)
+            self.event('async_scheduled', call_id=result, generation=self._io_generation())
             return result
         def finalized(*args, **kwargs):
             result = finalize(*args, **kwargs)
             self.finalized_ids.extend(result)
             for call_id in result:
-                self.event('async_finalized', call_id=call_id, generation=self.generation)
+                self.event('async_finalized', call_id=call_id, generation=self._io_generation())
             return result
         queue.schedule_async_request, queue.maybe_finalize_async_calls = scheduled, finalized
+        if getattr(queue, 'persistent', False):
+            raise RuntimeError('deferred commit requires a non-persistent (per-save fork) DCP writer')
+
+    def _io_generation(self):
+        return self.pending['generation'] if self.pending is not None else self.generation
 
     def begin(self, trajectories):
+        self.settle()
         if self.generation is not None or self.update is not None:
             raise RuntimeError('previous update not committed')
         self.update = self.bridge.begin_update(trajectories, dataclasses.asdict(self.config.actor))
@@ -237,7 +304,7 @@ class Runtime:
         rows = self.update['rows']
         groups = {}
         for row in rows:
-            record, _ = self.bridge._resolve(row['identity'])
+            record, _ = self.bridge.resolve_verified(row['identity'])
             draw = row['draw']; group = draw['group_id']
             prompt = {k: v for k, v in record['data'].items() if k != '_r_draw'}
             if group not in groups:
@@ -260,15 +327,18 @@ class Runtime:
         self.event('update_prepared', generation=self.generation, samples=[r['sample'] for r in rows])
         return clean
 
-    def writer_gate(self, pending):
-        value = writer_recovery.pending_gate(self.owner, self.generation) if pending else {
+    def writer_gate(self, pending, generation=None):
+        generation = self.generation if generation is None else generation
+        value = writer_recovery.pending_gate(self.owner, generation) if pending else {
             'pending': False, 'pid_namespace': os.stat('/proc/self/ns/pid').st_ino,
-            'generation': self.generation}
+            'generation': generation}
         state._write(self.root / 'writer.json', value, immutable=False)
 
     def save(self, handler, original_dump, engine, step_info, *args, **kwargs):
         if self.generation is None or self.optimizer_stats is None or not self.scheduler_done:
             raise RuntimeError('save lacks successful optimizer and scheduler')
+        if self.pending is not None:
+            raise RuntimeError('previous generation not settled')
         checkpoint = self.owner.root / 'generations' / self.generation / 'checkpoint'
         checkpoint.mkdir()
         # Bind the entire job before any async writer can fork. Recovery needs
@@ -277,46 +347,91 @@ class Runtime:
         self.io_checkpoint = checkpoint
         before = len(self.scheduled_ids)
         original_dump(handler, engine, step_info, *args, **kwargs)
-        self.actor.checkpointer.wait_async_saves()
         scheduled = self.scheduled_ids[before:]
-        if len(scheduled) != 1 or not set(scheduled) <= set(self.finalized_ids):
-            raise RuntimeError('missing actual async request/finalize identity')
-        # Hash the finalized checkpoint while R snapshots the in-memory state;
-        # commit reuses these digests only for unchanged stat identities.
-        with concurrent.futures.ThreadPoolExecutor(1) as pool:
-            prehashed = pool.submit(state.prehash, checkpoint)
-            signature = native_snapshot_r(self.actor)
-            prehashed = prehashed.result()
-        _publish(checkpoint / 'native-state.json', _encode(signature), 'native_state')
-        _publish(checkpoint / 'policy.json', _encode({'version': self.actor.get_version(),
-            'step_info': dataclasses.asdict(step_info), 'optimizer': self.optimizer_stats}), 'policy')
-        snapshot_id = self.update['physical_invocation_id']
-        state.record_evidence(self.owner, self.generation, {'kind': 'optimizer', 'snapshot_id': snapshot_id,
-            'physical_updates': [snapshot_id], 'successful': True, 'scheduler_applied': True})
-        state.record_evidence(self.owner, self.generation, {'kind': 'finalize', 'snapshot_id': snapshot_id,
-            'rank': 'actor:0', 'writer_closed': True, 'async_call_ids': scheduled})
-        # Writers are finished; checkpoint inventory is fsynced and hashed by
-        # state.commit_generation before the token becomes consumption authority.
-        self.writer_gate(False)
-        token = state.commit_generation(self.owner, self.generation, prehashed=prehashed)
-        with state._locked(self.owner) as control:
-            _, chain = state._head(self.owner, control)
-            self.loader.consumed = set(chain[self.generation][1]['data']['consumed'])
-        self.event('committed', generation=self.generation, token=token, global_step=step_info.global_step)
-        if self.pin_first_commit:
-            state.pin_generation(self.owner, self.generation, 'first_commit_after_recovery')
-            self.pin_first_commit = False
-        removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
-        if removed:
-            self.event('pruned', generation=self.generation, removed_bytes=removed)
+        if len(scheduled) != 1:
+            raise RuntimeError('missing actual async request identity')
+        writer_pid = None
+        try:
+            writer_pid = self.actor.checkpointer._async_queue.async_calls[-1].async_caller.process.pid
+        except (AttributeError, IndexError):
+            pass  # hasher then waits for the barrier's finalize
+        # Everything the commit needs is captured by value on the main thread,
+        # at the same point the synchronous version captured it (no optimizer,
+        # scheduler or RNG use happens between dump and this capture).
+        state_dict = self.actor.checkpointer.generate_state_dict(with_optimizer=True, with_rng=True)
+        hasher = _Hasher(checkpoint, writer_pid, state_dict)
+        self.pending = {'generation': self.generation, 'checkpoint': checkpoint, 'scheduled': scheduled,
+            'snapshot_id': self.update['physical_invocation_id'], 'hasher': hasher,
+            'policy': {'version': self.actor.get_version(), 'step_info': dataclasses.asdict(step_info),
+                       'optimizer': self.optimizer_stats},
+            'global_step': step_info.global_step}
+        hasher.start()
         self.generation = self.update = None
         if self.stop_after is not None and step_info.global_step + 1 == self.stop_after:
+            self.settle()
             raise TrainingStop()
+
+    def settle(self):
+        """Commit barrier for the pending generation, on the main thread: at the
+        next begin, before train() returns, or at close. Finalize (a collective)
+        stays here; the hasher only did speculative, verifiable hashing."""
+        pending = self.pending
+        if pending is None:
+            return
+        self.pending = None
+        hasher = pending['hasher']
+        try:
+            with perf_probe.span('r.settle_finalize'):
+                self.actor.checkpointer.wait_async_saves()
+            if not set(pending['scheduled']) <= set(self.finalized_ids):
+                raise RuntimeError('missing actual async request/finalize identity')
+        finally:
+            hasher.finalized.set()
+        with perf_probe.span('r.settle_join'):
+            hasher.join(HASH_WAIT_SECONDS)
+        if hasher.is_alive():
+            raise RuntimeError('commit hasher did not finish')
+        signature = hasher.signature
+        if signature is None:
+            signature = snapshot_of(hasher.state_dict)
+        generation, checkpoint = pending['generation'], pending['checkpoint']
+        with perf_probe.span('r.settle_commit'):
+            _publish(checkpoint / 'native-state.json', _encode(signature), 'native_state')
+            _publish(checkpoint / 'policy.json', _encode(pending['policy']), 'policy')
+            snapshot_id = pending['snapshot_id']
+            state.record_evidence(self.owner, generation, {'kind': 'optimizer', 'snapshot_id': snapshot_id,
+                'physical_updates': [snapshot_id], 'successful': True, 'scheduler_applied': True})
+            state.record_evidence(self.owner, generation, {'kind': 'finalize', 'snapshot_id': snapshot_id,
+                'rank': 'actor:0', 'writer_closed': True, 'async_call_ids': pending['scheduled']})
+            # Writers are finished; checkpoint inventory is fsynced and hashed by
+            # state.commit_generation before the token becomes consumption authority.
+            self.writer_gate(False, generation)
+            token = state.commit_generation(self.owner, generation, prehashed=hasher.prehashed)
+            with state._locked(self.owner) as control:
+                _, chain = state._head(self.owner, control)
+                self.loader.consumed = set(chain[generation][1]['data']['consumed'])
+        self.event('committed', generation=generation, token=token, global_step=pending['global_step'])
+        if self.pin_first_commit:
+            state.pin_generation(self.owner, generation, 'first_commit_after_recovery')
+            self.pin_first_commit = False
+        with perf_probe.span('r.prune'):
+            removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
+        if removed:
+            self.event('pruned', generation=generation, removed_bytes=removed)
+
+    def abandon_pending(self):
+        """Without a live engine the pending generation stays uncommitted;
+        recovery resolves it. Only the hasher thread is joined."""
+        pending, self.pending = self.pending, None
+        if pending is not None:
+            pending['hasher'].finalized.set()
+            pending['hasher'].join(HASH_WAIT_SECONDS)
 
     def close(self):
         if self.closed:
             return
         self.closed = True
+        self.abandon_pending()
         if self.bridge is not None:
             self.bridge.close()
         if self.workflow is not None:
@@ -377,6 +492,24 @@ def install(runtime):
             return runtime.save(self, RecoverHandler.dump, engine, step_info, *args, **kwargs)
 
     trainer_module.RecoverHandler = RRecoverHandler
+    original_trainer_train = trainer_cls.train
+    def train(self, *args, **kwargs):
+        # Deferred commit reads captured live tensors until the barrier; any
+        # post-save offload/colocation swap would race with that.
+        if self._should_offload_actor or self._is_v1_awex_colocate(self.config):
+            raise RuntimeError('deferred commit requires no actor offload or colocation')
+        try:
+            result = original_trainer_train(self, *args, **kwargs)
+        except BaseException:
+            try:
+                runtime.settle()
+            except BaseException as exc:
+                runtime.event('pending_commit_failed', error=type(exc).__name__)
+                runtime.abandon_pending()
+            raise
+        runtime.settle()
+        return result
+    trainer_cls.train = train
     original_ppo = MegatronPPOActor.ppo_update
     def ppo(self, trajectories, *args, **kwargs):
         runtime.begin(trajectories)

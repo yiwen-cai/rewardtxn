@@ -150,11 +150,14 @@ class TrainingBridge(IdentityBridge, RolloutWorkflow):
 
     def authorize(self, data):
         current_version = self.version()
-        for index in range(data['_r_draw']['k']):
-            sample = data['_r_draw']['group_id'] + ':' + str(index)
-            with state._locked(self.owner) as control:
-                old = copy.deepcopy(control['attempts'].get(sample))
-                receipt = copy.deepcopy(control['accepted'].get(sample))
+        samples = [data['_r_draw']['group_id'] + ':' + str(index) for index in range(data['_r_draw']['k'])]
+        # One read for the whole group; one all-or-nothing write below.
+        with state._locked(self.owner) as control:
+            seen = {sample: (copy.deepcopy(control['attempts'].get(sample)),
+                             copy.deepcopy(control['accepted'].get(sample))) for sample in samples}
+        requests, reused = [], {}
+        for sample in samples:
+            old, receipt = seen[sample]
             if old is not None and old['epoch'] == self.owner.epoch:
                 self.workflow.attempts[sample] = old
                 continue
@@ -168,10 +171,13 @@ class TrainingBridge(IdentityBridge, RolloutWorkflow):
                 reusable = bool(versions) and all(type(v) is int and 0 <= current_version - v <= self.max_lag
                                                  for v in versions)
             version = old['versions']['policy_version'] if reusable else current_version
-            attempt = state.authorize_attempt(self.owner, sample, None if old is None else old['attempt'],
-                                              uuid.uuid4().hex, expected_policy_version=version)
+            requests.append((sample, None if old is None else old['attempt'], uuid.uuid4().hex, version))
             if reusable:
-                self.workflow.origins[sample] = receipt
+                reused[sample] = receipt
+        for attempt in state.authorize_attempts(self.owner, requests):
+            sample = attempt['sample']
+            if sample in reused:
+                self.workflow.origins[sample] = reused[sample]
             self.workflow.attempts[sample] = attempt
 
     def validate_rows(self, data):
