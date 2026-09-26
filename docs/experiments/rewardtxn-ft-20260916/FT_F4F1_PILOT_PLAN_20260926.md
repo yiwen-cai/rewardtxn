@@ -84,3 +84,32 @@
    - 确认重启时会产生 job-lifecycle 回执。
 7. **接入清单补全**：`run_ft_minimal`（场景白名单、F2 专用检查）、`areal_pilot_hooks`、`check_ft1_fault`、`check_ft1_chain`/`check_training_*` 在 F4/F1 下的回归、`finalize_ft1_fault` 新字段，以及相应的 CPU 测试。
 8. **决策规则与预算上限**：试点最多 4 对、10 GPU·h；技术无效每对最多补做一次；超出预算即停。
+
+## 7. v1.2：F4 改为"评分进行中杀训练进程"（F4'，用户 2026-09-26 决定）
+
+**动机**：审计确认，原 F4（杀评分子进程）会被严格评分的原生重试吸收，两臂都只多评一次，测到的不是恢复能力。
+
+**F4' 切点**
+- 在两臂共用的父进程包装 `RLVRWorkflow._compute_rewards` 返回处计数。目标组 `source_row_id=5518` 的 8 条回答都已生成，且第 4 条的评分结果已返回到 workflow（父进程）时，trainer 客户端发出 ready，控制器 SIGKILL 整个 trainer 进程。rollout 与评分都在 trainer 进程内。
+- 实现复用 F2 的 trainer 目标（`Client('trainer')`，在 install 时注册）。契约改为：`event_id=ft1-f4t-trainer`、`target=trainer`，evidence 为 `{phase: 'fourth_target_score_returned', source_row_id: 5518, k: 8, ordinal: 4}`。
+- 原 F4 契约保留，不删除。
+- 两臂杀的是同一类进程、同一个逻辑切点，损失范围相同：当前所有在途的生成与评分全部丢失，训练器重启一次（`retries: 1`）。
+
+**对称性说明（如实登记）**
+- 切点处，R 可能已持久化前 3 条的 reward 阶段产物和若干条 response，第 4 条的 reward 在切点之后才写，因此随进程丢失。
+- A 不持久化任何 rollout 中间结果。
+- R 的优势正是来自这种差异，属于被测对象。
+
+**RTO 与目标行**
+- 目标行：5518 组。
+- A 端点：§1 与 §6.1 的"首次瞬时完整"下界。
+- R 端点：沿 token 链累计，首个使目标组进入保留链的提交。
+
+**恢复代价分解**：两臂分别统计目标组在故障后的重生成次数、重评分次数和采纳次数（R 的 adoption）。
+
+**试点判据补充**
+- `valid_hit`、trainer 确实重启；
+- 两臂都能测出端点；
+- R 至少采纳 1 条先前的 response 或 reward。若 R 的采纳次数为 0，报告原因（例如 max_head_offpolicyness 使旧回答过期），不进入正式矩阵。
+
+**不变的部分**：F1 各项、试点规模（F4' 2 对 + F1 2 对、上限 10 GPU·h）、决策规则。
