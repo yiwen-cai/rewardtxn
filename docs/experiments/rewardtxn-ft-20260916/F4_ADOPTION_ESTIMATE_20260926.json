@@ -1,0 +1,22 @@
+[
+ {
+  "run": "gate2-nofault-g01-s9225-20260926-r",
+  "cut_points": 504,
+  "inflight_accepted_median": 96.0,
+  "reusable_median": 96.0,
+  "reusable_mean": 86.97,
+  "share_cuts_with_any_reusable": 0.998,
+  "rejected_version_ahead_median": 0.0,
+  "reusable_fraction_of_inflight": 0.989
+ },
+ {
+  "run": "gate2-nofault-g02-s6707-20260926-r",
+  "cut_points": 464,
+  "inflight_accepted_median": 96.0,
+  "reusable_median": 96.0,
+  "reusable_mean": 88.62,
+  "share_cuts_with_any_reusable": 0.998,
+  "rejected_version_ahead_median": 0.0,
+  "reusable_fraction_of_inflight": 0.978
+ }
+]
