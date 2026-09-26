@@ -107,3 +107,30 @@
 ## 4. 流程
 
 本方案 → 独立审计 → 用户批准 → 实现（`.bak` 备份）→ CPU 验证 → GPU 门控（约 3–4 GPU·h，另行批准）。
+
+## 5. v1.1 修订：落实[审计](R_PERF_PHASE2_PLAN_AUDIT.md) 9 条必改项
+
+1. **快照一致性**：`save(k)` 在主线程按值捕获全部非张量组件，包括 RNG（含 tracker/Generator 状态拷贝）、scheduler、`param_groups`、step；hasher 只对张量做哈希。张量为活引用，在 optimizer(k+1) 之前不会被修改，B1 保持在 optimizer 前。新增测试：B1 前推进 RNG、改动 scheduler 容器，快照结果不变。
+2. **B1 的完成条件**：`native-state.json` 已持久发布，而不只是快照算完。hasher 失败时由主线程补算并发布。
+3. **finalize 包装**：只在 finalize 正常返回后写 finalize evidence 与 `writer_gate(False)`，并按 `save` 时登记的 call_id→代 映射找到对应代，不用"当前代"。
+4. **prepare 对 P 的约束写明**：
+   - P 属本 epoch/owner；P 与新代样本不相交；新代 drawn 以 P 的 drawn 为前缀；`intent_sha256` 按 intent.json 原始字节计算；
+   - prepare、commit、select_recovery 的 parent 检查分别处理两种形式；
+   - c1 提交失败时 c2 必须写 abandoned。
+5. **`loader.consumed` 只增不减**：B2 提交第 k 代后不能把视图覆盖回第 k 代（此时已含第 k+1 代的待决样本）。
+6. **验收工具**：
+   - 恢复提升某代时，由恢复进程写 `committed` 事件，带 `via='recovery'`；
+   - `check_training_fault` / `check_training_integration` 中的 parent 相等断言，改为同时接受 pending 形式（校验 intent 摘要）；
+   - 单 pid 六事件的断言，对 `via='recovery'` 的代放宽为"训练进程五事件 + 恢复进程 committed"；
+   - 复核 `check_ft1_chain`、`finalize_ft1_fault` 的端点语义；
+   - 四个工具在 CPU 上用构造的证据回归。
+7. **prune**：
+   - 分片删除保留在锁内，放弃"锁外删除"。审计已指出锁外删除会与 `_head` 枚举竞态；阶段 1 审计#12 就此撤回。
+   - 整个 prune 调用交给后台单线程，同一时刻至多一个；`close`、结束路径以及下一次 B2 之前都要先 join。
+   - 锁内删除会阻塞 rollout 的 flock 约 0.8 s/步，这一点如实登记。
+8. **性能登记改为 1.05–1.25**。门控改为无故障 2 对 + F2 1 对，报告每步中位数（约 5 GPU·h）。
+9. **补充 CPU 测试**：
+   - F2 式序列：B1 → optimizer → 钩子 drain → SIGKILL，应提升第 0 代、放弃第 1 代；
+   - hasher 发布前被杀，该代被放弃；
+   - finalize 抛异常时不写 evidence；
+   - 后台 prune 与 prepare 并发不出错。
