@@ -1,0 +1,62 @@
+{
+ "r.b1_wait": {
+  "count": 10,
+  "max_wall_s": 0.5571399020263925,
+  "thread_cpu_s": 0.0003197750000154542,
+  "wall_s": 0.5574028861010447
+ },
+ "r.native_snapshot": {
+  "count": 10,
+  "max_wall_s": 5.900375703931786,
+  "thread_cpu_s": 0.286097632,
+  "wall_s": 52.99543170782272
+ },
+ "r.prune": {
+  "count": 10,
+  "max_wall_s": 1.2296199080301449,
+  "thread_cpu_s": 7.535019109,
+  "wall_s": 8.706517009879462
+ },
+ "r.settle_commit": {
+  "count": 10,
+  "max_wall_s": 0.317580803995952,
+  "thread_cpu_s": 0.9364771149999811,
+  "wall_s": 1.3806895457673818
+ },
+ "r.settle_finalize": {
+  "count": 10,
+  "max_wall_s": 5.4190641769673675,
+  "thread_cpu_s": 2.8270947279999845,
+  "wall_s": 24.59117560798768
+ },
+ "r.settle_join": {
+  "count": 10,
+  "max_wall_s": 2.3486617068992928,
+  "thread_cpu_s": 0.0018315109999917922,
+  "wall_s": 20.40850571996998
+ },
+ "rlvr.io": {
+  "count": 3328,
+  "max_wall_s": 1.4928200929425657,
+  "thread_cpu_s": 31.00028450700004,
+  "wall_s": 120.45037103851791
+ },
+ "state.flock_wait": {
+  "count": 10607,
+  "max_wall_s": 1.1736924410797656,
+  "thread_cpu_s": 0.15699143199995677,
+  "wall_s": 18.82063678477425
+ },
+ "state.json_parse": {
+  "count": 1373,
+  "max_wall_s": 0.08476957096718252,
+  "thread_cpu_s": 6.227302592999995,
+  "wall_s": 6.327763804700226
+ },
+ "state.prehash": {
+  "count": 10,
+  "max_wall_s": 3.4477930900175124,
+  "thread_cpu_s": 0.21729680800000017,
+  "wall_s": 23.913937811390497
+ }
+}
