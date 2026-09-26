@@ -418,6 +418,7 @@ class Runtime:
             removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
         if removed:
             self.event('pruned', generation=generation, removed_bytes=removed)
+        perf_probe.dump()  # the trainer may later be SIGTERMed without atexit
 
     def abandon_pending(self):
         """Without a live engine the pending generation stays uncommitted;
@@ -432,6 +433,7 @@ class Runtime:
             return
         self.closed = True
         self.abandon_pending()
+        perf_probe.dump()
         if self.bridge is not None:
             self.bridge.close()
         if self.workflow is not None:

@@ -23,13 +23,19 @@ def sha256(path):
 
 
 def check_freeze(freeze, base):
-    assert freeze['formal_sample'] is True
     assert freeze['pilot_peak_bytes'] + 20 * 1024**3 == freeze['minimum_free_bytes']
-    assert len(freeze['pairs']) == 13
-    assert [p['scenario'] for p in freeze['pairs']] == ['F2'] * 10 + ['no_fault'] * 3
-    assert len({p['seed'] for p in freeze['pairs']}) == 13
     assert len(freeze['devices']) == len(set(freeze['devices'])) == 4
-    assert 0 <= freeze['retain_full_pair_index'] < 10
+    if freeze.get('kind') == 'perf_gate':
+        # R_PERF_REDESIGN gate: engineering pairs, never formal samples.
+        assert freeze['formal_sample'] is False and freeze['retain_full_pair_index'] is None
+        assert sorted(p['scenario'] for p in freeze['pairs']) == ['F2', 'no_fault']
+        assert len({p['seed'] for p in freeze['pairs']}) == 2
+    else:
+        assert freeze['formal_sample'] is True
+        assert len(freeze['pairs']) == 13
+        assert [p['scenario'] for p in freeze['pairs']] == ['F2'] * 10 + ['no_fault'] * 3
+        assert len({p['seed'] for p in freeze['pairs']}) == 13
+        assert 0 <= freeze['retain_full_pair_index'] < 10
     source_path = base / freeze['source_map_file']
     assert sha256(source_path) == freeze['source_map_sha256']
     for name, expected in json.loads(source_path.read_text()).items():
@@ -49,7 +55,7 @@ def run_pair(freeze_path, freeze, index):
             return old
         raise FileExistsError(f'existing incomplete or mismatched pair: {pair_path}')
     record = {'name': name, 'scenario': item['scenario'], 'seed': item['seed'],
-              'order': item['order'], 'devices': freeze['devices'], 'formal_sample': True,
+              'order': item['order'], 'devices': freeze['devices'], 'formal_sample': freeze['formal_sample'],
               'freeze_sha256': sha256(freeze_path), 'status': 'running', 'runs': []}
     write(pair_path, record)
     for arm in item['order']:
@@ -66,7 +72,8 @@ def run_pair(freeze_path, freeze, index):
             case = {'minimal': True, 'arm': arm, 'seed': item['seed'],
                     'devices': freeze['devices'], 'scenario': item['scenario'],
                     'steps': 10, 'f2_ordinal': 2, 'pointwise_autotune_off': True,
-                    'formal_sample': True, 'recovery_observation_seconds': 900}
+                    'formal_sample': freeze['formal_sample'], 'recovery_observation_seconds': 900,
+                    'perf_probe': bool(freeze.get('perf_probe'))}
             monitor = DiskMonitor(base)
             try:
                 with monitor:

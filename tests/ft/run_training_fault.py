@@ -92,6 +92,8 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
             env['FT_DCP_DIAG_PRESYNC']='1' if ft1.get('dcp_diag_presync') else '0'
             if ft1.get('dcp_diag_blocking_copy'):
                 env['FT_DCP_DIAG_BLOCKING_COPY']='1'
+        if ft1.get('perf_probe'):
+            env['RTX_PERF_PROBE']='/output/perf-probe'
         if ft1.get('cuda_launch_blocking'):
             env['CUDA_LAUNCH_BLOCKING']='1'
         if 'f2_ordinal' in ft1:env['FT1_F2_ORDINAL']=str(ft1['f2_ordinal'])
