@@ -3,7 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from offline_generation import check_files
+from offline_generation import check_files,parent_matches
 import re
 
 
@@ -89,7 +89,7 @@ def verify(root):
         token=read(d/'token.json'); manifest=read(d/'manifest.json')
         assert sha(d/'token.json')==head['token_sha256']
         assert sha(d/'manifest.json')==token['manifest_sha256'] and sha(d/'intent.json')==token['intent_sha256']
-        assert token['parent']==manifest['parent']
+        assert parent_matches(token,manifest['parent'],method/'state/generations',sha)
         hashed+=check_files(d,token,manifest,sha)[0]
         generations.append((d.name,manifest));head=token['parent']
     generations.reverse()
@@ -137,7 +137,9 @@ def verify(root):
         matched=[one([e for e in events if e.get('generation')==gid],'event',name) for name in
             ['update_prepared','optimizer_applied','scheduler_applied','async_scheduled','async_finalized','committed']]
         assert [e['monotonic_ns'] for e in matched]==sorted(e['monotonic_ns'] for e in matched)
-        assert len({e['pid'] for e in matched})==1
+        # A generation promoted by recovery is committed by the new process (lag-1).
+        writers={e['pid'] for e in matched[:-1]}
+        assert len(writers)==1 and (matched[-1]['pid'] in writers or matched[-1].get('via')=='recovery')
         assert matched[3]['call_id']==matched[4]['call_id']
         opt=one(manifest['receipts'],'kind','optimizer'); done=one(manifest['receipts'],'kind','finalize')
         assert opt['successful'] and opt['scheduler_applied'] and done['writer_closed']

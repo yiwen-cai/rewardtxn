@@ -3,7 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from offline_generation import check_files
+from offline_generation import check_files, parent_matches
 
 
 def read(path):
@@ -51,7 +51,7 @@ def verify(root):
         assert sha(directory / 'token.json') == head['token_sha256']
         assert sha(directory / 'manifest.json') == token['manifest_sha256']
         assert sha(directory / 'intent.json') == token['intent_sha256']
-        assert manifest['parent'] == token['parent']
+        assert parent_matches(token, manifest['parent'], method / 'state/generations', sha)
         total_bytes += check_files(directory, token, manifest, sha)[0]
         generations.append((directory.name, manifest))
         head = token['parent']

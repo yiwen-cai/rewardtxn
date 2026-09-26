@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 import time
 from check_ft1_input_audit import batch_rows,fingerprint,rows
-from offline_generation import check_files,pinned_generations
+from offline_generation import check_files,parent_matches,pinned_generations
 
 
 def read(path):return json.loads(path.read_text())
@@ -85,7 +85,7 @@ def verify(root):
             token=read(directory/'token.json');manifest=read(directory/'manifest.json');intent=read(directory/'intent.json')
             assert sha(directory/'token.json')==head['token_sha256']
             assert sha(directory/'manifest.json')==token['manifest_sha256'] and sha(directory/'intent.json')==token['intent_sha256']
-            assert token['parent']==manifest['parent']==intent['parent']
+            assert manifest['parent']==intent['parent'] and parent_matches(token,intent['parent'],method/'state/generations',sha)
             assert manifest['updates']==intent['updates'] and len(manifest['updates'])==1
             checkpoint=directory/'checkpoint'
             assert {'native/.metadata','native-state.json','policy.json'}<={str(p.relative_to(checkpoint)) for p in checkpoint.rglob('*') if p.is_file()}

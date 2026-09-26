@@ -138,23 +138,45 @@ def _writer_exited(pid):
 HASH_WAIT_SECONDS = 900
 
 
-class _Hasher(threading.Thread):
-    """Speculative off-path work for one pending generation: once the forked
-    DCP writer has exited (or the barrier says finalize succeeded), hash the
-    bulk shards and the captured state. No collectives, no AsyncCallsQueue
-    access; any failure only means the barrier recomputes synchronously."""
+def capture_snapshot(state_dict, pool):
+    """Main-thread capture for a deferred snapshot. Every non-tensor leaf and
+    the whole RNG subtree are normalized by value now; only (live) tensors are
+    hashed later in ``pool``. Tensors are not modified before the next
+    optimizer step, which joins the snapshot first (barrier B1)."""
+    tree = {}
+    for key, value in sorted(state_dict.items(), key=lambda kv: str(kv[0])):
+        tree[str(key)] = normalized(value) if key == 'rng_state' else _normalized_async(value, pool)
+    return tree
 
-    def __init__(self, checkpoint, writer_pid, state_dict):
+
+class _Hasher(threading.Thread):
+    """Off-path work for one pending generation: resolve and publish the
+    native-state signature, then (after the forked DCP writer exits or the
+    main thread reports finalize) pre-hash the bulk shards. No collectives,
+    no AsyncCallsQueue access; failures are recomputed on the main thread."""
+
+    def __init__(self, checkpoint, writer_pid, tree, pool):
         super().__init__(name='r-commit-hasher', daemon=True)
-        self.checkpoint, self.writer_pid, self.state_dict = checkpoint, writer_pid, state_dict
+        self.checkpoint, self.writer_pid, self.tree, self.pool = checkpoint, writer_pid, tree, pool
         self.finalized = threading.Event()
-        self.prehashed = self.signature = self.error = None
+        self.published = threading.Event()
+        self.snapshot_done = threading.Event()
+        self.prehashed = self.error = None
+
+    def publish(self):
+        with perf_probe.span('r.native_snapshot'):
+            signature = _check_snapshot(_resolve(self.tree))
+        _publish(self.checkpoint / 'native-state.json', _encode(signature), 'native_state')
 
     def run(self):
         try:
-            self.signature = snapshot_of(self.state_dict)
-        except BaseException as exc:  # recomputed at the barrier
+            self.publish()
+            self.published.set()
+        except BaseException as exc:  # B1 recomputes on the main thread
             self.error = exc
+        finally:
+            self.snapshot_done.set()
+            self.pool.shutdown(wait=False)
         try:
             while not self.finalized.is_set():
                 if self.writer_pid is not None and _writer_exited(self.writer_pid):
@@ -209,6 +231,8 @@ class Runtime:
         self.scheduled_ids = []
         self.closed = False
         self.pending = None
+        self.calls = {}  # async call_id -> pending generation record (for finalize evidence)
+        self.prune_thread = None
         self.pin_first_commit = False
         self.config_hash = digest(dataclasses.asdict(config))
         self.root.mkdir(parents=True, exist_ok=True)
@@ -241,6 +265,11 @@ class Runtime:
         self.event('recovery_selected', generation=self.recovery['generation'],
                    seconds=time.monotonic() - started,
                    content_hashed=[Path(p).parent.name for p in state.CONTENT_HASHED[mark:]])
+        for gid in self.recovery.get('promoted', []):
+            directory = self.owner.root / 'generations' / gid
+            policy = _decode(_read(directory / 'checkpoint' / 'policy.json'))
+            self.event('committed', generation=gid, token=_decode(_read(directory / 'token.json')),
+                       global_step=policy['step_info']['global_step'], via='recovery')
         self.pin_first_commit = self.recovery['generation'] is not None
         if self.pin_first_commit:
             state.pin_generation(self.owner, self.recovery['generation'], 'recovery_loaded')
@@ -272,28 +301,37 @@ class Runtime:
         self.workflow.max_lag = self.config.rollout.max_head_offpolicyness
         self.bridge = TrainingBridge(self.workflow, self.root / 'identity', policy_version=0,
             version=actor.get_version, max_lag=self.workflow.max_lag)
-        queue = actor.checkpointer._async_queue
+        self._wrap_queue(actor.checkpointer._async_queue)
+
+    def _wrap_queue(self, queue):
         schedule, finalize = queue.schedule_async_request, queue.maybe_finalize_async_calls
         def scheduled(request):
             result = schedule(request)
             self.scheduled_ids.append(result)
-            self.event('async_scheduled', call_id=result, generation=self._io_generation())
+            if self.generation is not None:
+                self.calls[result] = {'generation': self.generation,
+                                      'snapshot_id': self.update['physical_invocation_id']}
+            self.event('async_scheduled', call_id=result, generation=self.generation)
             return result
         def finalized(*args, **kwargs):
             result = finalize(*args, **kwargs)
+            # Only a normally returned finalize reaches here (failures raise).
             self.finalized_ids.extend(result)
             for call_id in result:
-                self.event('async_finalized', call_id=call_id, generation=self._io_generation())
+                record = self.calls.pop(call_id, None)
+                generation = None if record is None else record['generation']
+                self.event('async_finalized', call_id=call_id, generation=generation)
+                if record is not None:
+                    state.record_evidence(self.owner, generation, {'kind': 'finalize',
+                        'snapshot_id': record['snapshot_id'], 'rank': 'actor:0', 'writer_closed': True,
+                        'async_call_ids': [call_id]})
+                    self.writer_gate(False, generation)
             return result
         queue.schedule_async_request, queue.maybe_finalize_async_calls = scheduled, finalized
         if getattr(queue, 'persistent', False):
             raise RuntimeError('deferred commit requires a non-persistent (per-save fork) DCP writer')
 
-    def _io_generation(self):
-        return self.pending['generation'] if self.pending is not None else self.generation
-
     def begin(self, trajectories):
-        self.settle()
         if self.generation is not None or self.update is not None:
             raise RuntimeError('previous update not committed')
         self.update = self.bridge.begin_update(trajectories, dataclasses.asdict(self.config.actor))
@@ -312,10 +350,15 @@ class Runtime:
                     'prompt_sha256': state._hash(state._bytes(prompt)), 'samples': []}
             groups[group]['samples'].append({'sample_index': int(row['sample'].rsplit(':', 1)[1]),
                                             'sample': row['sample'], 'receipt': record['receipt']})
-        with state._locked(self.owner) as control:
-            # Token-derived head: control['head'] can be stale after a crash
-            # between token and control writes.
-            parent, _ = state._head(self.owner, control)
+        if self.pending is not None:
+            # Lag-1: build on the uncommitted predecessor, bound by its intent bytes.
+            raw = (self.owner.root / 'generations' / self.pending['generation'] / 'intent.json').read_bytes()
+            parent = {'generation': self.pending['generation'], 'intent_sha256': state._hash(raw)}
+        else:
+            with state._locked(self.owner) as control:
+                # Token-derived head: control['head'] can be stale after a crash
+                # between token and control writes.
+                parent, _ = state._head(self.owner, control)
         intent = {'parent': parent, 'ack_capability': 'none', 'config_sha256': self.config_hash,
             'expected_ranks': ['actor:0'], 'data_snapshot_id': self.update['physical_invocation_id'],
             'components': {c: {'actor:0': ['native/', 'recover/', 'policy.json', 'native-state.json']} for c in COMPONENTS},
@@ -324,6 +367,8 @@ class Runtime:
                 'train_input_sha256': digest(self.update['input_tensors']), 'groups': list(groups.values())}]}
         self.generation = state.prepare_generation(self.owner, intent,
             self.loader.snapshot([r['sample'] for r in rows]))
+        # Consumption view only grows; it now includes this uncommitted generation.
+        self.loader.consumed = self.loader.consumed | {r['sample'] for r in rows}
         self.event('update_prepared', generation=self.generation, samples=[r['sample'] for r in rows])
         return clean
 
@@ -335,49 +380,81 @@ class Runtime:
         state._write(self.root / 'writer.json', value, immutable=False)
 
     def save(self, handler, original_dump, engine, step_info, *args, **kwargs):
+        # Barrier B2: the previous generation commits before this one's writer
+        # is bound and scheduled (single writer slot; finalize on the main thread).
+        self.settle()
         if self.generation is None or self.optimizer_stats is None or not self.scheduler_done:
             raise RuntimeError('save lacks successful optimizer and scheduler')
-        if self.pending is not None:
-            raise RuntimeError('previous generation not settled')
-        checkpoint = self.owner.root / 'generations' / self.generation / 'checkpoint'
+        generation = self.generation
+        checkpoint = self.owner.root / 'generations' / generation / 'checkpoint'
         checkpoint.mkdir()
+        snapshot_id = self.update['physical_invocation_id']
+        # Evidence that already holds is persisted now so that recovery can
+        # promote this generation once its writer has also finalized.
+        state.record_evidence(self.owner, generation, {'kind': 'optimizer', 'snapshot_id': snapshot_id,
+            'physical_updates': [snapshot_id], 'successful': True, 'scheduler_applied': True})
+        _publish(checkpoint / 'policy.json', _encode({'version': self.actor.get_version(),
+            'step_info': dataclasses.asdict(step_info), 'optimizer': self.optimizer_stats}), 'policy')
         # Bind the entire job before any async writer can fork. Recovery needs
         # its completed subreaper receipt, including unregistered fork gaps.
         self.writer_gate(True)
         self.io_checkpoint = checkpoint
+        record = {'generation': generation, 'snapshot_id': snapshot_id}
         before = len(self.scheduled_ids)
         original_dump(handler, engine, step_info, *args, **kwargs)
         scheduled = self.scheduled_ids[before:]
         if len(scheduled) != 1:
             raise RuntimeError('missing actual async request identity')
+        if self.calls.get(scheduled[0]) != record:
+            raise RuntimeError('async request not bound to this generation')
         writer_pid = None
         try:
             writer_pid = self.actor.checkpointer._async_queue.async_calls[-1].async_caller.process.pid
         except (AttributeError, IndexError):
             pass  # hasher then waits for the barrier's finalize
-        # Everything the commit needs is captured by value on the main thread,
-        # at the same point the synchronous version captured it (no optimizer,
-        # scheduler or RNG use happens between dump and this capture).
         state_dict = self.actor.checkpointer.generate_state_dict(with_optimizer=True, with_rng=True)
-        hasher = _Hasher(checkpoint, writer_pid, state_dict)
-        self.pending = {'generation': self.generation, 'checkpoint': checkpoint, 'scheduled': scheduled,
-            'snapshot_id': self.update['physical_invocation_id'], 'hasher': hasher,
-            'policy': {'version': self.actor.get_version(), 'step_info': dataclasses.asdict(step_info),
-                       'optimizer': self.optimizer_stats},
-            'global_step': step_info.global_step}
+        pool = concurrent.futures.ThreadPoolExecutor(SNAPSHOT_THREADS)
+        hasher = _Hasher(checkpoint, writer_pid, capture_snapshot(state_dict, pool), pool)
+        self.pending = dict(record, checkpoint=checkpoint, scheduled=scheduled, hasher=hasher,
+                            state_dict=state_dict, global_step=step_info.global_step)
         hasher.start()
         self.generation = self.update = None
         if self.stop_after is not None and step_info.global_step + 1 == self.stop_after:
             self.settle()
             raise TrainingStop()
 
+    def join_snapshot(self):
+        """Barrier B1 (before the next optimizer step mutates parameters): the
+        pending generation's native-state.json is durably published."""
+        pending = self.pending
+        if pending is None or pending.get('published'):
+            return
+        hasher = pending['hasher']
+        with perf_probe.span('r.b1_wait'):
+            hasher.snapshot_done.wait(HASH_WAIT_SECONDS)
+        if not hasher.published.is_set():
+            if not hasher.snapshot_done.is_set():
+                raise RuntimeError('native snapshot did not finish')
+            # Recompute from the same live tensors (unchanged before the optimizer)
+            # and the by-value RNG/non-tensor capture.
+            pool = concurrent.futures.ThreadPoolExecutor(SNAPSHOT_THREADS)
+            try:
+                tree = capture_snapshot(pending['state_dict'], pool)
+                tree['rng_state'] = hasher.tree['rng_state']
+                signature = _check_snapshot(_resolve(tree))
+            finally:
+                pool.shutdown()
+            _publish(pending['checkpoint'] / 'native-state.json', _encode(signature), 'native_state')
+        pending['published'] = True
+
     def settle(self):
-        """Commit barrier for the pending generation, on the main thread: at the
-        next begin, before train() returns, or at close. Finalize (a collective)
-        stays here; the hasher only did speculative, verifiable hashing."""
+        """Barrier B2 for the pending generation, on the main thread: at the next
+        save, before train() returns, or at stop. Finalize (a collective) stays
+        here; the hasher only did verifiable, speculative hashing."""
         pending = self.pending
         if pending is None:
             return
+        self.join_snapshot()
         self.pending = None
         hasher = pending['hasher']
         try:
@@ -391,42 +468,50 @@ class Runtime:
             hasher.join(HASH_WAIT_SECONDS)
         if hasher.is_alive():
             raise RuntimeError('commit hasher did not finish')
-        signature = hasher.signature
-        if signature is None:
-            signature = snapshot_of(hasher.state_dict)
-        generation, checkpoint = pending['generation'], pending['checkpoint']
+        generation = pending['generation']
         with perf_probe.span('r.settle_commit'):
-            _publish(checkpoint / 'native-state.json', _encode(signature), 'native_state')
-            _publish(checkpoint / 'policy.json', _encode(pending['policy']), 'policy')
-            snapshot_id = pending['snapshot_id']
-            state.record_evidence(self.owner, generation, {'kind': 'optimizer', 'snapshot_id': snapshot_id,
-                'physical_updates': [snapshot_id], 'successful': True, 'scheduler_applied': True})
-            state.record_evidence(self.owner, generation, {'kind': 'finalize', 'snapshot_id': snapshot_id,
-                'rank': 'actor:0', 'writer_closed': True, 'async_call_ids': pending['scheduled']})
-            # Writers are finished; checkpoint inventory is fsynced and hashed by
-            # state.commit_generation before the token becomes consumption authority.
-            self.writer_gate(False, generation)
             token = state.commit_generation(self.owner, generation, prehashed=hasher.prehashed)
-            with state._locked(self.owner) as control:
-                _, chain = state._head(self.owner, control)
-                self.loader.consumed = set(chain[generation][1]['data']['consumed'])
         self.event('committed', generation=generation, token=token, global_step=pending['global_step'])
         if self.pin_first_commit:
             state.pin_generation(self.owner, generation, 'first_commit_after_recovery')
             self.pin_first_commit = False
-        with perf_probe.span('r.prune'):
-            removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
-        if removed:
-            self.event('pruned', generation=generation, removed_bytes=removed)
+        self.start_prune(generation)
         perf_probe.dump()  # the trainer may later be SIGTERMed without atexit
+
+    def start_prune(self, generation):
+        """At most one background prune; deletion stays under mutation.lock."""
+        self.join_prune()
+        def work():
+            try:
+                with perf_probe.span('r.prune'):
+                    removed = state.prune_generations(self.owner, prunable, keep=PRUNE_KEEP)
+                if removed:
+                    self.event('pruned', generation=generation, removed_bytes=removed)
+            except BaseException as exc:
+                thread.error = exc
+        thread = threading.Thread(target=work, name='r-prune', daemon=True)
+        thread.error = None
+        self.prune_thread = thread
+        thread.start()
+
+    def join_prune(self):
+        thread, self.prune_thread = self.prune_thread, None
+        if thread is not None:
+            thread.join()
+            if thread.error is not None:
+                raise thread.error
 
     def abandon_pending(self):
         """Without a live engine the pending generation stays uncommitted;
-        recovery resolves it. Only the hasher thread is joined."""
+        recovery resolves it. Only the helper threads are joined."""
         pending, self.pending = self.pending, None
         if pending is not None:
             pending['hasher'].finalized.set()
             pending['hasher'].join(HASH_WAIT_SECONDS)
+        try:
+            self.join_prune()
+        except BaseException as exc:
+            self.event('prune_failed', error=type(exc).__name__)
 
     def close(self):
         if self.closed:
@@ -505,11 +590,13 @@ def install(runtime):
         except BaseException:
             try:
                 runtime.settle()
+                runtime.join_prune()
             except BaseException as exc:
                 runtime.event('pending_commit_failed', error=type(exc).__name__)
                 runtime.abandon_pending()
             raise
         runtime.settle()
+        runtime.join_prune()
         return result
     trainer_cls.train = train
     original_ppo = MegatronPPOActor.ppo_update
@@ -525,6 +612,7 @@ def install(runtime):
     def optimizer(self):
         if runtime.optimizer_stats is not None:
             raise RuntimeError('more than one optimizer call in frozen update')
+        runtime.join_snapshot()
         result = original_optimizer(self)
         if result.get('update_successful') != 1.0:
             raise RuntimeError('native optimizer update unsuccessful')

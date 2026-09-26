@@ -213,3 +213,154 @@ class ChunkedDigest(unittest.TestCase):
         path.unlink(); path.write_bytes(bytes(data))
         with self.assertRaises(AssertionError):
             check_files(directory, token, self.manifest(gid), sha)
+
+
+class PipelinedParent(unittest.TestCase):
+    """Phase 2 lag-1 protocol: one uncommitted predecessor P."""
+
+    def setUp(self):
+        from test_state import complete, fixture, COMPONENTS
+        self.complete_fn, self.fixture, self.components = complete, fixture, COMPONENTS
+        self.tmp = tempfile.TemporaryDirectory()
+        self.owner = new_owner(Path(self.tmp.name) / "run")
+
+    def tearDown(self):
+        self.owner.close()
+        self.tmp.cleanup()
+
+    def gdir(self, gid):
+        return self.owner.root / "generations" / gid
+
+    def pending_parent(self, gid):
+        return {"generation": gid, "intent_sha256": state._hash((self.gdir(gid) / "intent.json").read_bytes())}
+
+    def prepare_on(self, number, base_gid, parent):
+        intent, data = self.fixture(self.owner, number, None)
+        base = json.loads((self.gdir(base_gid) / "intent.json").read_text())["data"]
+        key = f"group{number}:0"
+        consumed = base["consumed"] + [key]
+        data.update(drawn=consumed, consumed=consumed, cursor=len(consumed))
+        intent["parent"] = parent
+        return state.prepare_generation(self.owner, intent, data)
+
+    def finish(self, gid, number):
+        directory = self.gdir(gid) / "checkpoint"
+        directory.mkdir()
+        for name in self.components:
+            (directory / (name + ".bin")).write_bytes(name.encode() + b"x" * 1000)
+        state.record_evidence(self.owner, gid, {"kind": "optimizer", "snapshot_id": f"cut{number}",
+            "physical_updates": [f"p{number}"], "successful": True, "scheduler_applied": True})
+        state.record_evidence(self.owner, gid, {"kind": "finalize", "snapshot_id": f"cut{number}",
+            "rank": "actor:0", "writer_closed": True})
+
+    def g0(self):
+        return self.complete_fn(self.owner, 0, None, finalize=True)
+
+    def test_prepare_and_commit_on_pending_predecessor(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        self.finish(g1, 1)
+        with self.assertRaises(state.StateError):  # predecessor not committed yet
+            state.commit_generation(self.owner, g1)
+        state.commit_generation(self.owner, g0)
+        token = state.commit_generation(self.owner, g1)
+        self.assertEqual(token["parent"]["generation"], g0)
+        self.assertEqual(state.select_recovery(self.owner)["generation"], g1)
+
+    def test_wrong_parent_forms_rejected(self):
+        g0 = self.g0()
+        with self.assertRaises(state.StateError):  # head form while P unresolved
+            self.prepare_on(1, g0, None)
+        bad = dict(self.pending_parent(g0), intent_sha256="0" * 64)
+        with self.assertRaises(state.StateError):
+            self.prepare_on(1, g0, bad)
+
+    def test_two_unresolved_rejects_third(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        with self.assertRaises(state.StateError):
+            self.prepare_on(2, g1, self.pending_parent(g1))
+
+    def test_lineage_and_duplicate_samples_checked_against_predecessor(self):
+        g0 = self.g0()
+        intent, data = self.fixture(self.owner, 1, None)
+        intent["parent"] = self.pending_parent(g0)
+        data.update(drawn=["group1:0"], consumed=["group1:0"], cursor=1)  # drops P's consumption
+        with self.assertRaises(state.StateError):
+            state.prepare_generation(self.owner, intent, data)
+
+    def test_abandoned_predecessor_blocks_successor(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        self.finish(g1, 1)
+        (self.gdir(g0) / "checkpoint" / "model.bin").unlink()  # g0 incomplete
+        result = state.select_recovery(self.owner)
+        self.assertIsNone(result["generation"])
+        self.assertTrue((self.gdir(g0) / "abandoned.json").exists())
+        self.assertTrue((self.gdir(g1) / "abandoned.json").exists())
+        self.assertEqual(len(result["rollback_intents"]), 2)
+
+    def test_recovery_promotes_complete_predecessor_only(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))  # intent only (F2 shape)
+        result = state.select_recovery(self.owner)
+        self.assertEqual((result["generation"], result["promoted"]), (g0, [g0]))
+        self.assertTrue((self.gdir(g1) / "abandoned.json").exists())
+
+    def test_recovery_promotes_both_when_complete(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        self.finish(g1, 1)
+        result = state.select_recovery(self.owner)
+        self.assertEqual(result["promoted"], [g0, g1])
+        self.assertEqual(result["generation"], g1)
+
+    def test_recovery_complete_c1_incomplete_c2(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        (self.gdir(g1) / "checkpoint").mkdir()
+        result = state.select_recovery(self.owner)
+        self.assertEqual(result["promoted"], [g0])
+        self.assertIn("incomplete candidate", json.loads((self.gdir(g1) / "abandoned.json").read_text())["reason"])
+
+    def test_non_chain_unresolved_pair_is_an_error(self):
+        g0 = self.g0()
+        other, data = self.fixture(self.owner, 1, None)
+        # Forge a second unresolved intent that is not pending on g0.
+        forged = self.gdir("g-" + "f" * 32)
+        forged.mkdir(parents=True)
+        (forged / "intent.json").write_bytes(state._bytes(dict(other, parent=None, data=data)))
+        with self.assertRaises(state.StateError):
+            state.select_recovery(self.owner)
+
+
+class PipelinedSteadyState(PipelinedParent):
+    def test_predecessor_with_pending_parent_promoted(self):
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        self.finish(g1, 1)
+        state.commit_generation(self.owner, g0)  # B2 at save(1)
+        g2 = self.prepare_on(2, g1, self.pending_parent(g1))
+        result = state.select_recovery(self.owner)
+        self.assertEqual((result["generation"], result["promoted"]), (g1, [g1]))
+        self.assertTrue((self.gdir(g2) / "abandoned.json").exists())
+
+
+class OfflineParentCheck(PipelinedParent):
+    def test_parent_matches_both_forms(self):
+        import hashlib
+        from offline_generation import parent_matches
+        sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+        g0 = self.g0()
+        g1 = self.prepare_on(1, g0, self.pending_parent(g0))
+        self.finish(g1, 1)
+        state.commit_generation(self.owner, g0)
+        state.commit_generation(self.owner, g1)
+        root = self.owner.root / "generations"
+        for gid in (g0, g1):
+            token = json.loads((root / gid / "token.json").read_text())
+            manifest = json.loads((root / gid / "manifest.json").read_text())
+            self.assertTrue(parent_matches(token, manifest["parent"], root, sha))
+        token = json.loads((root / g1 / "token.json").read_text())
+        forged = dict(json.loads((root / g1 / "manifest.json").read_text())["parent"], intent_sha256="0" * 64)
+        self.assertFalse(parent_matches(token, forged, root, sha))

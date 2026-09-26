@@ -31,6 +31,16 @@ def file_matches(path, info, sha):
     return actual == chunks
 
 
+def parent_matches(token, parent, generations, sha):
+    """Intent/manifest parent vs committed token parent. The lag-1 pipelined
+    form binds the then-uncommitted predecessor by its intent.json SHA-256
+    (R_PERF_PHASE2_PLAN section 1.1); the token binds the committed token."""
+    if isinstance(parent, dict) and set(parent) == {'generation', 'intent_sha256'}:
+        return (token['parent'] is not None and token['parent']['generation'] == parent['generation']
+                and sha(generations / parent['generation'] / 'intent.json') == parent['intent_sha256'])
+    return token['parent'] == parent
+
+
 def check_files(directory, token, manifest, sha, *, pinned=()):
     """Return (bytes_hashed, files_hashed, files_pruned); assert on any mismatch."""
     checkpoint = directory / 'checkpoint'

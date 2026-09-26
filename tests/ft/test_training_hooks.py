@@ -30,10 +30,11 @@ class HookContract(unittest.TestCase):
             scheduler.step()
         self_test = self
         runtime = SimpleNamespace(optimizer_stats=None, scheduler_done=False, generation='cpu-hook',
-                                  event=lambda name, **fields: calls.append(name))
+                                  event=lambda name, **fields: calls.append(name),
+                                  join_snapshot=lambda: calls.append('b1'))
         with ExitStack() as stack:
             for cls, names in ((MegatronPPOActor, ('ppo_update', 'train_batch', 'optimizer_step', 'lr_scheduler_step', 'forward')),
-                               (trainer_module.PPOTrainer, ('_create_dataloader',))):
+                               (trainer_module.PPOTrainer, ('_create_dataloader', 'train'))):
                 for name in names:
                     stack.enter_context(patch.object(cls, name, getattr(cls, name)))
             stack.enter_context(patch.object(trainer_module, 'RecoverHandler', trainer_module.RecoverHandler))
@@ -58,7 +59,7 @@ class HookContract(unittest.TestCase):
             actor.step_lr_scheduler()
             self.assertTrue(runtime.scheduler_done)
             self.assertEqual(optimizer.param_groups[0]['lr'], 0.005)
-            self.assertEqual(calls, ['forward', 'optimizer_applied', 'scheduler_applied'])
+            self.assertEqual(calls, ['forward', 'b1', 'optimizer_applied', 'scheduler_applied'])
             with self.assertRaisesRegex(RuntimeError, 'more than one'):
                 actor.optimizer_step()
 

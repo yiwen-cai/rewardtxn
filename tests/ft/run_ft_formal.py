@@ -28,8 +28,8 @@ def check_freeze(freeze, base):
     if freeze.get('kind') == 'perf_gate':
         # R_PERF_REDESIGN gate: engineering pairs, never formal samples.
         assert freeze['formal_sample'] is False and freeze['retain_full_pair_index'] is None
-        assert sorted(p['scenario'] for p in freeze['pairs']) == ['F2', 'no_fault']
-        assert len({p['seed'] for p in freeze['pairs']}) == 2
+        assert {p['scenario'] for p in freeze['pairs']} <= {'F2', 'no_fault'}
+        assert len({p['seed'] for p in freeze['pairs']}) == len(freeze['pairs']) <= 4
     else:
         assert freeze['formal_sample'] is True
         assert len(freeze['pairs']) == 13

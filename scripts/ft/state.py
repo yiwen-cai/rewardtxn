@@ -620,15 +620,51 @@ def _head(owner, control, *, verify_head_content=False):
     return head, tokens
 
 
+def _unresolved(owner):
+    root = _path(owner.root, "generations")
+    return [] if not root.exists() else sorted(item.name for item in root.iterdir()
+        if (item / "intent.json").exists() and not (item / "token.json").exists()
+        and not (item / "abandoned.json").exists())
+
+
+def _pending_parent(parent):
+    """Pipelined (lag-1) parent form: an uncommitted predecessor bound by the
+    SHA-256 of its intent.json bytes (R_PERF_PHASE2_PLAN section 1.1)."""
+    return isinstance(parent, dict) and set(parent) == {"generation", "intent_sha256"}
+
+
+def _parent_ok(parent, head, tokens):
+    """Commit-time CAS for either parent form against the committed head."""
+    if _pending_parent(parent):
+        return (head is not None and head["generation"] == parent["generation"]
+                and tokens[head["generation"]][0]["intent_sha256"] == parent["intent_sha256"])
+    return parent == head
+
+
 def prepare_generation(owner, intent, data_snapshot):
     with _locked(owner) as control:
         head, tokens = _head(owner, control)
         directory = _path(owner.root, "generations")
         _directory(directory)
-        for item in directory.iterdir():
-            if (item / "intent.json").exists() and not (item / "token.json").exists() and not (item / "abandoned.json").exists():
+        unresolved = _unresolved(owner)
+        if len(unresolved) > 1:
+            raise StateError("unresolved generation")
+        # Base the new generation on the committed head, or (lag-1) on the one
+        # uncommitted predecessor P of this execution whose parent is that head.
+        base_data = None if head is None else tokens[head["generation"]][1]["data"]
+        pending_updates = set()
+        expected_parent = head
+        if unresolved:
+            gid_p = unresolved[0]
+            raw = _path(_generation(owner, gid_p), "intent.json").read_bytes()
+            prior = _parse(raw, Path("intent.json"))
+            if (not _parent_ok(prior.get("parent"), head, tokens)
+                    or (prior.get("execution_epoch"), prior.get("execution_owner")) != (owner.epoch, owner.nonce)):
                 raise StateError("unresolved generation")
-        if intent.get("parent") != head or intent.get("ack_capability") != "none":
+            expected_parent = {"generation": gid_p, "intent_sha256": _hash(raw)}
+            base_data = prior["data"]
+            pending_updates = {u["logical_update_id"] for u in prior["updates"]}
+        if intent.get("parent") != expected_parent or intent.get("ack_capability") != "none":
             raise StateError("parent mismatch or unsupported ACK")
         if intent.get("config_sha256") != control["config_sha256"]:
             raise StateError("configuration mismatch")
@@ -636,11 +672,10 @@ def prepare_generation(owner, intent, data_snapshot):
         if not ranks or len(ranks) != len(set(ranks)):
             raise StateError("invalid expected ranks")
         consumed = _sets(data_snapshot)
-        previous = set() if head is None else set(tokens[head["generation"]][1]["data"]["consumed"])
-        if head is not None:
-            old_data = tokens[head["generation"]][1]["data"]
-            if (data_snapshot["source_sha256"] != old_data["source_sha256"]
-                    or data_snapshot["drawn"][:len(old_data["drawn"])] != old_data["drawn"]):
+        previous = set() if base_data is None else set(base_data["consumed"])
+        if base_data is not None:
+            if (data_snapshot["source_sha256"] != base_data["source_sha256"]
+                    or data_snapshot["drawn"][:len(base_data["drawn"])] != base_data["drawn"]):
                 raise StateError("data lineage changed")
         samples, updates, physical = set(), set(), set()
         for update in intent.get("updates", []):
@@ -671,6 +706,7 @@ def prepare_generation(owner, intent, data_snapshot):
         if not updates or consumed != previous | samples or previous & samples:
             raise StateError("consumption mapping mismatch")
         prior_updates = {u["logical_update_id"] for _, manifest in tokens.values() for u in manifest["updates"]}
+        prior_updates |= pending_updates
         if updates & prior_updates:
             raise StateError("retained logical update duplicated")
         gid = "g-" + uuid.uuid4().hex
@@ -770,7 +806,7 @@ def commit_generation(owner, generation, *, prehashed=None):
             raise StateError("abandoned generation")
         identities = {}
         intent, receipts, files = _complete(owner, generation, cache=prehashed, identities=identities)
-        if intent["parent"] != head:
+        if not _parent_ok(intent["parent"], head, tokens):
             raise StateError("parent CAS failed")
         for update in intent["updates"]:
             for group in update["groups"]:
@@ -807,45 +843,53 @@ def commit_generation(owner, generation, *, prehashed=None):
 
 
 def select_recovery(owner):
-    prehashed = None
     with _locked(owner) as control:
-        head, _ = _head(owner, control, verify_head_content=True)
+        head, tokens = _head(owner, control, verify_head_content=True)
         root = _path(owner.root, "generations")
-        candidates = [] if not root.exists() else [item.name for item in root.iterdir()
-            if (item / "intent.json").exists() and not (item / "token.json").exists()
-            and not (item / "abandoned.json").exists()]
-        if len(candidates) > 1:
+        candidates = _unresolved(owner)
+        intents = {gid: _read(_path(_generation(owner, gid), "intent.json")) for gid in candidates}
+        # At most a lag-1 chain: c1 on the committed head (either parent form),
+        # c2 pending on c1.
+        on_head = [gid for gid in candidates if _parent_ok(intents[gid]["parent"], head, tokens)]
+        ordered = on_head + [gid for gid in candidates if gid not in on_head]
+        if len(ordered) > 2 or (len(ordered) == 2 and not (
+                len(on_head) == 1 and _pending_parent(intents[ordered[1]]["parent"])
+                and intents[ordered[1]]["parent"]["generation"] == ordered[0])):
             raise StateError("multiple unresolved candidates")
-        promote = None
-        reason = "verified committed chain"
-        for gid in candidates:
+    promoted = []
+    reason = "verified committed chain"
+    failed = False
+    for gid in ordered:
+        own = "predecessor not promoted"
+        if not failed:
             try:
-                identities = {}
-                intent, _, files = _complete(owner, gid, identities=identities)
+                with _locked(owner):
+                    identities = {}
+                    _, _, files = _complete(owner, gid, identities=identities)
                 prehashed = {name: (identities[name], info) for name, info in files.items()}
-                if intent["parent"] != head:
-                    raise StateError("candidate parent mismatch")
-                promote = gid
+                token = commit_generation(owner, gid, prehashed=prehashed)
+                head = {"generation": gid, "token_sha256": _hash(_bytes(token))}
+                promoted.append(gid)
+                reason = "completed durable candidate"
+                continue
             except StateError as exc:
-                reason = "incomplete candidate: " + str(exc)
-                _write(_path(_generation(owner, gid), "abandoned.json"),
-                       {"epoch": owner.epoch, "reason": reason})
-    if promote is not None:
-        token = commit_generation(owner, promote, prehashed=prehashed)
-        head = {"generation": promote, "token_sha256": _hash(_bytes(token))}
-        reason = "completed durable candidate"
+                failed = True
+                own = reason = "incomplete candidate: " + str(exc)
+        with _locked(owner):
+            _write(_path(_generation(owner, gid), "abandoned.json"), {"epoch": owner.epoch, "reason": own})
     # Preserve uncommitted consumption obligations in R's own intents. They are
     # recovery inputs, never evidence that replay has actually completed.
     rollback_intents = [] if not root.exists() else [str(item / "intent.json") for item in sorted(root.iterdir())
         if (item / "abandoned.json").exists() and not (item / "token.json").exists()]
     if head is None:
         return {"generation": None, "checkpoint": None, "pending": [],
-                "rollback_intents": rollback_intents, "reason": reason}
+                "rollback_intents": rollback_intents, "reason": reason, "promoted": promoted}
     directory = _generation(owner, head["generation"])
     # Content was verified above (or hashed by the promotion commit).
     _, manifest = _validate_token(owner, head["generation"])
     return {"generation": head["generation"], "checkpoint": str(directory / "checkpoint"),
-            "pending": manifest["data"]["pending"], "rollback_intents": rollback_intents, "reason": reason}
+            "pending": manifest["data"]["pending"], "rollback_intents": rollback_intents, "reason": reason,
+            "promoted": promoted}
 
 
 def pin_generation(owner, gid, reason):
