@@ -1,0 +1,68 @@
+{
+  "name": "pilot-f1-q03-s5141-20260926",
+  "scenario": "F1",
+  "seed": 5141,
+  "order": [
+    "R",
+    "A"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": false,
+  "freeze_sha256": "8727ba84e01c0606503fdcfbf77320818dbbc81ed2e6ea7a4601ff55c13f760f",
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/pilot-f1-q03-s5141-20260926-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F1",
+        "completed_untrained_scores_at_signal": 3,
+        "same_execution_reused": 3,
+        "discarded": 0,
+        "generated_tokens_after_fault": 137077,
+        "score_returns_after_fault": 414,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 439831191552,
+        "free_minimum": 418866114560,
+        "peak_incremental_bytes": 20965076992,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/pilot-f1-q03-s5141-20260926-a",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F1",
+        "completed_untrained_scores_at_signal": 3,
+        "same_execution_reused": 0,
+        "discarded": 3,
+        "generated_tokens_after_fault": 145819,
+        "score_returns_after_fault": 444,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 439597219840,
+        "free_minimum": 432400707584,
+        "peak_incremental_bytes": 7196512256,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    }
+  ]
+}
