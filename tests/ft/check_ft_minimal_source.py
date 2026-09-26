@@ -77,7 +77,7 @@ def a_batch(batch):
     return answer
 
 
-def audit_a(root, pilot, observed, physical, scored, killed_id):
+def audit_a(root, pilot, observed, physical, scored, killed_id, collect=None):
     recorded = events(root, 'observer-pilot')
     generated = [e for e in recorded if e['event'] == 'generation_done']
     generation = {e['sample_attempt']: e for e in generated}
@@ -114,6 +114,9 @@ def audit_a(root, pilot, observed, physical, scored, killed_id):
     retained_attempts = {row[0] for update in retained for row in by_update[update]}
     assert len(retained_attempts) == 320
     unused_generated = len(set(generation) - used_attempts)
+    if collect is not None:
+        collect['retained_scores'] = {scores[a]['execution_id'] for a in retained_attempts}
+        collect['update_scores'] = {u: {scores[r[0]]['execution_id'] for r in rows_} for u, rows_ in by_update.items()}
     if killed_id is None:
         return 0, 0, 320, unused_generated
     target = by_update[killed_id]
@@ -121,7 +124,7 @@ def audit_a(root, pilot, observed, physical, scored, killed_id):
         len(physical[generation[row[0]]['origin_request_id']]['output_tokens']) for row in target), len(retained_attempts), unused_generated
 
 
-def audit_r(root, pilot, observed, physical, scored, killed_id):
+def audit_r(root, pilot, observed, physical, scored, killed_id, collect=None):
     method = root / 'rewardtxn'
     scores = {}
     for event in scored:
@@ -182,6 +185,13 @@ def audit_r(root, pilot, observed, physical, scored, killed_id):
             assert sample not in retained
             retained[sample] = value
     assert len(retained) == 320
+    if collect is not None:
+        collect['retained_scores'] = {v['score_execution_id'] for v in retained.values()}
+        applied = {e['generation']: int(e['monotonic_ns']) for e in rows(method / 'events.jsonl')
+                   if e['event'] == 'optimizer_applied'}
+        collect['generation_scores'] = {
+            g: (t, {v['score_execution_id'] for v in samples(read(generation_dir / g / 'intent.json')).values()})
+            for g, t in applied.items()}
     if killed_id is None:
         return 0, 0, len(retained)
 
@@ -218,7 +228,9 @@ def audit_r(root, pilot, observed, physical, scored, killed_id):
 def verify(root):
     root = Path(root)
     case = read(root / 'ft1-case.json')
-    assert case['scenario'] in ('F2', 'no_fault') and case.get('minimal') is True
+    assert case['scenario'] in ('F2', 'F4T', 'F1', 'no_fault') and case.get('minimal') is True
+    if case['scenario'] in ('F4T', 'F1'):
+        return verify_inflight(root, case)
     accepted = check_accepted(root)
     observed = events(root, 'observer-ft1')
     pilot = sorted(events(root, 'observer-pilot'), key=lambda e: e['monotonic_ns'])
@@ -241,6 +253,35 @@ def verify(root):
             'generated_tokens_after_fault': None if sent is None else sum(len(e['output_tokens']) for e in physical.values() if e['monotonic_ns'] > sent),
             'score_returns_after_fault': None if sent is None else sum(e['monotonic_ns'] > sent for e in scored),
             'scope': 'actual engine call return and score execution ID to retained native chain; one run, no statistical claim'}
+
+
+def verify_inflight(root, case):
+    """F4'/F1 main metric (FT_F4F1_PILOT_PLAN section 8): completed work at the
+    signal = parent-accepted score executions returned before the signal whose
+    sample was not in any update already applied before it; reused = those whose
+    same physical score execution enters the final retained chain."""
+    check_accepted(root)
+    observed = events(root, 'observer-ft1')
+    pilot = sorted(events(root, 'observer-pilot'), key=lambda e: e['monotonic_ns'])
+    physical, _, scored = physical_index(observed)
+    scored = parent_accepted_scores(root, scored)
+    sent = unique([e for e in rows(root / 'events.jsonl') if e['kind'] == 'signal_sent'], 'signal')['controller_monotonic_ns']
+    collect = {}
+    if case['arm'] == 'A':
+        audit_a(root, pilot, observed, physical, scored, None, collect)
+        ends = {e['update_id']: e['monotonic_ns'] for e in pilot if e['event'] == 'optimizer_end'}
+        trained = set().union(*(ids for u, ids in collect['update_scores'].items() if ends.get(u, 1 << 62) < sent))
+    else:
+        audit_r(root, pilot, observed, physical, scored, None, collect)
+        trained = set().union(*(ids for t, ids in collect['generation_scores'].values() if t < sent))
+    completed = {e['execution_id'] for e in scored if e['monotonic_ns'] < sent} - trained
+    reused = completed & collect['retained_scores']
+    return {'verified': True, 'arm': case['arm'], 'scenario': case['scenario'],
+            'completed_untrained_scores_at_signal': len(completed),
+            'same_execution_reused': len(reused), 'discarded': len(completed) - len(reused),
+            'generated_tokens_after_fault': sum(len(e['output_tokens']) for e in physical.values() if e['monotonic_ns'] > sent),
+            'score_returns_after_fault': sum(e['monotonic_ns'] > sent for e in scored),
+            'scope': 'physical score execution identity to retained native chain; one run, no statistical claim'}
 
 
 if __name__ == '__main__':

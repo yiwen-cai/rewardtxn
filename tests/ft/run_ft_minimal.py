@@ -17,8 +17,8 @@ from minimal_storage import retain_or_clear
 
 
 def minimal_config(config, scenario, seed):
-    if scenario not in ('F2', 'no_fault') or type(seed) is not int or seed < 0:
-        raise ValueError('minimal experiment requires a fixed seed and F2/no_fault')
+    if scenario not in ('F2', 'F4T', 'F1', 'no_fault') or type(seed) is not int or seed < 0:
+        raise ValueError('minimal experiment requires a fixed seed and F2/F4T/F1/no_fault')
     replacements = {'total_train_steps: 3': 'total_train_steps: 10', 'seed: 211': f'seed: {seed}'}
     if scenario == 'no_fault':
         replacements['retries: 1  # one native restart after one trainer kill'] = 'retries: 0'

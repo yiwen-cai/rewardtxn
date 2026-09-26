@@ -113,3 +113,17 @@
 - R 至少采纳 1 条先前的 response 或 reward。若 R 的采纳次数为 0，报告原因（例如 max_head_offpolicyness 使旧回答过期），不进入正式矩阵。
 
 **不变的部分**：F1 各项、试点规模（F4' 2 对 + F1 2 对、上限 10 GPU·h）、决策规则。
+
+## 8. v1.3：主指标修订与实现要点（用户 2026-09-26 批准）
+
+- **主指标**：F4' 改用"故障时已完成但未训练的工作中，有多少以同一物理评分执行进入最终保留链（被保留 / 被丢弃）"，与 F2 同类。RTO 按 §1 与 §6.1 只作描述。依据见[离线复用率预估](F4_ADOPTION_ESTIMATE_20260926.md)：R 约 96 条在途已入账样本中，约 98% 可复用；A 按加载器位置跳过这些样本。
+- **目标行改为 2602**：采样器种子固定为 0（`DistributedSampler` 默认值），批次组成与训练种子无关；5518 永远落在第 2 批，task_id 为 0，太早。2602 在第 6 批（task_id 20，训练第 6 步），处于稳态。F1 仍用 5518，其 task_id=0 的断言成立。审计 v1.2 的"按种子筛选 2≤s≤8"因此由固定目标行满足。
+- **实现**：
+  - `ft1_fault_hooks`：F4T 契约与 `install_f4t`，只计成功返回，要求 8 条已进入评分，已触发后的重启不再布防；
+  - `areal_pilot_hooks`：类级 `dcp_scheduled`/`dcp_finalized` 观测，用 `meta.path` 显式配对；R 在 `_wrap_queue` 中断言它已先安装；
+  - `check_ft1_fault` 增加 F4T 分支，并记录被杀时主线程所处阶段和 ready→signal 的时间差；
+  - `finalize_ft1_fault` 使用统一端点：R 只计保留链内的提交，A 取"首次瞬时完整"下界；
+  - `check_ft_minimal_source.verify_inflight` 计算在途已完成工作的保留与丢弃；
+  - `run_ft_minimal`/`run_ft_formal` 接入 F1、F4T 与 `pilot` 类型。
+- **CPU**：新增 `test_f4t_hook` 4 项（触发、未全部生成时判为 missed、重启后不布防、非目标行不触发）。容器全量回归与阶段 2 一致。
+- **未覆盖**：新验收字段在真实证据上的运行，由 GPU 试点完成。

@@ -281,6 +281,41 @@ def install_hooks():
 
     wrap_io("save")
     wrap_io("load")
+    # Shared DCP persistence observation (FT_F4F1_PILOT_PLAN section 1): class
+    # level, installed before any R instance wrapper binds the queue methods.
+    from megatron.core.dist_checkpointing.strategies.async_utils import AsyncCallsQueue
+    import threading
+    current = threading.local()
+    engine_save = MegatronPPOActor.save
+
+    @functools.wraps(engine_save)
+    def bound_save(self, meta):
+        current.path = meta.path
+        try:
+            return engine_save(self, meta)
+        finally:
+            current.path = None
+
+    MegatronPPOActor.save = bound_save
+    schedule = AsyncCallsQueue.schedule_async_request
+    finalize = AsyncCallsQueue.maybe_finalize_async_calls
+
+    @functools.wraps(schedule)
+    def scheduled(self, request):
+        call_id = schedule(self, request)
+        emit("dcp_scheduled", call_id=call_id, path=getattr(current, "path", None))
+        return call_id
+
+    @functools.wraps(finalize)
+    def finalized(self, *args, **kwargs):
+        call_ids = finalize(self, *args, **kwargs)
+        if call_ids:
+            emit("dcp_finalized", call_ids=list(call_ids))
+        return call_ids
+
+    scheduled._pilot_wrapped = finalized._pilot_wrapped = True
+    AsyncCallsQueue.schedule_async_request = scheduled
+    AsyncCallsQueue.maybe_finalize_async_calls = finalized
     original_dump = RecoverInfo.dump
 
     @functools.wraps(original_dump)

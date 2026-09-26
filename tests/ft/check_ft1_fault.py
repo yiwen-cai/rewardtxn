@@ -4,6 +4,8 @@ from pathlib import Path
 import re
 import sys
 
+F4T_ROW=2602  # scripts/ft/ft1_fault_hooks.F4T_ROW (frozen with the source map)
+
 
 def gpu_id(value):
     value=str(value)
@@ -59,6 +61,19 @@ def verify(root):
         assert len(killed)==1 and killed[0]['status']=='error'
         retries=[e for e in logs if e['input_sha256']==killed[0]['input_sha256'] and e['attempt']==2 and e['status']=='scored']
         result['same_input_native_score_retry_succeeded']=len(retries)==1
+    elif scenario=='F4T':
+        witness=one(events,'event','fault_ready');assert witness['identity']==sent['identity']
+        assert witness['entered_samples']==list(range(8)) and witness['returned']==4
+        group=[e for e in events if e.get('source_row_id')==F4T_ROW and e.get('task_id')==witness['target_task_id']
+               and e['monotonic_ns']<=witness['cut_monotonic_ns']]
+        entered={e['sample_idx'] for e in group if e['event']=='generation_complete'
+                 and e.get('trainer_identity',{}).get('pid')==sent['identity']['pid']}
+        returned=[e for e in group if e['event']=='score_execution_returned']
+        assert entered==set(range(8)) and len({e['sample_idx'] for e in returned})>=4
+        assert witness['cut_monotonic_ns']<sent['controller_monotonic_ns']
+        stage=[e for e in pilot if e['pid']==sent['identity']['pid'] and e['monotonic_ns']<sent['controller_monotonic_ns']]
+        result['main_thread_last_event_before_kill']=stage[-1]['event'] if stage else None
+        result['ready_to_signal_seconds']=(sent['controller_monotonic_ns']-witness['cut_monotonic_ns'])/1e9
     elif scenario=='F2':
         witness=one(events,'event','fault_ready');assert witness['identity']==sent['identity']
         updates=[e for e in pilot if e['event']=='optimizer_end' and e['pid']==sent['identity']['pid']

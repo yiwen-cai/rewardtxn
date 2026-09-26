@@ -25,10 +25,10 @@ def sha256(path):
 def check_freeze(freeze, base):
     assert freeze['pilot_peak_bytes'] + 20 * 1024**3 == freeze['minimum_free_bytes']
     assert len(freeze['devices']) == len(set(freeze['devices'])) == 4
-    if freeze.get('kind') == 'perf_gate':
-        # R_PERF_REDESIGN gate: engineering pairs, never formal samples.
+    if freeze.get('kind') in ('perf_gate', 'pilot'):
+        # Engineering gates/pilots, never formal samples.
         assert freeze['formal_sample'] is False and freeze['retain_full_pair_index'] is None
-        assert {p['scenario'] for p in freeze['pairs']} <= {'F2', 'no_fault'}
+        assert {p['scenario'] for p in freeze['pairs']} <= {'F2', 'F4T', 'F1', 'no_fault'}
         assert len({p['seed'] for p in freeze['pairs']}) == len(freeze['pairs']) <= 4
     else:
         assert freeze['formal_sample'] is True

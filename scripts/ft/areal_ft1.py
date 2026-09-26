@@ -142,7 +142,7 @@ def main(args):
     TRAINER_IDENTITY=snapshot(os.getpid())
     arm=os.environ['FT1_ARM'];root=Path(config.cluster.fileroot).parent
     scenario=os.environ.get('FT1_SCENARIO','no_fault')
-    if scenario not in ('no_fault','F1','F2','F4'):raise RuntimeError('unmapped FT1 scenario')
+    if scenario not in ('no_fault','F1','F2','F4','F4T'):raise RuntimeError('unmapped FT1 scenario')
     steps=int(os.environ.get('FT1_STEPS','10'))
     if arm not in ('A','R') or steps not in (10,30) or config.total_train_steps!=steps or config.recover.retries!=(0 if scenario=='no_fault' else 1):
         raise RuntimeError('unsupported FT1 smoke configuration')

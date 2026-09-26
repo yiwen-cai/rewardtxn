@@ -304,6 +304,9 @@ class Runtime:
         self._wrap_queue(actor.checkpointer._async_queue)
 
     def _wrap_queue(self, queue):
+        if os.environ.get('AREAL_PILOT_EVENTS') and not getattr(
+                type(queue).maybe_finalize_async_calls, '_pilot_wrapped', False):
+            raise RuntimeError('shared DCP observer must be installed before R binds the queue')
         schedule, finalize = queue.schedule_async_request, queue.maybe_finalize_async_calls
         def scheduled(request):
             result = schedule(request)

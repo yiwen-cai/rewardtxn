@@ -11,6 +11,9 @@ def f2_ordinal():
     return value
 
 
+F4T_ROW=2602
+
+
 def contract(scenario):
     if scenario=='F1':
         return {'event_id':'ft1-f1-generator','target':'generator','waiters':['generator'],
@@ -18,6 +21,12 @@ def contract(scenario):
     if scenario=='F4':
         return {'event_id':'ft1-f4-score-worker','target':'reward','waiters':['reward'],
                 'evidence':{'phase':'fourth_score_worker_entry','source_row_id':5518,'k':8,'ordinal':4}}
+    if scenario=='F4T':
+        # F4' (FT_F4F1_PILOT_PLAN section 7): trainer SIGKILL while the frozen
+        # steady-state group is being scored. Row 2602 is in the sampler-seed-0
+        # batch 6 for every training seed.
+        return {'event_id':'ft1-f4t-trainer','target':'trainer','waiters':['trainer'],
+                'evidence':{'phase':'fourth_target_score_returned','source_row_id':F4T_ROW,'k':8,'ordinal':4}}
     if scenario=='F2':
         return {'event_id':'ft1-f2-trainer','target':'trainer','waiters':['trainer'],
                 'evidence':{'phase':'post_optimizer_pre_save','successful_ordinal':f2_ordinal()}}
@@ -32,6 +41,8 @@ def install(scenario, observer_module):
     if scenario=='F1':
         from scripts.ft.ft1_f1_trainer import install as install_f1
         install_f1(observer_module)
+    elif scenario=='F4T':
+        client=install_f4t(frozen,emit)
     elif scenario=='F4':
         # Shared only between this trainer and its forked score invocations.
         lock=multiprocessing.Lock()
@@ -129,4 +140,47 @@ def install(scenario, observer_module):
             return result
         MegatronPPOActor.save=save
         MegatronPPOActor.optimizer_step=optimizer_step
+    return client
+
+
+def install_f4t(frozen,emit):
+    """Count returns of the target group's scores at the shared parent-side
+    RLVRWorkflow._compute_rewards (same class attribute for both arms, wrapped
+    after the FT1 observer). On the 4th successful return with all 8 answers
+    generated, the trainer declares ready and blocks until SIGKILL."""
+    import functools
+    from areal import workflow_context
+    from areal.workflow.rlvr import RLVRWorkflow
+    from scripts.ft.descendants import Client,snapshot
+    client=Client('trainer',event_id=frozen['event_id'])
+    armed=client.injection['status']=='pending'
+    emit('fault_target_registered',scenario='F4T',identity=snapshot(os.getpid()),
+         incarnation=client.incarnation,assignment=client.injection)
+    row=frozen['evidence']['source_row_id']
+    state={'task':None,'entered':set(),'returned':0,'fired':False}
+    original=RLVRWorkflow._compute_rewards
+    @functools.wraps(original)
+    async def rewards(self,resp,prompt_str,task_data):
+        target=armed and not state['fired'] and task_data.get('source_row_id')==row
+        if target:
+            ctx=workflow_context.get()
+            if state['task'] is None:state['task']=ctx.task_id
+            target=ctx.task_id==state['task']
+            if target:state['entered'].add(ctx.sample_idx)
+        result=await original(self,resp,prompt_str,task_data)
+        if not target:return result
+        state['returned']+=1
+        if state['returned']!=4:return result
+        state['fired']=True
+        witness={'target_task_id':state['task'],'entered_samples':sorted(state['entered']),
+                 'returned':state['returned'],'cut_monotonic_ns':time.monotonic_ns()}
+        if len(state['entered'])!=8:
+            emit('fault_cut_missed',scenario='F4T',**witness)
+            return result
+        emit('fault_ready',scenario='F4T',identity=snapshot(os.getpid()),
+             incarnation=client.incarnation,evidence=frozen['evidence'],**witness)
+        client.ready(frozen['event_id'],frozen['evidence'])
+        client.wait_release(frozen['event_id'])
+        raise RuntimeError('SIGKILL target survived')
+    RLVRWorkflow._compute_rewards=rewards
     return client
