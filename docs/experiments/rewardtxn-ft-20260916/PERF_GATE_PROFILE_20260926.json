@@ -1,0 +1,35 @@
+[
+  {
+    "run": "gate-nofault-g01-s1199-20260926-a",
+    "wall": 489.0,
+    "launch_to_trainer": 77.8,
+    "trainer_to_first": 146.9,
+    "loop": 157.6,
+    "loop_tail": 59.1,
+    "outside_launcher": 47.7,
+    "step_wait_batch": 0.85,
+    "step_train": 2.41,
+    "step_opt_to_save": 0.14,
+    "step_save": 8.85
+  },
+  {
+    "run": "gate-nofault-g01-s1199-20260926-r",
+    "wall": 510.4,
+    "launch_to_trainer": 74.5,
+    "trainer_to_first": 147.5,
+    "loop": 209.2,
+    "loop_tail": 36.7,
+    "outside_launcher": 42.5,
+    "step_wait_batch": 5.92,
+    "step_train": 11.39,
+    "step_opt_to_save": 0.13,
+    "step_save": 3.97,
+    "r_update_prepared->optimizer_applied": 1.64,
+    "r_optimizer_applied->scheduler_applied": 0.0,
+    "r_scheduler_applied->async_scheduled": 4.14,
+    "r_async_scheduled->async_finalized": 10.96,
+    "r_async_finalized->committed": 1.95,
+    "r_committed->next_prepared": 2.37,
+    "r_batch_taken->prepared": 9.62
+  }
+]

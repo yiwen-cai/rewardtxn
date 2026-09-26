@@ -1,0 +1,95 @@
+{
+  "created_local": "2026-09-26T09:50:42.030808+08:00",
+  "purpose": "R_PERF_REDESIGN phase1+B GPU gate: 1 no-fault + 1 F2 pair, engineering only (not formal samples)",
+  "formal_sample": false,
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "areal_base_commit": "b83d1f40196e5bd7d9f83092563443561870d550",
+  "areal_tracked_patch_sha256": "f12f7767a69e9a807885e646d622a407d16725bba97d43c5587c404cd84e0a8e",
+  "source_map_file": "PERF_GATE_SOURCE_SHA256_20260926.json",
+  "source_map_sha256": "c9f24bf89010319a91b20dce4b1c92f0543c3caa4067f57d0b39b092c8a99a71",
+  "source_file_count": 511,
+  "extra_sha256": {
+    "tests/ft/run_ft_formal.py": "1838b83bd364f1e82838f8560d720fb8a3a9102dc2a6fa41c37d1d7a5fbf0ea3",
+    "docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml": "599b8ebcf3747c74fd32dcd27562e143458b47217691522ed5191b7cd3fc58db",
+    "runs/diagnosis-20260910/train.jsonl": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+    "models/Qwen2.5-0.5B-Instruct/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "models/Qwen2.5-0.5B-Instruct/LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+    "models/Qwen2.5-0.5B-Instruct/README.md": "b19c806a904db6dc878a0462e70b551f6b7ac78dfbb88c2eb966ca2b9109ae15",
+    "models/Qwen2.5-0.5B-Instruct/config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "models/Qwen2.5-0.5B-Instruct/configuration.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "models/Qwen2.5-0.5B-Instruct/generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "models/Qwen2.5-0.5B-Instruct/merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "models/Qwen2.5-0.5B-Instruct/model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "models/Qwen2.5-0.5B-Instruct/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "tests/ft/offline_generation.py": "c1e5e74c074447db0fe3631e5a0570e57e546a176b2eea0403258d8a860b302e",
+    "tests/ft/launch_ft_formal_dynamic.py": "10b4e0d913165aa6b2cc00cb600320977164528aa0495cbc54f383ddfc4f4f6d"
+  },
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "training_gpu": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d",
+  "pairs": [
+    {
+      "name": "gate-nofault-g01-s1199-20260926",
+      "scenario": "no_fault",
+      "seed": 1199,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "gate-f2-g02-s763-20260926",
+      "scenario": "F2",
+      "seed": 763,
+      "order": [
+        "R",
+        "A"
+      ]
+    }
+  ],
+  "seed_selection": "random.Random(20260926).sample([0..9999] excluding pilot 419/421/431 and 13 formal seeds, 2)",
+  "retain_full_pair_index": null,
+  "retain_full_pair_name": null,
+  "pilot_peak_bytes": 34727661568,
+  "minimum_free_bytes": 56202498048,
+  "training": {
+    "model": "models/Qwen2.5-0.5B-Instruct",
+    "data": "runs/diagnosis-20260910/train.jsonl",
+    "steps": 10,
+    "K": 8,
+    "U": 4,
+    "f2_ordinal": 2,
+    "fault_window": "after second successful optimizer update, after prior async checkpoint drain and before save of this update",
+    "recover_retries": {
+      "F2": 1,
+      "no_fault": 0
+    },
+    "async_full_dcp": true,
+    "checkpoint_freq_steps": 1,
+    "pointwise_autotune": false,
+    "blocking_d2h": true,
+    "run_timeout_seconds": 2400,
+    "recovery_observation_seconds": 900,
+    "handshake_timeout_seconds": 10,
+    "lease_timeout_seconds": 20
+  },
+  "failure_rule": "Any technical failure stops the gate for review; no automatic redo.",
+  "storage_rule": "One run at a time; each arm independent fault/chain/input/fresh native load/source verification, then SHA-256 every DCP shard. Retain full DCP for preselected F2 pair index 5 both arms; delete passed other shards only after verification; preserve all failed shards. Check free space >= P+20GiB and four GPU idle before every run.",
+  "formal_evidence_parent": "docs/experiments/rewardtxn-ft-20260916/minimal_evidence",
+  "kind": "perf_gate",
+  "perf_probe": true,
+  "gate_rule": "R/A training-loop time ratio (no-fault pair, profile_r_overhead loop) <= 1.15 -> stay; > 1.15 -> phase 2 (lag-1 pipelined commit), pre-decided by user 2026-09-25. F2 must stay R correct_recovered 32/32 and A safe_discard; native_state_loaded.exact_match required.",
+  "supersedes_note": "Code changed after FORMAL_FREEZE_20260924; formal results not merged with this version.",
+  "gpu_assignment_amendment": {
+    "original_freeze_sha256": "5607faa6032d8723f2bb944c4f2f05f88311e43960aa529d17fc358529185a7e",
+    "policy": "any four simultaneously idle identical H100s, fixed within each A/R pair",
+    "pair_index": 0,
+    "pair_name": "gate-nofault-g01-s1199-20260926"
+  }
+}
