@@ -1,5 +1,20 @@
 # RewardTxn 项目进展报告
 
+## 当前状态：2026-09-26
+
+**R 正常路径性能优化完成，用户接受当前版本（2026-09-26）。** R 与 A（AReaL 原生恢复）相比，端到端墙钟为 1.02–1.06 倍（原 1.60），训练循环为 1.21–1.29 倍（原 2.40）。恢复能力完整：F2 下 R 仍 32/32 `correct_recovered`，重新加载 `exact_match`。
+
+- 剖析：[R_OVERHEAD_PROFILE_20260925.md](docs/experiments/rewardtxn-ft-20260916/R_OVERHEAD_PROFILE_20260925.md)
+- 阶段 1+B（control 缓存、去冗余检查、分块摘要、后台提交）：[实现](docs/experiments/rewardtxn-ft-20260916/R_PERF_REDESIGN_IMPLEMENTATION_20260926.md)，[门控](docs/experiments/rewardtxn-ft-20260916/PERF_GATE_RESULT_20260926.md)
+- 阶段 2（lag-1 流水提交、证据提前落盘、恢复时提升未提交代）：[实现](docs/experiments/rewardtxn-ft-20260916/R_PERF_PHASE2_IMPLEMENTATION_20260926.md)，[门控](docs/experiments/rewardtxn-ft-20260916/PERF_GATE2_RESULT_20260926.md)
+- 各方案都经过独立审计，审计文件在同目录（`*_AUDIT.md`）。
+- 语义变化：
+  - 提交晚一步；写盘已 finalize 且快照已发布的代会在恢复时被提升，所以常见故障下回退与原版相同；写盘未完成时最多多回退 1 步（用户已接受）；
+  - RTO 端点（首个使目标行进入保留链的 committed）随之晚一步。
+- 2026-09-24 冻结的正式矩阵结果（F2 10/10 vs 0/10）属于旧版本，不与新版本合并。
+
+**下一步（待用户批准）**：以当前版本重新冻结，扩展 F4/F1 容错对比。开跑前需统一两臂的 RTO 口径，并批准 GPU 预算。
+
 ## 当前状态：2026-09-25
 
 **最小 FT 正式矩阵（AReaL 分支，冻结 2026-09-24 13:14）13/13 对已完成并通过验收。** 冻结见[FORMAL_FREEZE_20260924.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_FREEZE_20260924.md)，逐对记录在 `docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-*-pair.json`。
