@@ -1,0 +1,70 @@
+{
+  "name": "formal-f4t-p04-s3515-20260927",
+  "scenario": "F4T",
+  "seed": 3515,
+  "order": [
+    "R",
+    "A"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "eb50ed15cbf4f61279f2f71d81c4b6a7a81b113a34b813a947715d4c3878e9ee",
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p04-s3515-20260927-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F4T",
+        "completed_untrained_scores_at_signal": 44,
+        "same_execution_reused": 42,
+        "discarded": 2,
+        "generated_tokens_after_fault": 63358,
+        "score_returns_after_fault": 182,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 414024507392,
+        "free_minimum": 372417253376,
+        "peak_incremental_bytes": 41607254016,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p04-s3515-20260927-a",
+      "classification": "safe_stop",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F4T",
+        "outcome": "safe_stop",
+        "main_thread_last_event_before_kill": "recover_handler_dump_start",
+        "completed_untrained_scores_at_signal": 37,
+        "same_execution_reused": 0,
+        "discarded": 37,
+        "generated_tokens_after_fault": 0,
+        "score_returns_after_fault": 0,
+        "scope": "safe stop without final retained chain; completed-at-signal definition as verify_inflight; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 413922209792,
+        "free_minimum": 406954471424,
+        "peak_incremental_bytes": 6967738368,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "full_retained"
+    }
+  ]
+}
