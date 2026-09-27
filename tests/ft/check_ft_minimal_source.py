@@ -284,6 +284,55 @@ def verify_inflight(root, case):
             'scope': 'physical score execution identity to retained native chain; one run, no statistical claim'}
 
 
+def verify_safe_stop(root):
+    """F4' arm whose native recovery could not resume (e.g. SIGKILL tore the
+    recover checkpoint): no final retained chain exists, so nothing completed
+    at the signal is retained. Counts completed-untrained work at the signal
+    with the same definition as verify_inflight; reused is 0 by construction."""
+    root = Path(root)
+    case = read(root / 'ft1-case.json')
+    assert case['scenario'] == 'F4T' and case.get('minimal') is True
+    status = read(root / 'acceptance-status.json')
+    assert status['result'] == 'blocked_missing_final_native_state', status['result']
+    assert status['steps']['check_ft1_fault']['returncode'] == 0
+    fault = read(root / 'fault-verification.json')
+    assert fault['valid_hit'] and fault['signals'] == 1 and fault['all_jobs_cleaned']
+    assert fault['classification'] == 'safe_stop_or_error' and fault['training_returned'] is False
+    assert fault['successful_updates_after_fault'] == 0
+    assert not (root / 'final-native-state.json').exists()
+    observed = events(root, 'observer-ft1')
+    pilot = sorted(events(root, 'observer-pilot'), key=lambda e: e['monotonic_ns'])
+    physical, _, scored = physical_index(observed)
+    scored = parent_accepted_scores(root, scored)
+    sent = unique([e for e in rows(root / 'events.jsonl') if e['kind'] == 'signal_sent'], 'signal')['controller_monotonic_ns']
+    assert all(e['monotonic_ns'] < sent for e in pilot if e['event'] == 'optimizer_end'), 'update applied after signal'
+    ends = {e['update_id'] for e in pilot if e['event'] == 'optimizer_end'}
+    if case['arm'] == 'A':
+        by_attempt = {e['sample_attempt']: e['execution_id'] for e in scored if e.get('sample_attempt') is not None}
+        trains = [e for e in pilot if e['event'] == 'train_batch' and e['update_id'] in ends]
+        trained = {by_attempt[row[0]] for t in trains for row in a_batch(t)}
+    else:
+        method = root / 'rewardtxn'
+        applied = [e['generation'] for e in rows(method / 'events.jsonl') if e['event'] == 'optimizer_applied' and int(e['monotonic_ns']) < sent]
+        nonces = {e['reward_invocation_nonce']: e['execution_id'] for e in scored if e.get('reward_invocation_nonce') is not None}
+        trained = set()
+        for g in applied:
+            intent = read(method / 'state/generations' / g / 'intent.json')
+            for update in intent['updates']:
+                for group in update['groups']:
+                    for sample in group['samples']:
+                        reward = json.loads((method / 'artifacts/blobs' / sample['receipt']['payload']['reward_sha256']).read_bytes())
+                        trained.add(nonces[reward['payload']['return']['invocation_nonce']])
+    completed = {e['execution_id'] for e in scored if e['monotonic_ns'] < sent} - trained
+    return {'verified': True, 'arm': case['arm'], 'scenario': case['scenario'], 'outcome': 'safe_stop',
+            'main_thread_last_event_before_kill': fault['main_thread_last_event_before_kill'],
+            'completed_untrained_scores_at_signal': len(completed),
+            'same_execution_reused': 0, 'discarded': len(completed),
+            'generated_tokens_after_fault': sum(len(e['output_tokens']) for e in physical.values() if e['monotonic_ns'] > sent),
+            'score_returns_after_fault': sum(e['monotonic_ns'] > sent for e in scored),
+            'scope': 'safe stop without final retained chain; completed-at-signal definition as verify_inflight; one run, no statistical claim'}
+
+
 if __name__ == '__main__':
     root = Path(sys.argv[1]); report = verify(root)
     (root / 'source-verification.json').write_text(json.dumps(report, indent=2) + '\n')

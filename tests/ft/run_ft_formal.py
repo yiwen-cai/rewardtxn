@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from run_training_fault import REPO, main as run, write
 from run_ft_minimal import DiskMonitor
-from check_ft_minimal_source import verify as verify_source
+from check_ft_minimal_source import verify as verify_source, verify_safe_stop
 from minimal_storage import retain_or_clear
 from scripts.ft.native_gpu import idle_snapshot
 from gpu_load_monitor import GpuLoadMonitor
@@ -110,6 +110,17 @@ def run_pair(freeze_path, freeze, index):
                 if root.exists():
                     write(root / 'disk-peak.json', monitor.result())
             acceptance = json.loads((root / 'acceptance-status.json').read_text())
+            if (item['scenario'] == 'F4T' and freeze.get('kind') == 'f4t_formal'
+                    and acceptance['result'] == 'blocked_missing_final_native_state'):
+                # Amendment A2: a valid F4' hit whose native recovery cannot
+                # resume is a safe stop (nothing retained), not a failed pair.
+                source = verify_safe_stop(root)
+                write(root / 'source-verification.json', source)
+                record['runs'].append({'arm': arm, 'evidence': str(root), 'classification': 'safe_stop',
+                                       'source': source, 'disk_peak': monitor.result(),
+                                       'storage': 'full_retained'})
+                write(pair_path, record)
+                continue
             if acceptance['result'] != 'functional_verification_written':
                 raise RuntimeError(f'acceptance failed: {acceptance["result"]}')
             source = verify_source(root)

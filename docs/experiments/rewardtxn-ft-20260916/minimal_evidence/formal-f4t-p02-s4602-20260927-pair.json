@@ -1,0 +1,77 @@
+{
+  "name": "formal-f4t-p02-s4602-20260927",
+  "scenario": "F4T",
+  "seed": 4602,
+  "order": [
+    "R",
+    "A"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "88bb91d2403eea74d4373b742600fb20032bb1755add41c96fd3ed1c4b03ad9d",
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p02-s4602-20260927-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F4T",
+        "completed_untrained_scores_at_signal": 39,
+        "same_execution_reused": 37,
+        "discarded": 2,
+        "generated_tokens_after_fault": 65004,
+        "score_returns_after_fault": 187,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 420374753280,
+        "free_minimum": 378767659008,
+        "peak_incremental_bytes": 41607094272,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p02-s4602-20260927-a",
+      "classification": "safe_stop",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F4T",
+        "outcome": "safe_stop",
+        "main_thread_last_event_before_kill": "recover_handler_dump_start",
+        "completed_untrained_scores_at_signal": 43,
+        "same_execution_reused": 0,
+        "discarded": 43,
+        "generated_tokens_after_fault": 0,
+        "score_returns_after_fault": 0,
+        "scope": "safe stop without final retained chain; completed-at-signal definition as verify_inflight; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 420272615424,
+        "free_minimum": 413304848384,
+        "peak_incremental_bytes": 6967767040,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "full_retained"
+    }
+  ],
+  "acceptance_amendment": {
+    "original_error": "RuntimeError('acceptance failed: blocked_missing_final_native_state')",
+    "original_failed_arm": "A",
+    "reason": "valid F4T hit during AReaL recover_handler dump; torn recover checkpoint -> EOFError on reload; safe stop, nothing retained",
+    "document": "docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_SAFE_STOP_AMENDMENT_20260927.md",
+    "check_ft_minimal_source_sha256": "37aa121713ba7fc2c9ba8af173bd0fea01f2fe36c3a423a69936c89d45635367"
+  }
+}

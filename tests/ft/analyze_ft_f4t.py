@@ -7,7 +7,7 @@ from pathlib import Path
 import statistics
 
 
-SAFE = {'correct_recovered', 'safe_discard'}
+SAFE = {'correct_recovered', 'safe_discard', 'safe_stop'}
 
 
 def sha256(path):
@@ -52,7 +52,14 @@ def analyze(freeze_path):
             root = Path(run['evidence'])
             assert root.name == f"{name}-{run['arm'].lower()}"
             source = json.loads((root / 'source-verification.json').read_text())
-            result = json.loads((root / 'functional-verification.json').read_text())
+            if run['classification'] == 'safe_stop':
+                # Amendment A2: valid hit, native recovery could not resume; nothing retained.
+                assert source.get('outcome') == 'safe_stop' and source['same_execution_reused'] == 0
+                fault = json.loads((root / 'fault-verification.json').read_text())
+                assert fault['valid_hit'] and fault['classification'] == 'safe_stop_or_error'
+                result = {'classification': 'safe_stop'}
+            else:
+                result = json.loads((root / 'functional-verification.json').read_text())
             monitor = json.loads((root / 'gpu-load-summary.json').read_text())
             cost = json.loads((root / 'cost.json').read_text())
             count = source['completed_untrained_scores_at_signal']
@@ -60,7 +67,8 @@ def analyze(freeze_path):
             assert source['verified'] and source['arm'] == run['arm'] and source['scenario'] == 'F4T'
             assert count > 0 and 0 <= kept <= count and source['discarded'] == count - kept
             assert result['classification'] == run['classification'] in SAFE
-            assert result['safety_verified_for_retained_chain'] and result['full_native_reload_verified']
+            if result['classification'] != 'safe_stop':
+                assert result['safety_verified_for_retained_chain'] and result['full_native_reload_verified']
             assert monitor['samples'] > 0 and monitor['violation'] is None
             arms[run['arm']] = {'completed': count, 'kept': kept, 'fraction': kept / count,
                                'classification': result['classification'],
