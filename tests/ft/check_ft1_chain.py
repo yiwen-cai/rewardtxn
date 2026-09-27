@@ -18,6 +18,30 @@ def sha(path):
 def canon(value):return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
 
 
+def killed_update(root,case,pilot,batches,trained,applied):
+    """F4' may SIGKILL the trainer between train_batch and optimizer_end.
+
+    Accept exactly one such update, only if it is the last pilot event of the
+    killed process, the controller's signal falls after it, and every later
+    event belongs to a new process. Returns (batch_taken, train_batch) or None.
+    """
+    done={a['update_id'] for a in applied}
+    open_=[t for t in trained if t['update_id'] not in done]
+    if not open_:return None
+    assert case['scenario']=='F4T' and len(open_)==1,'unapplied train_batch outside F4T kill'
+    t=open_[0]
+    same=[e for e in pilot if e['pid']==t['pid'] and e['process_incarnation']==t['process_incarnation']]
+    assert same[-1] is t,'unapplied train_batch is not the last event of its process'
+    prior=[e for e in same if e['event']=='batch_taken' and e['monotonic_ns']<t['monotonic_ns']]
+    assert prior and prior[-1] in batches
+    signal=[e for e in rows(root/'events.jsonl') if e['kind']=='signal_sent']
+    assert len(signal)==1 and t['monotonic_ns']<signal[0]['controller_monotonic_ns']
+    later=[e for e in pilot if e['monotonic_ns']>t['monotonic_ns']]
+    assert later and all(e['pid']!=t['pid'] or e['process_incarnation']!=t['process_incarnation'] for e in later)
+    assert all(e['monotonic_ns']>signal[0]['controller_monotonic_ns'] for e in later)
+    return prior[-1],t
+
+
 def verify(root):
     started=time.monotonic();root=Path(root)
     case=read(root/'ft1-case.json');arm=case['arm']
@@ -31,6 +55,10 @@ def verify(root):
     pilot=sorted([e for p in (root/'observer-pilot').glob('*.jsonl') for e in rows(p)],key=lambda e:e['monotonic_ns'])
     batches=[e for e in pilot if e['event']=='batch_taken'];trained=[e for e in pilot if e['event']=='train_batch']
     applied=[e for e in pilot if e['event']=='optimizer_end']
+    killed_in_flight=killed_update(root,case,pilot,batches,trained,applied)
+    if killed_in_flight:
+        batches=[b for b in batches if b is not killed_in_flight[0]]
+        trained=[t for t in trained if t is not killed_in_flight[1]]
     assert len(batches)==len(trained)==len(applied)
     if no_fault:assert len(applied)==steps
     for b,t,a in zip(batches,trained,applied):
@@ -140,7 +168,8 @@ def verify(root):
         extra={'retained_generations':steps,'unique_consumed_samples':n_samples,'unique_source_rows':n_groups,'retained_source_rows':sorted(source_rows),
                'pruned_files':pruned_files,'pins':pins}
     return {'verified':True,'arm':arm,'scope':'observed optimizer/input to checkpoint linkage; reward re-score and native reload reported separately',
-            'checkpoint_bytes_hashed':size,'files_hashed':files_checked,'wall_seconds':time.monotonic()-started,**extra}
+            'checkpoint_bytes_hashed':size,'files_hashed':files_checked,
+            'killed_in_flight_update_id':killed_in_flight[1]['update_id'] if killed_in_flight else None,'wall_seconds':time.monotonic()-started,**extra}
 
 
 if __name__=='__main__':

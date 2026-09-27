@@ -1,0 +1,77 @@
+{
+  "name": "formal-f4t-p01-s9023-20260927-redo2",
+  "scenario": "F4T",
+  "seed": 9023,
+  "order": [
+    "A",
+    "R"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "91c6959ffaf0fbaad7595057281445e77bfbf58f6bab48bd2c465a2697f38db3",
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p01-s9023-20260927-redo2-a",
+      "classification": "safe_discard",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F4T",
+        "completed_untrained_scores_at_signal": 40,
+        "same_execution_reused": 0,
+        "discarded": 40,
+        "generated_tokens_after_fault": 102473,
+        "score_returns_after_fault": 320,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 420549939200,
+        "free_minimum": 413558923264,
+        "peak_incremental_bytes": 6991015936,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p01-s9023-20260927-redo2-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F4T",
+        "completed_untrained_scores_at_signal": 69,
+        "same_execution_reused": 66,
+        "discarded": 3,
+        "generated_tokens_after_fault": 65965,
+        "score_returns_after_fault": 190,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 420476637184,
+        "free_minimum": 378869440512,
+        "peak_incremental_bytes": 41607196672,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    }
+  ],
+  "acceptance_amendment": {
+    "original_error": "RuntimeError('acceptance failed: blocked_at_chain')",
+    "original_failed_arm": "R",
+    "reason": "checker assumed every train_batch has an optimizer_end; F4' SIGKILL landed between them (update 09eb2f16...). Evidence unchanged; acceptance re-run with amended checkers.",
+    "document": "docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_CHAIN_AMENDMENT_20260927.md",
+    "check_ft1_chain_sha256": "b28ca277d526013ced109f771be35574595c4efed912a241967f3ae7a87886e9",
+    "check_ft1_input_audit_sha256": "c43f9775d6eaa1c1306183b0ad0e90a0afc2a3d34268da96974ae261d939eaed",
+    "original_acceptance_status": "acceptance-status-blocked_at_chain-20260927.json"
+  }
+}

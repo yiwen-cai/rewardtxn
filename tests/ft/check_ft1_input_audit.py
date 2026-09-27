@@ -33,6 +33,24 @@ def batch_rows(batches, training=False):
     return result
 
 
+def drop_killed_update(root,case,pilot,taken,trained,applied):
+    """Mirror of check_ft1_chain.killed_update: F4' may SIGKILL between train_batch and optimizer_end."""
+    done={a['update_id'] for a in applied}
+    open_=[t for t in trained if t['update_id'] not in done]
+    if not open_:return taken,trained
+    assert case['scenario']=='F4T' and len(open_)==1,'unapplied train_batch outside F4T kill'
+    t=open_[0]
+    same=[e for e in pilot if e['pid']==t['pid'] and e['process_incarnation']==t['process_incarnation']]
+    assert same[-1] is t,'unapplied train_batch is not the last event of its process'
+    prior=[e for e in same if e['event']=='batch_taken' and e['monotonic_ns']<t['monotonic_ns']]
+    assert prior and prior[-1] in taken
+    signal=[e for e in rows(root/'events.jsonl') if e['kind']=='signal_sent']
+    assert len(signal)==1 and t['monotonic_ns']<signal[0]['controller_monotonic_ns']
+    later=[e for e in pilot if e['monotonic_ns']>t['monotonic_ns']]
+    assert later and all(e['monotonic_ns']>signal[0]['controller_monotonic_ns'] for e in later)
+    return [b for b in taken if b is not prior[-1]],[x for x in trained if x is not t]
+
+
 async def main():
     from transformers import AutoTokenizer
     from areal.api import AsyncRewardWrapper
@@ -54,6 +72,7 @@ async def main():
     trained=[e for e in pilot if e['event']=='train_batch']
     applied=[e for e in pilot if e['event']=='optimizer_end']
     case=json.loads((root/'ft1-case.json').read_text());no_fault=case['scenario']=='no_fault'
+    taken,trained=drop_killed_update(root,case,pilot,taken,trained,applied)
     assert len(taken)==len(trained)==len(applied)
     if no_fault:assert len(applied)==case.get('steps',10)
     assert applied,'no optimizer input available for authority audit'
