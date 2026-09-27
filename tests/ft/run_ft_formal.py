@@ -30,6 +30,16 @@ def check_freeze(freeze, base):
         assert freeze['formal_sample'] is False and freeze['retain_full_pair_index'] is None
         assert {p['scenario'] for p in freeze['pairs']} <= {'F2', 'F4T', 'F1', 'no_fault'}
         assert len({p['seed'] for p in freeze['pairs']}) == len(freeze['pairs']) <= 4
+    elif freeze.get('kind') == 'f4t_formal':
+        assert freeze['formal_sample'] is True
+        assert len(freeze['pairs']) == freeze['planned_pair_count'] > 0
+        assert all(p['scenario'] == 'F4T' and p['order'] in (['A', 'R'], ['R', 'A'])
+                   for p in freeze['pairs'])
+        assert abs(sum(p['order'][0] == 'A' for p in freeze['pairs']) -
+                   sum(p['order'][0] == 'R' for p in freeze['pairs'])) <= 1
+        assert len({p['seed'] for p in freeze['pairs']}) == len(freeze['pairs'])
+        assert len({p['name'] for p in freeze['pairs']}) == len(freeze['pairs'])
+        assert 0 <= freeze['retain_full_pair_index'] < len(freeze['pairs'])
     else:
         assert freeze['formal_sample'] is True
         assert len(freeze['pairs']) == 13
@@ -86,7 +96,7 @@ def run_pair(freeze_path, freeze, index):
                 raise RuntimeError(f'acceptance failed: {acceptance["result"]}')
             source = verify_source(root)
             write(root / 'source-verification.json', source)
-            keep_full = item['scenario'] == 'F2' and index == freeze['retain_full_pair_index']
+            keep_full = freeze['formal_sample'] and index == freeze['retain_full_pair_index']
             storage = retain_or_clear(root, keep_full=keep_full)
             result = json.loads((root / 'functional-verification.json').read_text())
             record['runs'].append({'arm': arm, 'evidence': str(root),
