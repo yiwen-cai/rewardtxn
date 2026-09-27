@@ -5,9 +5,9 @@
 **冻结完成**（[FORMAL_F4T_FREEZE_20260927.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_FREEZE_20260927.md)）：用户决定 F4′ 10 对正式（上限 25 GPU·h），F1 目标后移到 `2602/task 20` 先做 2 对工程试点（上限 5 GPU·h）；旧 F2/无故障结果单独报告；共享 GPU，运行中每 5 s 监测外部进程。
 
 - **F1 后移试点**（[结果](docs/experiments/rewardtxn-ft-20260916/PILOT_F1_LATE_RESULT_20260927.md)）：s525 两臂均 `safe_discard`（R 同次执行保留 65/65，A 0/64；目标行未进最终保留链）；s7598 A `safe_discard`，R 未产生 `f1-claimed.json` → `fault_not_valid_hit`，技术无效。累计 3.42 GPU·h，余量不足整对补做，F1 停在工程观察，不升级正式。
-- **F4′ 正式 p01 s9023（A→R）**：A 完成验收，`safe_discard`，保留 0/46。R 臂 11:56 以 `technical_invalid`（`host lease expired`）结束，容器退出 2；宿主 runner 已不在运行，pair 文件仍标 `running`，尚未登记技术无效，也未补做。GPU 监测无外部进程违规记录（待核）。
+- **F4′ 正式 p01 s9023（A→R）**：A 完成验收，`safe_discard`，保留 0/46。R 臂 11:56 以 `technical_invalid`（`host lease expired`）结束，容器退出 2；宿主 runner 已不在运行（根因：Codex 在前台 PTY 会话 22097 中启动 runner，11:55:06 该轮对话结束，约 60 s 后 runner 随会话被终止，租约计数停在 418；非代码、GPU 或 OOM 问题），pair 文件仍标 `running`，尚未登记技术无效，也未补做。GPU 监测无外部进程违规记录（待核）。
 
-**下一步（待用户决定）**：查明宿主 runner 退出原因 → 按冻结规则把 p01 登记为技术无效并同 seed 同顺序整对补做一次 → 继续 p02–p10。
+**下一步（待用户决定）**：runner 改用 `setsid nohup`/tmux 脱离会话启动 → 按冻结规则把 p01 登记为技术无效并同 seed 同顺序整对补做一次 → 继续 p02–p10。
 
 ## 当前状态：2026-09-26 晚（F4'/F1 试点）
 
