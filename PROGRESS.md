@@ -7,7 +7,7 @@
 - **F1 后移试点**（[结果](docs/experiments/rewardtxn-ft-20260916/PILOT_F1_LATE_RESULT_20260927.md)）：s525 两臂均 `safe_discard`（R 同次执行保留 65/65，A 0/64；目标行未进最终保留链）；s7598 A `safe_discard`，R 未产生 `f1-claimed.json` → `fault_not_valid_hit`，技术无效。累计 3.42 GPU·h，余量不足整对补做，F1 停在工程观察，不升级正式。
 - **F4′ 正式 p01 s9023（A→R）**：A 完成验收，`safe_discard`，保留 0/46。R 臂 11:56 以 `technical_invalid`（`host lease expired`）结束，容器退出 2；宿主 runner 已不在运行（根因：Codex 在前台 PTY 会话 22097 中启动 runner，11:55:06 该轮对话结束，约 60 s 后 runner 随会话被终止，租约计数停在 418；非代码、GPU 或 OOM 问题），pair 文件仍标 `running`，尚未登记技术无效，也未补做。GPU 监测无外部进程违规记录（待核）。
 
-**下一步（待用户决定）**：runner 改用 `setsid nohup`/tmux 脱离会话启动 → 按冻结规则把 p01 登记为技术无效并同 seed 同顺序整对补做一次 → 继续 p02–p10。
+**14:3x 已处理**：p01 pair 状态补登为 `stopped_for_review`（R 臂 technical_invalid），R 臂成本按 docker 起止时间补记 0.254 GPU·h。新增 `tests/ft/launch_ft_f4t_redo.py`（由 F2 补做启动器泛化，不在冻结源码表内，哈希写入补做清单 `extra_sha256`）。已用 `setsid nohup` 脱离会话启动：p01 整对补做（`-redo1`，同 seed、A→R，同一组 4 卡）→ `launch_ft_formal_dynamic.py --start-pair-index 1` 继续 p02–p10；日志 `minimal_evidence/f4t-formal-runner-20260927.log`。注：补做清单改了 p01 名称，统计器按名称累计成本，原 p01 的 1.10 GPU·h 在补做那一步不计入上限检查，须在最终预算中手工加回。
 
 ## 当前状态：2026-09-26 晚（F4'/F1 试点）
 

@@ -1,0 +1,192 @@
+{
+  "created_local": "2026-09-27T10:31:55.938764+08:00",
+  "purpose": "F4' 10-pair formal work-retention comparison; frozen before first new GPU run",
+  "formal_sample": true,
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "areal_base_commit": "b83d1f40196e5bd7d9f83092563443561870d550",
+  "areal_tracked_patch_sha256": "f12f7767a69e9a807885e646d622a407d16725bba97d43c5587c404cd84e0a8e",
+  "source_map_file": "FORMAL_F4T_SOURCE_SHA256_20260927.json",
+  "source_map_sha256": "acc6569865a0101a135f243d57272b84a068c924ae51ce94840d8082e20c9dd6",
+  "source_file_count": 512,
+  "extra_sha256": {
+    "tests/ft/run_ft_formal.py": "d70d6466c99cc6f44fb5599db1aa584c544f3be5bbe8bd8a16d0d1187086b9cf",
+    "docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml": "599b8ebcf3747c74fd32dcd27562e143458b47217691522ed5191b7cd3fc58db",
+    "runs/diagnosis-20260910/train.jsonl": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+    "models/Qwen2.5-0.5B-Instruct/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "models/Qwen2.5-0.5B-Instruct/LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+    "models/Qwen2.5-0.5B-Instruct/README.md": "b19c806a904db6dc878a0462e70b551f6b7ac78dfbb88c2eb966ca2b9109ae15",
+    "models/Qwen2.5-0.5B-Instruct/config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "models/Qwen2.5-0.5B-Instruct/configuration.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "models/Qwen2.5-0.5B-Instruct/generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "models/Qwen2.5-0.5B-Instruct/merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "models/Qwen2.5-0.5B-Instruct/model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "models/Qwen2.5-0.5B-Instruct/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "tests/ft/offline_generation.py": "4285dffcc4a455031abd114a0e1f15fd62955f27989628afd46987281f51d436",
+    "docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json": "35aef0469166b80d9399d89da377bde7732b2e0001788d9ab0626ac53698c77d",
+    "tests/ft/launch_ft_formal_dynamic.py": "10b4e0d913165aa6b2cc00cb600320977164528aa0495cbc54f383ddfc4f4f6d",
+    "tests/ft/gpu_load_monitor.py": "8af20b73dc291b2e2dae5a6c0648d88b8885a108e26fa1ed1c27689b03c01133",
+    "tests/ft/analyze_ft_f4t.py": "508fec5f0f18b979245c28ccfecf9fee0012c0da36d9fd05fe7b6fcd2b8c7ddc",
+    "tests/ft/ft1_scheduler_fixture.py": "c44954dcc463d7d58997c13a3af9ba9e28d7beb259aac16dd6acf45570b5668b",
+    "tests/ft/test_f1_target_hook.py": "16b5e93742df67014c1eeae1b1714ad98a0270a5ab99f2c57b6f691924c1cb60",
+    "docs/experiments/rewardtxn-ft-20260916/ft1-f1-target-2602.json": "94a369b5d316ec3f1eba09d293fc2651360a450439c16592113d36c6d4596adb",
+    "tests/ft/launch_ft_f4t_redo.py": "ca741500bc2821a69f23551ee70bb669799830f3289b64f05fb98cf3c08e1785"
+  },
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "training_gpu": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d",
+  "pairs": [
+    {
+      "name": "formal-f4t-p01-s9023-20260927-redo1",
+      "scenario": "F4T",
+      "seed": 9023,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f4t-p02-s4602-20260927",
+      "scenario": "F4T",
+      "seed": 4602,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f4t-p03-s526-20260927",
+      "scenario": "F4T",
+      "seed": 526,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f4t-p04-s3515-20260927",
+      "scenario": "F4T",
+      "seed": 3515,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f4t-p05-s1556-20260927",
+      "scenario": "F4T",
+      "seed": 1556,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f4t-p06-s7299-20260927",
+      "scenario": "F4T",
+      "seed": 7299,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f4t-p07-s5778-20260927",
+      "scenario": "F4T",
+      "seed": 5778,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f4t-p08-s3216-20260927",
+      "scenario": "F4T",
+      "seed": 3216,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f4t-p09-s5509-20260927",
+      "scenario": "F4T",
+      "seed": 5509,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f4t-p10-s8400-20260927",
+      "scenario": "F4T",
+      "seed": 8400,
+      "order": [
+        "R",
+        "A"
+      ]
+    }
+  ],
+  "seed_selection": "random.Random(20260928).sample(sorted([0..9999] excluding all existing minimal pair and freeze seeds),12); first 10 F4T, last 2 F1 late pilot; selected before new GPU run",
+  "retain_full_pair_index": 6,
+  "retain_full_pair_name": "formal-f4t-p07-s5778-20260927",
+  "pilot_peak_bytes": 34780889088,
+  "minimum_free_bytes": 56255725568,
+  "training": {
+    "model": "models/Qwen2.5-0.5B-Instruct",
+    "data": "runs/diagnosis-20260910/train.jsonl",
+    "steps": 10,
+    "K": 8,
+    "U": 4,
+    "f2_ordinal": 2,
+    "fault_window": "after second successful optimizer update, after prior async checkpoint drain and before save of this update",
+    "recover_retries": {
+      "F4T": 1,
+      "F1": 1
+    },
+    "async_full_dcp": true,
+    "checkpoint_freq_steps": 1,
+    "pointwise_autotune": false,
+    "blocking_d2h": true,
+    "run_timeout_seconds": 2400,
+    "recovery_observation_seconds": 900,
+    "handshake_timeout_seconds": 10,
+    "lease_timeout_seconds": 20
+  },
+  "failure_rule": "Stop on failed acceptance, invalid commit, timeout, monitor violation, unverified source, or budget cap; retain failed run evidence; no automatic retry",
+  "storage_rule": "Serial runs; fresh-state load and source verification before cleanup; retain both full shards of preselected pair 7; hash then clear other passed shards; preserve all failed runs; check P+20GiB before each arm and any four idle H100s before pair",
+  "formal_evidence_parent": "docs/experiments/rewardtxn-ft-20260916/minimal_evidence",
+  "kind": "f4t_formal",
+  "perf_probe": false,
+  "supersedes_note": "Code changed after FORMAL_FREEZE_20260924; formal results not merged with this version.",
+  "targets": {
+    "F4T": {
+      "source_row_id": 2602,
+      "batch": 6,
+      "task_id": 20
+    }
+  },
+  "monitor_external_gpu": true,
+  "monitor_interval_seconds": 5,
+  "planned_pair_count": 10,
+  "gpu_hour_cap": 25.0,
+  "budget_scope": "allocated training-container GPU-hours from cost.json, including invalid attempts and redos",
+  "redo_rule": "At most one same-seed, same-order full-pair redo for documented technical invalidity in a new directory; retain original and count its GPU-hours",
+  "analysis_rule": "Ten safe decidable paired runs required; compare per-arm same-physical-score retention fraction among completed-untrained scores at signal; exact two-sided paired sign test, p<0.05 and R direction; report ties, all costs and phase; RTO descriptive only",
+  "gpu_assignment_rule": "Any four simultaneously idle identical H100s, fixed for both arms of each pair; monitor all selected GPUs every 5s and stop own container on foreign compute PID or cap",
+  "pilot_pair_names": [
+    "pilot-f4t-q01-s3922-20260926"
+  ],
+  "gpu_assignment_amendment": {
+    "original_freeze_sha256": "448b5c4b73178595dd95b8b4d9520273c5e14b0e3e1fa4c4825d545dbdfec0c6",
+    "failed_pair": "formal-f4t-p01-s9023-20260927",
+    "reason": "one full-pair redo after documented technical invalidity",
+    "policy": "any four simultaneously idle identical H100s, fixed within each A/R pair",
+    "pair_index": 0
+  }
+}

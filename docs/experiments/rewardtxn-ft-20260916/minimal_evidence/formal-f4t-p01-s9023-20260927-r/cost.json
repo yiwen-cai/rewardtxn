@@ -1,0 +1,5 @@
+{
+  "wall_seconds": 228.75501,
+  "allocated_gpu_hours": 0.25417223333333333,
+  "scope": "technical_invalid attempt; derived post hoc from docker inspect StartedAt/FinishedAt because host runner was killed before writing cost.json"
+}
