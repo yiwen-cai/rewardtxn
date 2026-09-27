@@ -1,0 +1,25 @@
+{
+  "checked_local": "2026-09-27T10:35:58.115141+08:00",
+  "formal_freeze_sha256": "448b5c4b73178595dd95b8b4d9520273c5e14b0e3e1fa4c4825d545dbdfec0c6",
+  "f1_pilot_freeze_sha256": "486b34bffbf6fb6f8d4cd8616a96ce20c1cc7328931c7a28ef558299287892b9",
+  "source_file_count": 512,
+  "source_map_sha256": "acc6569865a0101a135f243d57272b84a068c924ae51ce94840d8082e20c9dd6",
+  "historical_seed_count": 24,
+  "new_seed_count": 12,
+  "formal_pair_count": 10,
+  "f1_pilot_pair_count": 2,
+  "target_row": 2602,
+  "target_task_id": 20,
+  "full_retention_pair_index_one_based": 7,
+  "formal_gpu_hour_cap": 25,
+  "f1_pilot_gpu_hour_cap": 5,
+  "public_free_bytes": 434952806400,
+  "required_free_bytes": 56255725568,
+  "idle_gpu_uuids_at_check": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "scope": "read-only independent freeze audit; GPU snapshot temporary, runtime gates remain required"
+}

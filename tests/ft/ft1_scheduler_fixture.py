@@ -10,9 +10,11 @@ from scripts.ft.ft1_scheduler_observer import attach
 
 root=Path(os.environ['FT_CONTROL_SOCKET']).parent
 mode=sys.argv[1]
-active={'trainer':snapshot(os.getpid()),'task_id':0,'source_row_id':5518,'run_nonce':os.environ['FT_RUN_NONCE'],'ambiguous':False}
+row=int(sys.argv[2]) if len(sys.argv)>2 else 5518
+task=20 if row==2602 else 0
+active={'trainer':snapshot(os.getpid()),'task_id':task,'source_row_id':row,'run_nonce':os.environ['FT_RUN_NONCE'],'ambiguous':False}
 complete={**active,'sample_idx':0,'monotonic_ns':time.monotonic_ns(),'run_nonce':os.environ['FT_RUN_NONCE']}
-contract={'source_row_id':5518,'unique_tokenized_source_rows':1,'input_tokens':[11,12,13],'prompt_sha256':'fixture'}
+contract={'source_row_id':row,'task_id':task,'unique_tokenized_source_rows':1,'input_tokens':[11,12,13],'prompt_sha256':'fixture'}
 if mode=='ambiguous':active['ambiguous']=True
 if mode=='wrong_source':complete['source_row_id']=0
 if mode=='stale_nonce':active['run_nonce']='old'

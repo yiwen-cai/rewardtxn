@@ -1,5 +1,6 @@
 """Run the frozen minimal FT formal pairs, one accepted run at a time."""
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 from pathlib import Path
@@ -12,6 +13,7 @@ from run_ft_minimal import DiskMonitor
 from check_ft_minimal_source import verify as verify_source
 from minimal_storage import retain_or_clear
 from scripts.ft.native_gpu import idle_snapshot
+from gpu_load_monitor import GpuLoadMonitor
 
 
 def sha256(path):
@@ -30,8 +32,11 @@ def check_freeze(freeze, base):
         assert freeze['formal_sample'] is False and freeze['retain_full_pair_index'] is None
         assert {p['scenario'] for p in freeze['pairs']} <= {'F2', 'F4T', 'F1', 'no_fault'}
         assert len({p['seed'] for p in freeze['pairs']}) == len(freeze['pairs']) <= 4
+        if any(p['scenario'] == 'F1' for p in freeze['pairs']):
+            assert freeze['targets']['F1']['source_row_id'] in (5518,2602)
     elif freeze.get('kind') == 'f4t_formal':
         assert freeze['formal_sample'] is True
+        assert freeze['monitor_external_gpu'] is True and freeze['gpu_hour_cap'] > 0
         assert len(freeze['pairs']) == freeze['planned_pair_count'] > 0
         assert all(p['scenario'] == 'F4T' and p['order'] in (['A', 'R'], ['R', 'A'])
                    for p in freeze['pairs'])
@@ -52,6 +57,12 @@ def check_freeze(freeze, base):
         assert sha256(REPO / name) == expected, f'source drift: {name}'
     for name, expected in freeze['extra_sha256'].items():
         assert sha256(REPO / name) == expected, f'input drift: {name}'
+
+
+def spent_gpu_hours(freeze, base):
+    return sum(json.loads(path.read_text())['allocated_gpu_hours']
+               for pair in freeze['pairs']
+               for path in base.glob(f"{pair['name']}-*/cost.json"))
 
 
 def run_pair(freeze_path, freeze, index):
@@ -79,14 +90,21 @@ def run_pair(freeze_path, freeze, index):
             if free < freeze['minimum_free_bytes']:
                 raise RuntimeError(f'insufficient free space: {free} < {freeze["minimum_free_bytes"]}')
             idle_snapshot(freeze['devices'], base / f'{rid}-gpu-preflight.json')
+            remaining = freeze.get('gpu_hour_cap', float('inf')) - spent_gpu_hours(freeze, base)
+            if remaining <= 0:
+                raise RuntimeError('frozen GPU-hour cap reached')
             case = {'minimal': True, 'arm': arm, 'seed': item['seed'],
                     'devices': freeze['devices'], 'scenario': item['scenario'],
                     'steps': 10, 'f2_ordinal': 2, 'pointwise_autotune_off': True,
                     'formal_sample': freeze['formal_sample'], 'recovery_observation_seconds': 900,
                     'perf_probe': bool(freeze.get('perf_probe'))}
+            if item['scenario'] == 'F1':
+                case['f1_target_row'] = freeze['targets']['F1']['source_row_id']
             monitor = DiskMonitor(base)
+            gpu_monitor = (GpuLoadMonitor(root, freeze['devices'], remaining)
+                           if freeze.get('monitor_external_gpu') else nullcontext())
             try:
-                with monitor:
+                with monitor, gpu_monitor:
                     run(rid, ft1=case)
             finally:
                 if root.exists():

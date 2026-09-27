@@ -65,7 +65,10 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
             from run_ft1_faults import fault_config
             config=fault_config(config,ft1['scenario'],ft1['seed'])
         if ft1['scenario']=='F1':
-            shutil.copy2(REPO/'docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',output/'f1-target.json')
+            row=ft1.get('f1_target_row',5518)
+            if row not in (5518,2602):raise ValueError('unfrozen F1 target row')
+            name='ft1-f1-target-2602.json' if row==2602 else 'ft1-f1-target.json'
+            shutil.copy2(REPO/'docs/experiments/rewardtxn-ft-20260916'/name,output/'f1-target.json')
         write(output/'ft1-case.json',ft1)
     (output / 'training.yaml').write_text(config)
     for name in ('areal', 'name_resolve', 'tmp'):
@@ -81,6 +84,7 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
         env['FT1_ARM']=ft1['arm']
         env['FT1_SCENARIO']=ft1['scenario']
         env['FT1_STEPS']=str(ft1.get('steps',10))
+        if ft1['scenario']=='F1':env['FT1_F1_TARGET_ROW']=str(ft1.get('f1_target_row',5518))
         if ft1.get('minimal') is True and not ft1.get('dcp_diag'):
             env['FT_MINIMAL_BLOCKING_D2H']='1'
         if ft1.get('minimal') is True and ft1.get('pointwise_autotune_off'):
@@ -100,11 +104,15 @@ def main(rid, scenario='post-optimizer', *, ft1=None):
         if ft1['scenario']!='no_fault':
             from scripts.ft.ft1_fault_hooks import contract as fault_contract
             previous=os.environ.pop('FT1_F2_ORDINAL',None)
+            previous_f1=os.environ.pop('FT1_F1_TARGET_ROW',None)
             if 'f2_ordinal' in ft1:os.environ['FT1_F2_ORDINAL']=str(ft1['f2_ordinal'])
+            if ft1['scenario']=='F1':os.environ['FT1_F1_TARGET_ROW']=env['FT1_F1_TARGET_ROW']
             try:schedule=[fault_contract(ft1['scenario'])]
             finally:
                 os.environ.pop('FT1_F2_ORDINAL',None)
+                os.environ.pop('FT1_F1_TARGET_ROW',None)
                 if previous is not None:os.environ['FT1_F2_ORDINAL']=previous
+                if previous_f1 is not None:os.environ['FT1_F1_TARGET_ROW']=previous_f1
     contract = {'argv':['/opt/.venv/bin/python','-m','areal.infra.launcher.local',
                          entry,'--config','/output/training.yaml'],
         'env':env, 'schedule':schedule if ft1 is not None else [{'event_id':EVENT,'target':'trainer','waiters':['trainer'],'evidence':EVIDENCE}],
@@ -148,6 +156,7 @@ finally:
         files.extend(REPO/p for p in ('tests/ft/check_ft1_smoke.py','tests/ft/run_ft1.py','tests/ft/run_ft1_faults.py',
             'tests/ft/check_ft1_input_audit.py','tests/ft/check_ft1_load.py','tests/ft/check_ft1_chain.py',
             'tests/ft/check_ft1_fault.py','tests/ft/finalize_ft1_fault.py','tests/ft/run_ft1_acceptance.py','docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json',
+            'docs/experiments/rewardtxn-ft-20260916/ft1-f1-target-2602.json',
             'third_party/areal/areal/v2/inference_service/sglang/scheduler.py',
             'third_party/areal/areal/api/reward_api.py','third_party/areal/areal/utils/strict_reward.py',
             'third_party/areal/areal/infra/remote_inf_engine.py','third_party/areal/areal/infra/workflow_executor.py',

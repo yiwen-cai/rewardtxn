@@ -14,7 +14,9 @@ def install(observer_module):
     from scripts.ft.descendants import snapshot
     root=Path(os.environ['FT_CONTROL_SOCKET']).parent
     target=json.loads((root/'f1-target.json').read_text())
-    assert target['source_row_id']==5518 and target['unique_tokenized_source_rows']==1
+    assert target['source_row_id'] in (5518,2602) and target['unique_tokenized_source_rows']==1
+    row=target['source_row_id']
+    task=target.get('task_id',0)
     trainer=snapshot(os.getpid())
     nonce=os.environ['FT_RUN_NONCE']
     lock=threading.Lock()
@@ -27,13 +29,14 @@ def install(observer_module):
     @functools.wraps(original)
     async def collect(self,engine,req,prompt_str,task_data):
         nonlocal active
-        if task_data['source_row_id']==target['source_row_id']:
+        if task_data['source_row_id']==row:
             ctx=workflow_context.get()
+            assert ctx.task_id==task,'target task drift'
             assert req.input_ids==target['input_tokens'],'target tokenization drift'
             with lock, (root/'f1-marker.lock').open('a') as marker_lock:
                 fcntl.flock(marker_lock,fcntl.LOCK_EX)
                 if active is None:
-                    active={'trainer':trainer,'task_id':ctx.task_id,'source_row_id':5518,
+                    active={'trainer':trainer,'task_id':ctx.task_id,'source_row_id':row,
                             'run_nonce':nonce,'prompt_sha256':target['prompt_sha256'],
                             'ambiguous':False,'monotonic_ns':time.monotonic_ns()}
                     write('f1-active.json',active)
@@ -46,7 +49,7 @@ def install(observer_module):
     def observe(event,**fields):
         cut=time.monotonic_ns()
         emit(event,**fields)
-        if event=='generation_complete' and fields.get('source_row_id')==5518:
+        if event=='generation_complete' and fields.get('source_row_id')==row:
             with lock, (root/'f1-marker.lock').open('a') as marker_lock:
                 fcntl.flock(marker_lock,fcntl.LOCK_EX)
                 if active is not None and not active['ambiguous'] and fields['task_id']==active['task_id']:

@@ -20,8 +20,10 @@ def attach(scheduler):
     root = Path(os.environ['FT_CONTROL_SOCKET']).parent
     attached_at = time.monotonic_ns()
     contract = json.loads((root / 'f1-target.json').read_text())
-    if contract['source_row_id'] != 5518 or contract['unique_tokenized_source_rows'] != 1:
-        raise RuntimeError('F1 requires frozen unique first source prompt')
+    if contract['source_row_id'] not in (5518,2602) or contract['unique_tokenized_source_rows'] != 1:
+        raise RuntimeError('F1 requires a frozen unique source prompt')
+    row=contract['source_row_id']
+    task=contract.get('task_id',0)
     target_tokens = list(contract['input_tokens'])
     original = scheduler.run_batch
 
@@ -39,8 +41,8 @@ def attach(scheduler):
     def active_ok(active):
         if (active['ambiguous']
                 or active['run_nonce'] != os.environ['FT_RUN_NONCE']
-                or active['source_row_id'] != 5518
-                or active['task_id'] != 0
+                or active['source_row_id'] != row
+                or active['task_id'] != task
                 or active['monotonic_ns'] < attached_at):
             return False
         try:
@@ -79,7 +81,7 @@ def attach(scheduler):
                         or complete['run_nonce'] != os.environ['FT_RUN_NONCE']
                         or active['trainer'] != complete['trainer']
                         or active['task_id'] != complete['task_id']
-                        or complete['source_row_id'] != 5518):
+                        or complete['source_row_id'] != row):
                     return None
             elif finished:
                 # Trainer has not observed generation_complete yet, but the
@@ -130,7 +132,7 @@ def attach(scheduler):
         try:
             if client.injection['status'] == 'already_fired':
                 return False
-            evidence = {'phase': 'generator_active_after_one_response', 'source_row_id': 5518, 'k': 8}
+            evidence = {'phase': 'generator_active_after_one_response', 'source_row_id': row, 'k': 8}
             witness['incarnation'] = client.incarnation
             (root / 'f1-worker-witness.json').write_text(json.dumps(witness, indent=2))
             client.ready('ft1-f1-generator', evidence)

@@ -14,10 +14,16 @@ def f2_ordinal():
 F4T_ROW=2602
 
 
+def f1_row():
+    row=int(os.environ.get('FT1_F1_TARGET_ROW','5518'))
+    if row not in (5518,2602):raise ValueError('unfrozen F1 target row')
+    return row
+
+
 def contract(scenario):
     if scenario=='F1':
         return {'event_id':'ft1-f1-generator','target':'generator','waiters':['generator'],
-                'evidence':{'phase':'generator_active_after_one_response','source_row_id':5518,'k':8}}
+                'evidence':{'phase':'generator_active_after_one_response','source_row_id':f1_row(),'k':8}}
     if scenario=='F4':
         return {'event_id':'ft1-f4-score-worker','target':'reward','waiters':['reward'],
                 'evidence':{'phase':'fourth_score_worker_entry','source_row_id':5518,'k':8,'ordinal':4}}

@@ -82,15 +82,17 @@ def verify(root):
         assert not any(e['event']=='checkpoint_save_start' and e['update_id']==updates[-1]['update_id'] for e in pilot)
         result['killed_uncheckpointed_update_id']=updates[-1]['update_id']
     elif scenario=='F1':
+        target=read(root/'f1-target.json')
+        target_row=target['source_row_id'];target_task=target.get('task_id',0)
         witness=read(root/'f1-worker-witness.json');assert witness['identity']==sent['identity']
         assert witness['request_ids'] and len(witness['request_ids'])==len(witness['output_lengths'])
         active,complete=witness['active'],witness['completed']
-        assert active['trainer']==complete['trainer'] and active['task_id']==complete['task_id']==0
-        assert active['source_row_id']==complete['source_row_id']==5518
+        assert active['trainer']==complete['trainer'] and active['task_id']==complete['task_id']==target_task
+        assert active['source_row_id']==complete['source_row_id']==target_row
         assert not active['ambiguous'] and not complete['ambiguous']
         assert witness['scheduler_attached_ns']<=active['monotonic_ns']<=complete['monotonic_ns']<witness['cut_monotonic_ns']<sent['controller_monotonic_ns']
         returned=[e for e in events if e['event']=='generation_complete' and e['trainer_identity']==complete['trainer']
-                  and e['source_row_id']==5518 and e['task_id']==0 and e['sample_idx']==complete['sample_idx']]
+                  and e['source_row_id']==target_row and e['task_id']==target_task and e['sample_idx']==complete['sample_idx']]
         assert returned and min(e['monotonic_ns'] for e in returned)<witness['cut_monotonic_ns']
         result['target_gpu_uuid']=witness['gpu_uuid']
         assert gpu_id(witness['gpu_uuid']) in {gpu_id(gpu) for gpu in read(root/'gpu-uuids.json')}

@@ -54,6 +54,7 @@ def finalize(root,input_dir,load_dir):
             target.update(generated[key])
         assert len(target)==4
     elif fault['scenario']=='F4T':target={F4T_ROW}
+    elif fault['scenario']=='F1':target={read(root/'f1-target.json')['source_row_id']}
     else:target={5518}
     retained=set(chain['retained_source_rows']);recovered=target<=retained
     sent=next(e for e in rows(root/'events.jsonl') if e['kind']=='signal_sent')['controller_monotonic_ns']
