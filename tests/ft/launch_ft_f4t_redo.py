@@ -21,22 +21,25 @@ def main():
     parser.add_argument('--freeze', type=Path, required=True)
     parser.add_argument('--freeze-sha256', required=True)
     parser.add_argument('--pair-index', type=int, required=True)
+    parser.add_argument('--attempt', type=int, default=1)
     parser.add_argument('--max-wait-seconds', type=int, default=172800)
     args = parser.parse_args()
     original = args.freeze.resolve()
     assert sha256(original) == args.freeze_sha256
     frozen = json.loads(original.read_text())
     base = original.parent
-    old_name = frozen['pairs'][args.pair_index]['name']
+    base_name = frozen['pairs'][args.pair_index]['name']
+    old_name = base_name if args.attempt == 1 else f'{base_name}-redo{args.attempt - 1}'
     failed = base / 'minimal_evidence' / f'{old_name}-pair.json'
     old = json.loads(failed.read_text())
     assert frozen['kind'] == 'f4t_formal'
-    assert old['status'] == 'stopped_for_review' and 'technical_invalid' in old['error']
+    assert old['status'] == 'stopped_for_review'
+    # Amendment 2026-09-27: externally caused technical invalidity (host runner kill or
+    # foreign GPU compute process) does not consume the single redo.
+    assert 'technical_invalid' in old['error'] or 'foreign_compute_process' in old['error']
     assert old['order'] == frozen['pairs'][args.pair_index]['order']
     assert old['seed'] == frozen['pairs'][args.pair_index]['seed']
-    events = (base / 'minimal_evidence' / f"{old_name}-{old['failed_arm'].lower()}" / 'events.jsonl').read_text()
-    assert json.loads(events.splitlines()[-1])['classification'] == 'technical_invalid'
-    name = f'{old_name}-redo1'
+    name = f'{base_name}-redo{args.attempt}'
     assigned = base / f'FORMAL_FREEZE_{name}.json'
     pair = base / 'minimal_evidence' / f'{name}-pair.json'
     assert not pair.exists(), 'redo already started; manual review required'

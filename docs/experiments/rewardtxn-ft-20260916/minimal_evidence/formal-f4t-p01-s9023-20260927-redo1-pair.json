@@ -1,0 +1,21 @@
+{
+  "name": "formal-f4t-p01-s9023-20260927-redo1",
+  "scenario": "F4T",
+  "seed": 9023,
+  "order": [
+    "A",
+    "R"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "e82c99474a0799876623581690e36168345446bac6ded63ca3cd212486faa1e9",
+  "status": "stopped_for_review",
+  "runs": [],
+  "failed_arm": "A",
+  "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1139513974294467, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 73768', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 65556', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 65556', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 8', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 802680', ' 65542'], ['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 805549', ' 8870'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 802637', ' 65542'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 802673', ' 65542']], 'own_pids': [799707, 800984, 801522, 801523, 801524, 801935, 801937, 801938, 802636, 802637, 802638, 802672, 802673, 802674, 802679, 802680, 802681, 805069, 805071, 805072, 805204], 'foreign': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 805549', ' 8870']]}}\")"
+}
