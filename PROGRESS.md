@@ -1,5 +1,21 @@
 # RewardTxn 项目进展报告
 
+## 当前状态：2026-09-28 中午（F4′ 正式矩阵 10/10 完成）
+
+**F4′ 正式矩阵 10 对全部 `formal_pair_verified`。** 冻结：FORMAL_F4T_FREEZE_20260927 → 修订 A1（kill 落在 train_batch 与 optimizer_end 之间时，验收放行）→ A2（A 原生恢复失败时记为 `safe_stop`）→ A3（GPU 监测器误判修复）。
+
+| 指标 | 值 |
+|---|---|
+| R 保留比例 − A 保留比例 | 10 正 / 0 零 / 0 负，中位数 0.974，最小 0.933 |
+| 双侧精确符号检验 | p = 0.00195 < 0.05（预注册判据成立） |
+| R 臂 | 10/10 `correct_recovered` |
+| A 臂 | 5 `safe_discard`、5 `safe_stop`（kill 落在 AReaL recover dump 期间，检查点被写坏，重启时 EOFError），保留均为 0 |
+| 故障后生成 token 中位数 | A（safe_discard）约 10.1 万，R 约 6.4 万 |
+| GPU·h | 有效配对 15.78；含全部技术无效尝试 18.70（上限 25） |
+
+- 生效的配对：p01 取 redo2，p06 取 redo1，p07 取 redo1，其余取原始运行。技术无效共 4 次：runner 随会话被杀、真实外部 GPU 进程各 1 次，监测器误判 2 次。
+- **待办**：`analyze_ft_f4t.py` 还要能识别补做名和 A1–A3 冻结，才能从原始证据正式复算；写 F4′ 正式结果报告。
+
 ## 当前状态：2026-09-28 09:47 CST（F4′ 正式矩阵）
 
 **冻结的 10 对 F4′ 正式矩阵中，已有 6 对达到 `formal_pair_verified`。** 六对均为 R `correct_recovered`、A `safe_discard` 或 `safe_stop`；这些是逐对结果，不构成预定 10 对的统计结论。

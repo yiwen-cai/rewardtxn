@@ -1,6 +1,8 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
+> **2026-09-28 更新**：F4′ 正式 10 对全部通过，R−A 保留比例差 10/10 为正（中位 0.974），符号检验 p=0.00195；A 臂有 5 次 safe_stop（AReaL 恢复检查点非原子写入）。修订 A1–A3 与各次补做见 PROGRESS.md 顶部。下一步：统计器支持补做名和修订后的冻结，写正式报告。
+
 > **2026-09-28 09:47 CST 更新**：F4′ 10 对正式矩阵已有 6 对 `formal_pair_verified`（p01 redo2、p02–p05、p06 redo1），六对均为 R `correct_recovered`、A `safe_discard/safe_stop`。p07 s5778 的 A 臂因选定 GPU 出现外部计算 PID 被监控器停止，exit 137、无最终 native state，R 臂未启动；其状态仍为 `stopped_for_review`，不计有效对。逐臂成本合计 11.976655/25 GPU·h，包含无效尝试与补做；本次未发现 F4′ runner 在运行。下一步复核并按已批准外因规则登记 p07，符合后才可同 seed、同顺序整对补做并继续 p08–p10。逐对数据和后续计划见 [PROGRESS.md](PROGRESS.md)，p07 证据摘要见 [配对记录](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p07-s5778-20260927-pair.json)。
 
 > **2026-09-26 晚更新**：F4'/F1 试点完成（HEAD `5e09b5a`）。F4' s3922：R 保留 40/41 已完成评分、A 0/46；F1 两对两臂均恢复（在途仅 3–4 条）；F4' 第 2 对因外部 GPU 占用两次技术无效。详见 PROGRESS.md 顶部与 `PILOT_F4F1_RESULT_20260926.md`。下一步待用户决定：正式矩阵规模、F1 切点后移、GPU 独占策略。
