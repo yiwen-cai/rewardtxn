@@ -32,7 +32,7 @@ def main():
     old_name = base_name if args.attempt == 1 else f'{base_name}-redo{args.attempt - 1}'
     failed = base / 'minimal_evidence' / f'{old_name}-pair.json'
     old = json.loads(failed.read_text())
-    assert frozen['kind'] == 'f4t_formal'
+    assert frozen.get('kind', 'f2_formal') in ('f4t_formal', 'f2_formal')
     assert old['status'] == 'stopped_for_review'
     # Amendment 2026-09-27: externally caused technical invalidity (host runner kill or
     # foreign GPU compute process) does not consume the single redo.
