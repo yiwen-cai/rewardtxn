@@ -1,0 +1,21 @@
+{
+  "name": "formal-f2v2-p05-s2420-20260928",
+  "scenario": "F2",
+  "seed": 2420,
+  "order": [
+    "A",
+    "R"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "e803e6f17fac167bbc1cd6bb83dc957666fa6b2a5b841676a3f7f4e72eb52300",
+  "status": "stopped_for_review",
+  "runs": [],
+  "failed_arm": "A",
+  "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1235185135705252, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 65478', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 65478', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 65478', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 35650', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 3131054', ' 65464'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 3131071', ' 65464'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 3131109', ' 65464'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3132002', ' 35636']], 'own_pids': [3129776, 3130225, 3130498, 3130499, 3130500, 3130696, 3130698, 3130699, 3131053, 3131054, 3131055, 3131070, 3131071, 3131072, 3131108, 3131109, 3131110, 3133035, 3133036, 3133037, 3133045, 3133046, 3133047], 'foreign': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3132002', ' 35636']], 'foreign_confirmed': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3132002', ' 35636']]}}\")"
+}
