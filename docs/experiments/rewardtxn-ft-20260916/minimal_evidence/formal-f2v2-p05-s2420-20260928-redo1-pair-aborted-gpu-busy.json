@@ -1,0 +1,21 @@
+{
+  "name": "formal-f2v2-p05-s2420-20260928-redo1",
+  "scenario": "F2",
+  "seed": 2420,
+  "order": [
+    "A",
+    "R"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "21f866cc5575d05e012df6adfcbca15af18c258406444a4319635e03ffa598fd",
+  "status": "stopped_for_review",
+  "runs": [],
+  "failed_arm": "A",
+  "error": "RuntimeError('selected GPU has a compute process')"
+}

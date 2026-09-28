@@ -1,0 +1,225 @@
+{
+  "created_local": "2026-09-28T14:40:56.371788+08:00",
+  "purpose": "F2 (10 pairs) + no-fault (3 pairs) formal rerun on the current R implementation (same version as F4T formal); frozen before first GPU run",
+  "formal_sample": true,
+  "image": "sha256:c0573bb8412a8db753d44b02c9e04504d2392c54f019707f58acf26dd68d2469",
+  "areal_base_commit": "b83d1f40196e5bd7d9f83092563443561870d550",
+  "areal_tracked_patch_sha256": "f12f7767a69e9a807885e646d622a407d16725bba97d43c5587c404cd84e0a8e",
+  "source_map_file": "FORMAL_F2V2_SOURCE_SHA256_20260928-A4.json",
+  "source_map_sha256": "774687d1466d1a48edf1c47afb1b3f219b7580a6ccf70fb7bd6006de0750a245",
+  "source_file_count": 512,
+  "extra_sha256": {
+    "tests/ft/run_ft_formal.py": "89e76bb5917ffd8e960950e597309aee120773de4c66cadbf0507aa1aa280dd0",
+    "docs/experiments/rewardtxn-ft-20260916/native-trainer.yaml": "599b8ebcf3747c74fd32dcd27562e143458b47217691522ed5191b7cd3fc58db",
+    "runs/diagnosis-20260910/train.jsonl": "e348030a2faa24c7b732cf588d16dd409b83cdd18545144490e4e87e2a2b13c5",
+    "models/Qwen2.5-0.5B-Instruct/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "models/Qwen2.5-0.5B-Instruct/LICENSE": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+    "models/Qwen2.5-0.5B-Instruct/README.md": "b19c806a904db6dc878a0462e70b551f6b7ac78dfbb88c2eb966ca2b9109ae15",
+    "models/Qwen2.5-0.5B-Instruct/config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "models/Qwen2.5-0.5B-Instruct/configuration.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "models/Qwen2.5-0.5B-Instruct/generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "models/Qwen2.5-0.5B-Instruct/merges.txt": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3",
+    "models/Qwen2.5-0.5B-Instruct/model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "models/Qwen2.5-0.5B-Instruct/tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "models/Qwen2.5-0.5B-Instruct/vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "tests/ft/offline_generation.py": "4285dffcc4a455031abd114a0e1f15fd62955f27989628afd46987281f51d436",
+    "docs/experiments/rewardtxn-ft-20260916/ft1-f1-target.json": "35aef0469166b80d9399d89da377bde7732b2e0001788d9ab0626ac53698c77d",
+    "tests/ft/launch_ft_formal_dynamic.py": "10b4e0d913165aa6b2cc00cb600320977164528aa0495cbc54f383ddfc4f4f6d",
+    "tests/ft/gpu_load_monitor.py": "71e3bd49b36fcfc182baa170fe33b4ade09d2d2247315ec074bbe0ad1e375402",
+    "tests/ft/analyze_ft_f4t.py": "7a56e07f5df06b780f9d387b70374d17d6422bc2e82f6f1c4029f9e7a1fbefa7",
+    "tests/ft/ft1_scheduler_fixture.py": "c44954dcc463d7d58997c13a3af9ba9e28d7beb259aac16dd6acf45570b5668b",
+    "tests/ft/test_f1_target_hook.py": "16b5e93742df67014c1eeae1b1714ad98a0270a5ab99f2c57b6f691924c1cb60",
+    "docs/experiments/rewardtxn-ft-20260916/ft1-f1-target-2602.json": "94a369b5d316ec3f1eba09d293fc2651360a450439c16592113d36c6d4596adb",
+    "tests/ft/test_chain_killed_update.py": "b1aac0d673d77e9710e3dd689d0b9f24a2743ae3529aff6b4ab05e45719ebeaf",
+    "tests/ft/launch_ft_f4t_redo.py": "c0daa427a18ec04ced6112a55e9431c25d189dd44b1240e655b051b788cf5cce",
+    "tests/ft/analyze_ft_formal.py": "8a02b9dfe48fd9c70566231a3d031f8c3c48124f1f81586eca5ffa8ddb291925",
+    "tests/ft/resume_ft_formal_arm.py": "1847831290c837a323bb267b68762c1b7d05e838339c2caf600dbeb3da338028"
+  },
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "training_gpu": "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d",
+  "pairs": [
+    {
+      "name": "formal-f2v2-p01-s6293-20260928",
+      "scenario": "F2",
+      "seed": 6293,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p02-s8514-20260928",
+      "scenario": "F2",
+      "seed": 8514,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p03-s4779-20260928",
+      "scenario": "F2",
+      "seed": 4779,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p04-s7615-20260928",
+      "scenario": "F2",
+      "seed": 7615,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p05-s2420-20260928-redo1",
+      "scenario": "F2",
+      "seed": 2420,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p06-s7171-20260928",
+      "scenario": "F2",
+      "seed": 7171,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p07-s3887-20260928",
+      "scenario": "F2",
+      "seed": 3887,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p08-s9862-20260928",
+      "scenario": "F2",
+      "seed": 9862,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p09-s6019-20260928",
+      "scenario": "F2",
+      "seed": 6019,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-f2v2-p10-s7931-20260928",
+      "scenario": "F2",
+      "seed": 7931,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-nofaultv2-p11-s1125-20260928",
+      "scenario": "no_fault",
+      "seed": 1125,
+      "order": [
+        "A",
+        "R"
+      ]
+    },
+    {
+      "name": "formal-nofaultv2-p12-s8347-20260928",
+      "scenario": "no_fault",
+      "seed": 8347,
+      "order": [
+        "R",
+        "A"
+      ]
+    },
+    {
+      "name": "formal-nofaultv2-p13-s149-20260928",
+      "scenario": "no_fault",
+      "seed": 149,
+      "order": [
+        "A",
+        "R"
+      ]
+    }
+  ],
+  "seed_selection": "random.Random(20260929).sample(sorted([0..9999] minus every seed in any freeze/pair record in this directory and pilots 419/421/431), 13); first 10 F2, last 3 no_fault; order alternates starting A->R",
+  "retain_full_pair_index": 7,
+  "retain_full_pair_name": "formal-f2v2-p08-s9862-20260928",
+  "pilot_peak_bytes": 41743597568,
+  "minimum_free_bytes": 63218434048,
+  "training": {
+    "model": "models/Qwen2.5-0.5B-Instruct",
+    "data": "runs/diagnosis-20260910/train.jsonl",
+    "steps": 10,
+    "K": 8,
+    "U": 4,
+    "f2_ordinal": 2,
+    "fault_window": "after second successful optimizer update, after prior async checkpoint drain and before save of this update",
+    "recover_retries": {
+      "F2": 1,
+      "no_fault": 0
+    },
+    "async_full_dcp": true,
+    "checkpoint_freq_steps": 1,
+    "pointwise_autotune": false,
+    "blocking_d2h": true,
+    "run_timeout_seconds": 2400,
+    "recovery_observation_seconds": 900,
+    "handshake_timeout_seconds": 10,
+    "lease_timeout_seconds": 20
+  },
+  "monitor_external_gpu": true,
+  "gpu_hour_cap": 30.0,
+  "failure_rule": "Stop after invalid_commit, safe_stop, timeout, technical_invalid, unverifiable or independent load failure; preserve failed run shards and all evidence. No automatic retry.",
+  "redo_rule": "At most one same-seed, same-order full-pair redo only for documented technical invalidity, in fresh directories; retain originals and register both attempts. No redo for a valid hit with safe but zero reuse. If implementation/cleanup changes, remeasure P and refreeze before redo. Amendment 2026-09-27 carried over: externally caused technical invalidity (host runner kill, real foreign GPU process, monitor false positive) does not consume the redo.",
+  "analysis_rule": "Ten F2 pairs: per-run binary 32/32 same-execution-source retention, paired exact two-sided McNemar p<0.05 only if all ten pairs safe and decidable; exact 95% intervals; report all run costs and no-fault costs separately; no seed expansion for significance.",
+  "storage_rule": "One run at a time; each arm independent fault/chain/input/fresh native load/source verification, then SHA-256 every DCP shard. Retain full DCP for preselected F2 pair index 5 both arms; delete passed other shards only after verification; preserve all failed shards. Check free space >= P+20GiB and four GPU idle before every run.",
+  "formal_evidence_parent": "docs/experiments/rewardtxn-ft-20260916/minimal_evidence",
+  "relation": "Replaces nothing; 2026-09-24 F2 results stay separate (older R implementation). Same judge rule as 2026-09-24 for comparability.",
+  "amendment_A4": {
+    "previous_freeze_sha256": "e504bf14d153b1958c767118a60888269eeabcabdf3c4b213d2fe35f97097b69",
+    "date": "2026-09-28",
+    "document": "FORMAL_F2V2_MONITOR_AMENDMENT_20260928.md",
+    "changed": {
+      "tests/ft/gpu_load_monitor.py": {
+        "old": "34f80cc02a49700cb5f8c5b2a71c78b7859d78848018ddce48c86f5a6c3cc1a7",
+        "new": "71e3bd49b36fcfc182baa170fe33b4ade09d2d2247315ec074bbe0ad1e375402"
+      },
+      "tests/ft/launch_ft_f4t_redo.py": {
+        "old": "a469fdb121d2e664be6dd80a68f6dc329271a8b469967d7f6a5b81c7ea214077",
+        "new": "c0daa427a18ec04ced6112a55e9431c25d189dd44b1240e655b051b788cf5cce"
+      },
+      "tests/ft/resume_ft_formal_arm.py": {
+        "old": null,
+        "new": "1847831290c837a323bb267b68762c1b7d05e838339c2caf600dbeb3da338028"
+      }
+    }
+  },
+  "gpu_assignment_amendment": {
+    "original_freeze_sha256": "6399f63968dbc4214b6a8dbfcd3aa7752a7a4b8716a402d76ab39f8f7af79982",
+    "failed_pair": "formal-f2v2-p05-s2420-20260928",
+    "reason": "one full-pair redo after documented technical invalidity",
+    "policy": "any four simultaneously idle identical H100s, fixed within each A/R pair",
+    "pair_index": 4
+  }
+}
