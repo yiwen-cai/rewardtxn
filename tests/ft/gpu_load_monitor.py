@@ -16,6 +16,9 @@ class GpuLoadMonitor:
         self.thread = threading.Thread(target=self._watch, daemon=True)
         self.violation = None
         self.samples = 0
+        # PIDs ever listed in our container: a killed trainer vanishes from
+        # docker top before nvidia-smi stops reporting its memory.
+        self.seen_own = set()
 
     def __enter__(self):
         self.thread.start()
@@ -65,13 +68,14 @@ class GpuLoadMonitor:
                     seen_running = True
                     try:
                         own = {int(line.strip()) for line in top.stdout.splitlines()[1:] if line.strip()}
+                        self.seen_own |= own
                         gpu_raw = self._query('--query-gpu=uuid,memory.used,utilization.gpu')
                         compute_raw = self._query('--query-compute-apps=gpu_uuid,pid,used_gpu_memory')
                         gpu = [row for row in csv.reader(gpu_raw.splitlines()) if row and row[0].strip() in self.devices]
                         compute = [row for row in csv.reader(compute_raw.splitlines()) if row and row[0].strip() in self.devices]
                         if len(gpu) != 4:
                             raise RuntimeError('selected GPU load rows missing')
-                        foreign = [row for row in compute if int(row[1].strip()) not in own]
+                        foreign = [row for row in compute if int(row[1].strip()) not in self.seen_own]
                         sample = {'monotonic_ns': time.monotonic_ns(), 'gpu': gpu,
                                   'compute': compute, 'own_pids': sorted(own), 'foreign': foreign}
                         with (self.root / 'gpu-load.jsonl').open('a') as stream:
