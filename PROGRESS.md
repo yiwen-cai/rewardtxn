@@ -1,13 +1,30 @@
 # RewardTxn 项目进展报告
 
-## 当前状态：2026-09-27 下午（F4′ 正式矩阵中断）
+## 当前状态：2026-09-28 09:47 CST（F4′ 正式矩阵）
 
-**冻结完成**（[FORMAL_F4T_FREEZE_20260927.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_FREEZE_20260927.md)）：用户决定 F4′ 10 对正式（上限 25 GPU·h），F1 目标后移到 `2602/task 20` 先做 2 对工程试点（上限 5 GPU·h）；旧 F2/无故障结果单独报告；共享 GPU，运行中每 5 s 监测外部进程。
+**冻结的 10 对 F4′ 正式矩阵中，已有 6 对达到 `formal_pair_verified`。** 六对均为 R `correct_recovered`、A `safe_discard` 或 `safe_stop`；这些是逐对结果，不构成预定 10 对的统计结论。
 
-- **F1 后移试点**（[结果](docs/experiments/rewardtxn-ft-20260916/PILOT_F1_LATE_RESULT_20260927.md)）：s525 两臂均 `safe_discard`（R 同次执行保留 65/65，A 0/64；目标行未进最终保留链）；s7598 A `safe_discard`，R 未产生 `f1-claimed.json` → `fault_not_valid_hit`，技术无效。累计 3.42 GPU·h，余量不足整对补做，F1 停在工程观察，不升级正式。
-- **F4′ 正式 p01 s9023（A→R）**：A 完成验收，`safe_discard`，保留 0/46。R 臂 11:56 以 `technical_invalid`（`host lease expired`）结束，容器退出 2；宿主 runner 已不在运行（根因：Codex 在前台 PTY 会话 22097 中启动 runner，11:55:06 该轮对话结束，约 60 s 后 runner 随会话被终止，租约计数停在 418；非代码、GPU 或 OOM 问题），pair 文件仍标 `running`，尚未登记技术无效，也未补做。GPU 监测无外部进程违规记录（待核）。
+### 已验收配对
 
-**14:3x 已处理**：p01 pair 状态补登为 `stopped_for_review`（R 臂 technical_invalid），R 臂成本按 docker 起止时间补记 0.254 GPU·h。新增 `tests/ft/launch_ft_f4t_redo.py`（由 F2 补做启动器泛化，不在冻结源码表内，哈希写入补做清单 `extra_sha256`）。已用 `setsid nohup` 脱离会话启动：p01 整对补做（`-redo1`，同 seed、A→R，同一组 4 卡）→ `launch_ft_formal_dynamic.py --start-pair-index 1` 继续 p02–p10；日志 `minimal_evidence/f4t-formal-runner-20260927.log`。注：补做清单改了 p01 名称，统计器按名称累计成本，原 p01 的 1.10 GPU·h 在补做那一步不计入上限检查，须在最终预算中手工加回。
+| 配对 | Seed | A：同次评分保留 / 故障时已完成评分 | R：同次评分保留 / 故障时已完成评分 | 本对 GPU·h |
+|---|---:|---|---|---:|
+| [p01 redo2](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p01-s9023-20260927-redo2-pair.json) | 9023 | `safe_discard`，0/40 | `correct_recovered`，66/69 | 1.728 |
+| [p02](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p02-s4602-20260927-pair.json) | 4602 | `safe_stop`，0/43 | `correct_recovered`，37/39 | 1.414 |
+| [p03](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p03-s526-20260927-pair.json) | 526 | `safe_discard`，0/43 | `correct_recovered`，42/43 | 1.695 |
+| [p04](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p04-s3515-20260927-pair.json) | 3515 | `safe_stop`，0/37 | `correct_recovered`，42/44 | 1.412 |
+| [p05](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p05-s1556-20260927-pair.json) | 1556 | `safe_stop`，0/39 | `correct_recovered`，68/69 | 1.413 |
+| [p06 redo1](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p06-s7299-20260927-redo1-pair.json) | 7299 | `safe_stop`，0/37 | `correct_recovered`，41/42 | 1.386 |
+
+### 中断配对与预算
+
+- **p07 s5778**（[配对记录](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p07-s5778-20260927-pair.json)）：A 臂期间 GPU 监控发现所选卡上有外部计算进程，随后停止容器（exit 137）；未形成最终 native state，R 臂未启动。配对保持 `stopped_for_review`，不计入 6 个有效配对。
+- 已保留所有原始尝试。p01 原始 R 臂遇到 `host lease expired`；p01 redo1、p06 原始配对和 p07 A 臂均因所选卡出现外部计算 PID 而中断。已完成的 p01 redo2、p06 redo1 分别使对应 seed 成为有效配对。外因补做规则见 [F4′ 补做规则修订](docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_REDO_AMENDMENT_20260927.md)。
+- 截至本次核对，所有 F4T run 的 `cost.json` 合计 **11.976655 GPU·h / 25 GPU·h**；总数包含无效尝试和补做，剩余约 **13.023345 GPU·h**。
+- H100 上未发现仍在运行的 F4′ runner。开始下一对前仍须现场重新核对四卡占用和磁盘门槛；当前快照不代表 GPU 预留。
+
+**下一步**：先按已批准的外因规则复核并登记 p07；若确认符合规则，在新目录以相同 seed 和 A→R 顺序完成整对补做，再继续 p08–p10。只有 10 对全部安全、来源可判定且完整后，才运行冻结的配对统计分析；在此之前不报告显著性或总体优势结论。
+
+---
 
 ## 当前状态：2026-09-26 晚（F4'/F1 试点）
 

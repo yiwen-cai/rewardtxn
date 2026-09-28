@@ -14,6 +14,57 @@
   ],
   "formal_sample": true,
   "freeze_sha256": "8b9325e07980331d43c83bf4abf2836c8b444a470d8002c9166c790121500fed",
-  "status": "running",
-  "runs": []
+  "status": "formal_pair_verified",
+  "runs": [
+    {
+      "arm": "R",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p06-s7299-20260927-redo1-r",
+      "classification": "correct_recovered",
+      "source": {
+        "verified": true,
+        "arm": "R",
+        "scenario": "F4T",
+        "completed_untrained_scores_at_signal": 42,
+        "same_execution_reused": 41,
+        "discarded": 1,
+        "generated_tokens_after_fault": 63821,
+        "score_returns_after_fault": 183,
+        "scope": "physical score execution identity to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 400748548096,
+        "free_minimum": 366062702592,
+        "peak_incremental_bytes": 34685845504,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    },
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p06-s7299-20260927-redo1-a",
+      "classification": "safe_stop",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F4T",
+        "outcome": "safe_stop",
+        "main_thread_last_event_before_kill": "recover_handler_dump_start",
+        "completed_untrained_scores_at_signal": 37,
+        "same_execution_reused": 0,
+        "discarded": 37,
+        "generated_tokens_after_fault": 0,
+        "score_returns_after_fault": 0,
+        "scope": "safe stop without final retained chain; completed-at-signal definition as verify_inflight; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 400649973760,
+        "free_minimum": 393690746880,
+        "peak_incremental_bytes": 6959226880,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "full_retained"
+    }
+  ]
 }
