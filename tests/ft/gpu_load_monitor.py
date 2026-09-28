@@ -19,6 +19,9 @@ class GpuLoadMonitor:
         # PIDs ever listed in our container: a killed trainer vanishes from
         # docker top before nvidia-smi stops reporting its memory.
         self.seen_own = set()
+        # Unowned PIDs from the previous sample; a violation needs two in a row
+        # (a child born between docker top and nvidia-smi is transient).
+        self.pending = set()
 
     def __enter__(self):
         self.thread.start()
@@ -35,6 +38,13 @@ class GpuLoadMonitor:
                  'scope': 'selected GPU load and compute PIDs during the training container'}, indent=2))
         if self.violation is not None and exc_type is None:
             raise RuntimeError(f'GPU monitor stopped training: {self.violation}')
+
+    @staticmethod
+    def _in_container(pid, cid):
+        try:
+            return cid in Path(f'/proc/{pid}/cgroup').read_text()
+        except OSError:
+            return False
 
     def _query(self, args):
         failure = None
@@ -75,13 +85,25 @@ class GpuLoadMonitor:
                         compute = [row for row in csv.reader(compute_raw.splitlines()) if row and row[0].strip() in self.devices]
                         if len(gpu) != 4:
                             raise RuntimeError('selected GPU load rows missing')
-                        foreign = [row for row in compute if int(row[1].strip()) not in self.seen_own]
+                        foreign = []
+                        for row in compute:
+                            pid = int(row[1].strip())
+                            if pid in self.seen_own:
+                                continue
+                            if self._in_container(pid, cid):
+                                self.seen_own.add(pid)
+                                continue
+                            foreign.append(row)
+                        unowned = {int(row[1].strip()) for row in foreign}
+                        confirmed = [row for row in foreign if int(row[1].strip()) in self.pending]
+                        self.pending = unowned
                         sample = {'monotonic_ns': time.monotonic_ns(), 'gpu': gpu,
-                                  'compute': compute, 'own_pids': sorted(own), 'foreign': foreign}
+                                  'compute': compute, 'own_pids': sorted(own), 'foreign': foreign,
+                                  'foreign_confirmed': confirmed}
                         with (self.root / 'gpu-load.jsonl').open('a') as stream:
                             stream.write(json.dumps(sample) + '\n')
                         self.samples += 1
-                        if foreign:
+                        if confirmed:
                             self.violation = {'reason': 'foreign_compute_process', 'sample': sample}
                         elif time.monotonic() - started >= self.remaining_seconds:
                             self.violation = {'reason': 'gpu_hour_cap', 'sample': sample}

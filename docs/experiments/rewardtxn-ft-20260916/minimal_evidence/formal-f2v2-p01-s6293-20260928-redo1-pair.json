@@ -1,0 +1,49 @@
+{
+  "name": "formal-f2v2-p01-s6293-20260928-redo1",
+  "scenario": "F2",
+  "seed": 6293,
+  "order": [
+    "A",
+    "R"
+  ],
+  "devices": [
+    "GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794",
+    "GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9",
+    "GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3",
+    "GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d"
+  ],
+  "formal_sample": true,
+  "freeze_sha256": "e61dd19ff9d17918da4c633ef182fbe9339c6fff5c0242c65ae4f68607fc8caa",
+  "status": "stopped_for_review",
+  "runs": [
+    {
+      "arm": "A",
+      "evidence": "/public/home/caiyiwen/rewardtxn/docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f2v2-p01-s6293-20260928-redo1-a",
+      "classification": "safe_discard",
+      "source": {
+        "verified": true,
+        "arm": "A",
+        "scenario": "F2",
+        "target_rows": 32,
+        "same_execution_source_rows": 0,
+        "all_32_reused": false,
+        "retained_rows": 320,
+        "target_output_tokens": 11303,
+        "unused_generated_attempts": 160,
+        "generated_tokens_after_fault": 125117,
+        "score_returns_after_fault": 384,
+        "scope": "actual engine call return and score execution ID to retained native chain; one run, no statistical claim"
+      },
+      "disk_peak": {
+        "free_before": 353594499072,
+        "free_minimum": 346603913216,
+        "peak_incremental_bytes": 6990585856,
+        "sample_interval_seconds": 0.5,
+        "scope": "training through independent input/chain/final-state load acceptance"
+      },
+      "storage": "shards_deleted"
+    }
+  ],
+  "failed_arm": "R",
+  "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1227910248986877, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 65514', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 67580', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 65514', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 8', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 2991593', ' 65500'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 2991632', ' 65500'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 2991363', ' 458'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 2991565', ' 65500']], 'own_pids': [2990484, 2990875, 2990993, 2990998, 2990999, 2991309, 2991311, 2991312, 2991564, 2991565, 2991566, 2991592, 2991593, 2991594, 2991631, 2991632, 2991633, 2992614, 2992615, 2992616, 2992672, 2992726, 2992727, 2992728, 2992749, 2992750], 'foreign': [['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 2991363', ' 458']]}}\")"
+}
