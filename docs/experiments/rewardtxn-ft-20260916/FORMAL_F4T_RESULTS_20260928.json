@@ -1,0 +1,377 @@
+{
+  "freeze_sha256": "448b5c4b73178595dd95b8b4d9520273c5e14b0e3e1fa4c4825d545dbdfec0c6",
+  "accepted_freeze_chain": [
+    "448b5c4b73178595dd95b8b4d9520273c5e14b0e3e1fa4c4825d545dbdfec0c6",
+    "b608ef90c06898dc4cadf77de30a93bd1ed2dcc3a8668ba27c09daf623a39815",
+    "a7d347cf4e3322a70f184d9b9e221ec0a354edab7491695976bf592fa67782aa",
+    "a9822e05fa983858037eef9f6a1d2b8d59409dc325a1b520b1f7609a32928869"
+  ],
+  "technical_invalid_attempts": [
+    {
+      "name": "formal-f4t-p01-s9023-20260927",
+      "failed_arm": "R",
+      "error": "technical_invalid: host lease expired (controller result 11:56:27 CST); host runner process was terminated with its parent Codex PTY session ~60 s after the turn ended at 11:55:06 CST; last host_lease counter 418 at 11:56:06. Status set post hoc on 2026-09-27 because the runner died before its exception handler ran.",
+      "cause_correction": null
+    },
+    {
+      "name": "formal-f4t-p01-s9023-20260927-redo1",
+      "failed_arm": "A",
+      "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1139513974294467, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 73768', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 65556', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 65556', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 8', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 802680', ' 65542'], ['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 805549', ' 8870'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 802637', ' 65542'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 802673', ' 65542']], 'own_pids': [799707, 800984, 801522, 801523, 801524, 801935, 801937, 801938, 802636, 802637, 802638, 802672, 802673, 802674, 802679, 802680, 802681, 805069, 805071, 805072, 805204], 'foreign': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 805549', ' 8870']]}}\")",
+      "cause_correction": null
+    },
+    {
+      "name": "formal-f4t-p06-s7299-20260927",
+      "failed_arm": "A",
+      "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1165042643136524, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 66052', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 66010', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 66096', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 63224', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 1562453', ' 66038'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 1562631', ' 65996'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 1562446', ' 66082'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 1564305', ' 63212']], 'own_pids': [1560541, 1561420, 1561655, 1561656, 1561657, 1561937, 1561939, 1561940, 1562445, 1562446, 1562447, 1562452, 1562453, 1562454, 1562630, 1562631, 1562632, 1564168, 1564169, 1564170, 1568945, 1569119, 1569121, 1569123, 1569125, 1569127, 1569139, 1569143, 1569145, 1569147, 1569149, 1569151, 1569153, 1569155, 1569157, 1569159, 1569161, 1569163, 1569166, 1569168, 1569170, 1569173, 1569175, 1569177, 1569179, 1569182, 1569184, 1569186, 1569188, 1569190, 1569192, 1569194, 1569196, 1570053, 1570054, 1572010], 'foreign': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 1564305', ' 63212']]}}\")",
+      "cause_correction": {
+        "actual_cause": "monitor_false_positive",
+        "detail": "PID 1564305 was our own trainer (listed in own_pids before SIGKILL); after the kill it left docker top before nvidia-smi released its memory, so the monitor flagged it as foreign. Not an external process.",
+        "document": "docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_MONITOR_AMENDMENT_20260928.md"
+      }
+    },
+    {
+      "name": "formal-f4t-p07-s5778-20260927",
+      "failed_arm": "A",
+      "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1167024000409105, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 66010', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 66052', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 66054', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 63104', ' 0']], 'compute': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 1627060', ' 65996'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 1627053', ' 66038'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 1627088', ' 66040'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 1628956', ' 63092']], 'own_pids': [1625151, 1626064, 1626248, 1626298, 1626299, 1626535, 1626537, 1626538, 1627052, 1627053, 1627054, 1627059, 1627060, 1627061, 1627087, 1627088, 1627089, 1628890, 1628891, 1628892, 1634460, 1634462, 1636066, 1636067, 1639366], 'foreign': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 1628956', ' 63092']]}}\")",
+      "cause_correction": {
+        "actual_cause": "monitor_false_positive",
+        "detail": "PID 1628956 was our own trainer (listed in own_pids before SIGKILL); after the kill it left docker top before nvidia-smi released its memory, so the monitor flagged it as foreign. Not an external process.",
+        "document": "docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_MONITOR_AMENDMENT_20260928.md"
+      }
+    }
+  ],
+  "gpu_hours_all_attempts": 18.702976156923853,
+  "gpu_hours_verified_pairs": 15.774621768223588,
+  "planned_pairs": 10,
+  "verified_pairs": 10,
+  "pairs": [
+    {
+      "name": "formal-f4t-p01-s9023-20260927-redo2",
+      "planned_name": "formal-f4t-p01-s9023-20260927",
+      "seed": 9023,
+      "order": [
+        "A",
+        "R"
+      ],
+      "arms": {
+        "A": {
+          "completed": 40,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_discard",
+          "wall_seconds": 757.813317206921,
+          "gpu_hours": 0.842014796896579,
+          "generated_tokens_after_fault": 102473,
+          "score_returns_after_fault": 320
+        },
+        "R": {
+          "completed": 69,
+          "kept": 66,
+          "fraction": 0.9565217391304348,
+          "classification": "correct_recovered",
+          "wall_seconds": 797.0851236979943,
+          "gpu_hours": 0.8856501374422159,
+          "generated_tokens_after_fault": 65965,
+          "score_returns_after_fault": 190
+        }
+      },
+      "retention_fraction_difference": 0.9565217391304348
+    },
+    {
+      "name": "formal-f4t-p02-s4602-20260927",
+      "planned_name": "formal-f4t-p02-s4602-20260927",
+      "seed": 4602,
+      "order": [
+        "R",
+        "A"
+      ],
+      "arms": {
+        "R": {
+          "completed": 39,
+          "kept": 37,
+          "fraction": 0.9487179487179487,
+          "classification": "correct_recovered",
+          "wall_seconds": 792.0032034460455,
+          "gpu_hours": 0.880003559384495,
+          "generated_tokens_after_fault": 65004,
+          "score_returns_after_fault": 187
+        },
+        "A": {
+          "completed": 43,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_stop",
+          "wall_seconds": 480.7002287909854,
+          "gpu_hours": 0.5341113653233172,
+          "generated_tokens_after_fault": 0,
+          "score_returns_after_fault": 0
+        }
+      },
+      "retention_fraction_difference": 0.9487179487179487
+    },
+    {
+      "name": "formal-f4t-p03-s526-20260927",
+      "planned_name": "formal-f4t-p03-s526-20260927",
+      "seed": 526,
+      "order": [
+        "A",
+        "R"
+      ],
+      "arms": {
+        "A": {
+          "completed": 43,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_discard",
+          "wall_seconds": 756.3843996678479,
+          "gpu_hours": 0.8404271107420532,
+          "generated_tokens_after_fault": 100713,
+          "score_returns_after_fault": 320
+        },
+        "R": {
+          "completed": 43,
+          "kept": 42,
+          "fraction": 0.9767441860465116,
+          "classification": "correct_recovered",
+          "wall_seconds": 768.7544340349268,
+          "gpu_hours": 0.8541715933721409,
+          "generated_tokens_after_fault": 65253,
+          "score_returns_after_fault": 182
+        }
+      },
+      "retention_fraction_difference": 0.9767441860465116
+    },
+    {
+      "name": "formal-f4t-p04-s3515-20260927",
+      "planned_name": "formal-f4t-p04-s3515-20260927",
+      "seed": 3515,
+      "order": [
+        "R",
+        "A"
+      ],
+      "arms": {
+        "R": {
+          "completed": 44,
+          "kept": 42,
+          "fraction": 0.9545454545454546,
+          "classification": "correct_recovered",
+          "wall_seconds": 791.5671911351383,
+          "gpu_hours": 0.8795191012612648,
+          "generated_tokens_after_fault": 63358,
+          "score_returns_after_fault": 182
+        },
+        "A": {
+          "completed": 37,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_stop",
+          "wall_seconds": 479.5201303861104,
+          "gpu_hours": 0.532800144873456,
+          "generated_tokens_after_fault": 0,
+          "score_returns_after_fault": 0
+        }
+      },
+      "retention_fraction_difference": 0.9545454545454546
+    },
+    {
+      "name": "formal-f4t-p05-s1556-20260927",
+      "planned_name": "formal-f4t-p05-s1556-20260927",
+      "seed": 1556,
+      "order": [
+        "A",
+        "R"
+      ],
+      "arms": {
+        "A": {
+          "completed": 39,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_stop",
+          "wall_seconds": 483.14551063091494,
+          "gpu_hours": 0.5368283451454611,
+          "generated_tokens_after_fault": 0,
+          "score_returns_after_fault": 0
+        },
+        "R": {
+          "completed": 69,
+          "kept": 68,
+          "fraction": 0.9855072463768116,
+          "classification": "correct_recovered",
+          "wall_seconds": 788.9011693499051,
+          "gpu_hours": 0.8765568548332279,
+          "generated_tokens_after_fault": 65994,
+          "score_returns_after_fault": 188
+        }
+      },
+      "retention_fraction_difference": 0.9855072463768116
+    },
+    {
+      "name": "formal-f4t-p06-s7299-20260927-redo1",
+      "planned_name": "formal-f4t-p06-s7299-20260927",
+      "seed": 7299,
+      "order": [
+        "R",
+        "A"
+      ],
+      "arms": {
+        "R": {
+          "completed": 42,
+          "kept": 41,
+          "fraction": 0.9761904761904762,
+          "classification": "correct_recovered",
+          "wall_seconds": 754.9128816730808,
+          "gpu_hours": 0.8387920907478676,
+          "generated_tokens_after_fault": 63821,
+          "score_returns_after_fault": 183
+        },
+        "A": {
+          "completed": 37,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_stop",
+          "wall_seconds": 492.68296485603787,
+          "gpu_hours": 0.5474255165067088,
+          "generated_tokens_after_fault": 0,
+          "score_returns_after_fault": 0
+        }
+      },
+      "retention_fraction_difference": 0.9761904761904762
+    },
+    {
+      "name": "formal-f4t-p07-s5778-20260927-redo1",
+      "planned_name": "formal-f4t-p07-s5778-20260927",
+      "seed": 5778,
+      "order": [
+        "A",
+        "R"
+      ],
+      "arms": {
+        "A": {
+          "completed": 41,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_stop",
+          "wall_seconds": 488.9976417638827,
+          "gpu_hours": 0.5433307130709808,
+          "generated_tokens_after_fault": 0,
+          "score_returns_after_fault": 0
+        },
+        "R": {
+          "completed": 45,
+          "kept": 44,
+          "fraction": 0.9777777777777777,
+          "classification": "correct_recovered",
+          "wall_seconds": 797.091067875037,
+          "gpu_hours": 0.8856567420833744,
+          "generated_tokens_after_fault": 62607,
+          "score_returns_after_fault": 180
+        }
+      },
+      "retention_fraction_difference": 0.9777777777777777
+    },
+    {
+      "name": "formal-f4t-p08-s3216-20260927",
+      "planned_name": "formal-f4t-p08-s3216-20260927",
+      "seed": 3216,
+      "order": [
+        "R",
+        "A"
+      ],
+      "arms": {
+        "R": {
+          "completed": 70,
+          "kept": 68,
+          "fraction": 0.9714285714285714,
+          "classification": "correct_recovered",
+          "wall_seconds": 839.6337938879151,
+          "gpu_hours": 0.932926437653239,
+          "generated_tokens_after_fault": 65792,
+          "score_returns_after_fault": 188
+        },
+        "A": {
+          "completed": 47,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_discard",
+          "wall_seconds": 792.1979243438691,
+          "gpu_hours": 0.8802199159376323,
+          "generated_tokens_after_fault": 102720,
+          "score_returns_after_fault": 320
+        }
+      },
+      "retention_fraction_difference": 0.9714285714285714
+    },
+    {
+      "name": "formal-f4t-p09-s5509-20260927",
+      "planned_name": "formal-f4t-p09-s5509-20260927",
+      "seed": 5509,
+      "order": [
+        "A",
+        "R"
+      ],
+      "arms": {
+        "A": {
+          "completed": 45,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_discard",
+          "wall_seconds": 787.8530509269331,
+          "gpu_hours": 0.8753922788077034,
+          "generated_tokens_after_fault": 101003,
+          "score_returns_after_fault": 320
+        },
+        "R": {
+          "completed": 45,
+          "kept": 42,
+          "fraction": 0.9333333333333333,
+          "classification": "correct_recovered",
+          "wall_seconds": 784.4630047269166,
+          "gpu_hours": 0.871625560807685,
+          "generated_tokens_after_fault": 63307,
+          "score_returns_after_fault": 182
+        }
+      },
+      "retention_fraction_difference": 0.9333333333333333
+    },
+    {
+      "name": "formal-f4t-p10-s8400-20260927",
+      "planned_name": "formal-f4t-p10-s8400-20260927",
+      "seed": 8400,
+      "order": [
+        "R",
+        "A"
+      ],
+      "arms": {
+        "R": {
+          "completed": 52,
+          "kept": 51,
+          "fraction": 0.9807692307692307,
+          "classification": "correct_recovered",
+          "wall_seconds": 769.883154157782,
+          "gpu_hours": 0.8554257268419799,
+          "generated_tokens_after_fault": 60837,
+          "score_returns_after_fault": 173
+        },
+        "A": {
+          "completed": 44,
+          "kept": 0,
+          "fraction": 0.0,
+          "classification": "safe_discard",
+          "wall_seconds": 793.5693988429848,
+          "gpu_hours": 0.8817437764922054,
+          "generated_tokens_after_fault": 98662,
+          "score_returns_after_fault": 320
+        }
+      },
+      "retention_fraction_difference": 0.9807692307692307
+    }
+  ],
+  "incomplete": [],
+  "positive": 10,
+  "negative": 0,
+  "tied": 0,
+  "median_fraction_difference": 0.9738095238095238,
+  "exact_two_sided_sign_p": 0.001953125,
+  "primary_claim_eligible": true,
+  "scope": "10-update single-machine F4T; one paired run is one independent unit"
+}

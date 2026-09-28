@@ -14,7 +14,7 @@
 | GPU·h | 有效配对 15.78；含全部技术无效尝试 18.70（上限 25） |
 
 - 生效的配对：p01 取 redo2，p06 取 redo1，p07 取 redo1，其余取原始运行。技术无效共 4 次：runner 随会话被杀、真实外部 GPU 进程各 1 次，监测器误判 2 次。
-- **待办**：`analyze_ft_f4t.py` 还要能识别补做名和 A1–A3 冻结，才能从原始证据正式复算；写 F4′ 正式结果报告。
+- 正式报告：[FORMAL_F4T_RESULTS_20260928.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_F4T_RESULTS_20260928.md)。`analyze_ft_f4t.py` 已能识别补做名和 A1–A3 修订链，从原始证据复算结果为 `primary_claim_eligible=true`（输出 `FORMAL_F4T_RESULTS_20260928.json`）。
 
 ## 当前状态：2026-09-28 09:47 CST（F4′ 正式矩阵）
 
