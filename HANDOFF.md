@@ -1,6 +1,10 @@
 <!-- CURRENT_SNAPSHOT_START -->
 # RewardTxn HANDOFF — 当前快照
 
+> **2026-10-01 更新**：F2／无故障同版本重跑（冻结 `FORMAL_F2V2_FREEZE_20260928`，修订 A4 后为 `-A4`）完成 4/13 对，全部 R 32/32、A 0/32。p05 两次被 zhanglx 在 GPU 7 上的任务打断，runner 已停，等独占 GPU 后继续。重启命令：
+> `setsid nohup zsh -lc "cd ~/rewardtxn && python3 tests/ft/launch_ft_f4t_redo.py --freeze docs/experiments/rewardtxn-ft-20260916/FORMAL_F2V2_FREEZE_20260928-A4.json --freeze-sha256 6399f63968dbc4214b6a8dbfcd3aa7752a7a4b8716a402d76ab39f8f7af79982 --pair-index 4 --attempt 2 && python3 tests/ft/launch_ft_formal_dynamic.py --freeze <同上> --freeze-sha256 <同上> --start-pair-index 5 --max-wait-seconds 43200" > docs/experiments/rewardtxn-ft-20260916/minimal_evidence/f2v2-formal-runner-<日期>.log 2>&1 < /dev/null &`
+> 长时间运行一律用 setsid 脱离会话。F4′ 正式结果见 `FORMAL_F4T_RESULTS_20260928.md`。
+
 > **2026-09-28 更新**：F4′ 正式 10 对全部通过，R−A 保留比例差 10/10 为正（中位 0.974），符号检验 p=0.00195；A 臂有 5 次 safe_stop（AReaL 恢复检查点非原子写入）。修订 A1–A3 与各次补做见 PROGRESS.md 顶部。正式报告 `FORMAL_F4T_RESULTS_20260928.md`，统计器复算通过。
 
 > **2026-09-28 09:47 CST 更新**：F4′ 10 对正式矩阵已有 6 对 `formal_pair_verified`（p01 redo2、p02–p05、p06 redo1），六对均为 R `correct_recovered`、A `safe_discard/safe_stop`。p07 s5778 的 A 臂因选定 GPU 出现外部计算 PID 被监控器停止，exit 137、无最终 native state，R 臂未启动；其状态仍为 `stopped_for_review`，不计有效对。逐臂成本合计 11.976655/25 GPU·h，包含无效尝试与补做；本次未发现 F4′ runner 在运行。下一步复核并按已批准外因规则登记 p07，符合后才可同 seed、同顺序整对补做并继续 p08–p10。逐对数据和后续计划见 [PROGRESS.md](PROGRESS.md)，p07 证据摘要见 [配对记录](docs/experiments/rewardtxn-ft-20260916/minimal_evidence/formal-f4t-p07-s5778-20260927-pair.json)。

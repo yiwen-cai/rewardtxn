@@ -17,5 +17,5 @@
   "status": "stopped_for_review",
   "runs": [],
   "failed_arm": "A",
-  "error": "RuntimeError('selected GPU has a compute process')"
+  "error": "RuntimeError(\"GPU monitor stopped training: {'reason': 'foreign_compute_process', 'sample': {'monotonic_ns': 1235791072145813, 'gpu': [['GPU-40b9b481-bf7d-cd0e-d659-065cfc44e794', ' 8', ' 0'], ['GPU-1b3ba0aa-8679-a6d9-8c4f-d5ba5990bfe9', ' 8', ' 0'], ['GPU-8c3a30a0-a187-3387-9e90-089a3c851bd3', ' 8', ' 0'], ['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 35650', ' 5']], 'compute': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3143072', ' 35636']], 'own_pids': [3143730, 3143838], 'foreign': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3143072', ' 35636']], 'foreign_confirmed': [['GPU-6ab6332e-3b12-c9bf-21dc-3e6c4e57f91d', ' 3143072', ' 35636']]}}\")"
 }

@@ -1,5 +1,27 @@
 # RewardTxn 项目进展报告
 
+## 当前状态：2026-10-01（F2／无故障同版本重跑暂停，等独占 GPU）
+
+**目标**：用与 F4′ 正式矩阵相同的 R 实现，重跑 F2 10 对和无故障 3 对，冻结见 [FORMAL_F2V2_FREEZE_20260928.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_F2V2_FREEZE_20260928.md)。判据与 2026-09-24 相同，GPU·h 上限 30。
+
+**进度：4/13 对有效**，全部符合预期：
+
+| 对 | seed | 顺序 | A | R |
+|---|---|---|---|---|
+| p01（redo1，只重跑 R 臂） | 6293 | A→R | safe_discard 0/32 | correct_recovered 32/32 |
+| p02 | 8514 | R→A | safe_discard 0/32 | correct_recovered 32/32 |
+| p03 | 4779 | A→R | safe_discard 0/32 | correct_recovered 32/32 |
+| p04 | 7615 | R→A | safe_discard 0/32 | correct_recovered 32/32 |
+
+故障后生成 token：A 约 12.2–12.8 万，R 约 8.4–8.8 万。已用约 7.3 GPU·h。
+
+**中断记录**（原始证据全部保留）：
+- p01 原始：xuyouxuan 占用 GPU 1，真实外部进程。
+- p01 redo1 的 R 臂：监测器把刚创建的自有子进程误判为外部进程 → 修订 A4（cgroup 归属判断 + 连续两次确认），见 [FORMAL_F2V2_MONITOR_AMENDMENT_20260928.md](docs/experiments/rewardtxn-ft-20260916/FORMAL_F2V2_MONITOR_AMENDMENT_20260928.md)。A 臂结果不受影响，予以保留，只重跑 R 臂（`tests/ft/resume_ft_formal_arm.py`）。
+- p05 原始，以及 p05 redo1（第二次尝试）：zhanglx 在 GPU 7 上反复运行约 35 GB 的任务，被 A4 监测器确认为真实外部进程而停下。redo1 的第一次尝试在开跑前因 GPU 忙中止，相关文件为 `*-aborted-gpu-busy.json`。
+
+**当前**：runner 已停。本机平时只有 GPU 1/5/6/7 这 4 张 H100 空闲，GPU 7 被 zhanglx 间歇占用，空闲间隙不够完整跑一对。**下一步待用户决定**：协调独占 GPU 1/5/6/7 约 5 小时（推荐），或在夜间空闲时再试。之后继续 p05（redo2）和 p06–p13。p05 再补做时需要 `launch_ft_f4t_redo.py --attempt 2`。
+
 ## 当前状态：2026-09-28 中午（F4′ 正式矩阵 10/10 完成）
 
 **F4′ 正式矩阵 10 对全部 `formal_pair_verified`。** 冻结：FORMAL_F4T_FREEZE_20260927 → 修订 A1（kill 落在 train_batch 与 optimizer_end 之间时，验收放行）→ A2（A 原生恢复失败时记为 `safe_stop`）→ A3（GPU 监测器误判修复）。
